@@ -1,0 +1,12 @@
+FROM nginx:1.19.5-alpine
+
+WORKDIR /usr/src/app
+
+COPY package*.json ./
+RUN apk add --update npm
+RUN npm install
+COPY . .
+RUN npm run build
+COPY dist/ /usr/share/nginx/html/
+RUN rm -Rf /usr/src/app
+EXPOSE 80
