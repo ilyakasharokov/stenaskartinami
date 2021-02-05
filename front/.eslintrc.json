@@ -1,0 +1,55 @@
+{
+    "env": {
+        "browser": true,
+        "es2021": true
+    },
+    "extends": [
+        "plugin:react/recommended",
+        "airbnb"
+    ],
+    "parserOptions": {
+        "ecmaFeatures": {
+            "jsx": true
+        },
+        "ecmaVersion": 12,
+        "sourceType": "module"
+    },
+    "plugins": [
+        "react"
+    ],
+    "rules": {
+        "camelcase": ["off"],
+        "standard/computed-property-even-spacing": ["off"],
+        "brace-style": ["error", "1tbs"],
+        "consistent-return": ["off"],
+        "curly": ["error", "all"],
+        "dot-notation": ["off"],
+        "func-names": ["off"],
+        "guard-for-in": ["off"],
+        "indent": ["error", 4, {"SwitchCase": 1}],
+        "linebreak-style": ["error", "unix"],
+        "max-statements-per-line": ["error", { "max": 1 }],
+        "no-console": ["off"],
+        "no-else-return": ["off"],
+        "no-loop-func": ["off"],
+        "no-nested-ternary": ["off"],
+        "no-param-reassign": ["off"],
+        "no-process-exit": ["off"],
+        "no-shadow": ["off"],
+        "no-unused-vars": ["error", { "vars": "all", "args": "all", "ignoreRestSiblings": false }],
+        "no-undef": ["error", { "typeof": true }],
+        "radix": ["off"],
+        "semi": ["error", "always"],
+        "semi-spacing": ["error", {"before": false, "after": true}],
+        "space-before-function-paren": ["error", "never"],
+        "valid-jsdoc": ["off"],
+
+        // todo: remove or leave next lines
+        "eqeqeq": [ 0, 0 ],
+        "one-var": [ 0, 0 ],
+        "no-extend-native": [ 0, 0 ],
+        "no-mixed-operators": [ 0, 0 ],
+        "new-cap": [ 0, 0 ],
+        "quotes": ["off", "double"]
+    }
+}

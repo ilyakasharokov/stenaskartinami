@@ -1,0 +1,31 @@
+{
+  "kind": "collectionType",
+  "collectionName": "artists",
+  "info": {
+    "name": "Artist",
+    "description": ""
+  },
+  "options": {
+    "increments": true,
+    "timestamps": true,
+    "draftAndPublish": true
+  },
+  "attributes": {
+    "full_name": {
+      "type": "string"
+    },
+    "description": {
+      "type": "richtext"
+    },
+    "email": {
+      "type": "email"
+    },
+    "Arts": {
+      "via": "Artist",
+      "collection": "art"
+    },
+    "Phone": {
+      "type": "string"
+    }
+  }
+}

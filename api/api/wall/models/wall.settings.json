@@ -1,0 +1,24 @@
+{
+  "kind": "collectionType",
+  "collectionName": "walls",
+  "info": {
+    "name": "Wall"
+  },
+  "options": {
+    "increments": true,
+    "timestamps": true,
+    "draftAndPublish": true
+  },
+  "attributes": {
+    "Title": {
+      "type": "string"
+    },
+    "Description": {
+      "type": "richtext"
+    },
+    "art": {
+      "via": "wall",
+      "model": "art"
+    }
+  }
+}

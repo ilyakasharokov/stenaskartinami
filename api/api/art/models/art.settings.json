@@ -1,0 +1,59 @@
+{
+  "kind": "collectionType",
+  "collectionName": "arts",
+  "info": {
+    "name": "Art",
+    "description": ""
+  },
+  "options": {
+    "increments": true,
+    "timestamps": true,
+    "draftAndPublish": true
+  },
+  "attributes": {
+    "Title": {
+      "type": "string"
+    },
+    "Description": {
+      "type": "richtext"
+    },
+    "Pictures": {
+      "collection": "file",
+      "via": "related",
+      "allowedTypes": [
+        "images",
+        "files",
+        "videos"
+      ],
+      "plugin": "upload",
+      "required": false
+    },
+    "Artist": {
+      "model": "artist",
+      "via": "Arts"
+    },
+    "Articul": {
+      "type": "string",
+      "required": true,
+      "unique": true
+    },
+    "Size": {
+      "type": "component",
+      "repeatable": false,
+      "component": "size.size"
+    },
+    "Materials": {
+      "type": "text"
+    },
+    "Year": {
+      "type": "date"
+    },
+    "Owners_price": {
+      "type": "integer"
+    },
+    "wall": {
+      "model": "wall",
+      "via": "art"
+    }
+  }
+}
