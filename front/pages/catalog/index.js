@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 
 export default function Catalog({ Component, pageProps }) {
   
-  const API_HOST = 'http://localhost:1337'
+  const API_HOST = 'http://18.157.84.41:1337'
 
   const [arts, setArts] = useState([])
 

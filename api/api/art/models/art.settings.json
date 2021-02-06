@@ -29,8 +29,8 @@
       "required": false
     },
     "Artist": {
-      "model": "artist",
-      "via": "Arts"
+      "via": "Arts",
+      "model": "artist"
     },
     "Articul": {
       "type": "string",
@@ -52,8 +52,11 @@
       "type": "integer"
     },
     "wall": {
-      "model": "wall",
-      "via": "art"
+      "via": "art",
+      "model": "wall"
+    },
+    "slug": {
+      "type": "string"
     }
   }
 }
