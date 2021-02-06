@@ -4,6 +4,10 @@ export default function Menu(){
 
   const menuItems = [
     {
+      title: 'О проекте',
+      link: '/about'
+    },
+    {
       title: 'Главная',
       link: '/'
     },

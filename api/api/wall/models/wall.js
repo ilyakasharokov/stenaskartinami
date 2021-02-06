@@ -5,4 +5,19 @@
  * to customize this model
  */
 
-module.exports = {};
+const slugify = require('slugify');
+
+module.exports = {
+  lifecycles: {
+    beforeCreate: async (data) => {
+      if (data.Title) {
+        data.slug = slugify(data.Title, {remove: /[*+~.()'"!:@]/g});
+      }
+    },
+    beforeUpdate: async (params, data) => {
+      if (data.Title) {
+        data.slug = slugify(data.Title, {remove: /[*+~.()'"!:@]/g});
+      }
+    },
+  },
+};

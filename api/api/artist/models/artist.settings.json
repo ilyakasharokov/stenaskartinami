@@ -21,10 +21,13 @@
       "type": "email"
     },
     "Arts": {
-      "via": "Artist",
-      "collection": "art"
+      "collection": "art",
+      "via": "Artist"
     },
     "Phone": {
+      "type": "string"
+    },
+    "slug": {
       "type": "string"
     }
   }
