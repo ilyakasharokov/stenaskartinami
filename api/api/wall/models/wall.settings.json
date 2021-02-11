@@ -18,8 +18,8 @@
       "type": "richtext"
     },
     "art": {
-      "model": "art",
-      "via": "wall"
+      "via": "wall",
+      "model": "art"
     },
     "slug": {
       "type": "string"

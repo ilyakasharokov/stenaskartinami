@@ -1,0 +1,21 @@
+{
+  "kind": "collectionType",
+  "collectionName": "styles",
+  "info": {
+    "name": "Style"
+  },
+  "options": {
+    "increments": true,
+    "timestamps": true,
+    "draftAndPublish": true
+  },
+  "attributes": {
+    "Title": {
+      "type": "string"
+    },
+    "arts": {
+      "via": "styles",
+      "collection": "art"
+    }
+  }
+}

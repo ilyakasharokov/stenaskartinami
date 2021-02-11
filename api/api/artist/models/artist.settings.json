@@ -21,8 +21,8 @@
       "type": "email"
     },
     "Arts": {
-      "collection": "art",
-      "via": "Artist"
+      "via": "Artist",
+      "collection": "art"
     },
     "Phone": {
       "type": "string"

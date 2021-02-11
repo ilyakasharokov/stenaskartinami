@@ -29,8 +29,8 @@
       "required": false
     },
     "Artist": {
-      "via": "Arts",
-      "model": "artist"
+      "model": "artist",
+      "via": "Arts"
     },
     "Articul": {
       "type": "string",
@@ -49,14 +49,22 @@
       "type": "date"
     },
     "Owners_price": {
-      "type": "integer"
+      "type": "integer",	"private": true
     },
     "wall": {
-      "via": "art",
-      "model": "wall"
+      "model": "wall",
+      "via": "art"
     },
     "slug": {
       "type": "string"
+    },
+    "styles": {
+      "collection": "style",
+      "via": "arts",
+      "dominant": true
+    },
+    "Price": {
+      "type": "integer"
     }
   }
 }
