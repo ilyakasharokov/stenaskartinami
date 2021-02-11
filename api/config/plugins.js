@@ -2,11 +2,11 @@ module.exports = ({ env }) => ({
   upload: {
     provider: 'aws-s3',
     providerOptions: {
-      accessKeyId: 'AKIAJZYODCTSOW4WXANQ',
-      secretAccessKey: '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',
-      region: 'eu-central-1',
+      accessKeyId: env('AWS_ACCESS_KEY_ID'),
+      secretAccessKey: env('AWS_ACCESS_SECRET'),
+      region: env('AWS_REGION'),
       params: {
-        Bucket: 'stenastrapi',
+        Bucket: env('AWS_BUCKET_NAME'),
       },
     },
   },
