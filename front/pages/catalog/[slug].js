@@ -41,14 +41,12 @@ export default function Catalog({ arts }) {
                   <img className="catalog-item__img" src={ imageUrlBuilder(art.Pictures[0].formats.small.url) } alt={art.Title} onLoad={resizeThrottled}/>
                 </Link>
               </div>
-              <Link href={ '/art/' + art.slug}>
-                <div className="catalog-item__title">{art.Title}</div>
-              </Link>
+              <div className="catalog-item__title">{art.Title}</div>
               <div className="catalog-item__size">{art.Size.Width} x {art.Size.Height}</div>
               <div className="catalog-item__artist-price">
                 { 
                   art.Artist &&
-                  <div className="catalog-item__artist"><Link href={ '/artist/' + art.Artist.slug}>{art.Artist.full_name}</Link> 
+                  <div className="catalog-item__artist">{art.Artist.full_name} 
                     {
                       art.Year && 
                       <span>, { (new Date(art.Year)).getFullYear()}</span>
