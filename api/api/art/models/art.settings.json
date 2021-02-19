@@ -49,7 +49,8 @@
       "type": "date"
     },
     "Owners_price": {
-      "type": "integer",	"private": true
+      "type": "integer",
+      "private": true
     },
     "wall": {
       "model": "wall",
@@ -59,12 +60,16 @@
       "type": "string"
     },
     "styles": {
-      "collection": "style",
       "via": "arts",
+      "collection": "style",
       "dominant": true
     },
     "Price": {
       "type": "integer"
+    },
+    "subject": {
+      "via": "arts",
+      "model": "subject"
     }
   }
 }
