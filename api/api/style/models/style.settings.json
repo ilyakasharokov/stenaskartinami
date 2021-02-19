@@ -1,8 +1,8 @@
 {
   "kind": "collectionType",
-  "collectionName": "walls",
+  "collectionName": "styles",
   "info": {
-    "name": "Wall",
+    "name": "Style",
     "description": ""
   },
   "options": {
@@ -14,12 +14,9 @@
     "Title": {
       "type": "string"
     },
-    "Description": {
-      "type": "richtext"
-    },
-    "art": {
-      "via": "wall",
-      "model": "art"
+    "arts": {
+      "collection": "art",
+      "via": "styles"
     },
     "slug": {
       "type": "string"

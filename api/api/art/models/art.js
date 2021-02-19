@@ -11,13 +11,13 @@ module.exports = {
   lifecycles: {
     beforeCreate: async (data) => {
       if (data.Title) {
-        data.slug = slugify(data.Title, {remove: /[*+~.()'"!:@]/g});
+        data.slug = slugify(data.Title, {lower: true,remove: /[*+~.()'"!:@]/g});
       }
     },
     beforeUpdate: async (params, data) => {
         console.log('before' + data.Title)
       if (data.Title) {
-        data.slug = slugify(data.Title, {remove: /[*+~.()'"!:@]/g});
+        data.slug = slugify(data.Title, {lower: true,remove: /[*+~.()'"!:@]/g});
       }
     },
   },
