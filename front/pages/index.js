@@ -7,14 +7,14 @@ export default function Home() {
     
     <div className="container">
       <Head>
-        <title>Картины: купить искусство онлайн</title>
+        <title>Картины: купить искусство онлайн | Стена с картинами, облачная галерея</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
       <main className="demo-page">
         <div className="logo">
           <img src="/images/Logo_stenaskartinami_black.svg"/> 
-          <div className="logo__text">stenaskartinami.com</div>
+          <div className="logo__text">Стена с картинами</div>
         </div>
 
       

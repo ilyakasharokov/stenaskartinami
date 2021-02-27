@@ -4,7 +4,10 @@ export default class MyDocuement extends Document {
   render() {
     return (
       <Html>
-        <Head></Head>
+        <Head>
+
+          <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+        </Head>
         <body>
           <Main/>
           <NextScript/>

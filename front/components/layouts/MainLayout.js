@@ -11,7 +11,7 @@ export default function MainLayout({children}){
           <div className="logo__text">Стена с картинами</div>
         </div>
         <Menu></Menu>
-        <SearchWidget></SearchWidget>
+        { /* <SearchWidget></SearchWidget> */ }
       </nav>
       <main>
         <div className="container">
