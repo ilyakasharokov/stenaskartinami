@@ -18,11 +18,41 @@
       "type": "richtext"
     },
     "art": {
-      "via": "wall",
-      "model": "art"
+      "model": "art",
+      "via": "wall"
     },
     "slug": {
       "type": "string"
+    },
+    "Address": {
+      "type": "string"
+    },
+    "Coordinates": {
+      "type": "json"
+    },
+    "Website": {
+      "type": "string"
+    },
+    "Schedule": {
+      "type": "richtext"
+    },
+    "Phone": {
+      "type": "string"
+    },
+    "Images": {
+      "collection": "file",
+      "via": "related",
+      "allowedTypes": [
+        "images",
+        "files",
+        "videos"
+      ],
+      "plugin": "upload",
+      "required": false
+    },
+    "city": {
+      "via": "walls",
+      "model": "city"
     }
   }
 }

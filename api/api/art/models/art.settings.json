@@ -53,23 +53,24 @@
       "private": true
     },
     "wall": {
-      "model": "wall",
-      "via": "art"
+      "via": "art",
+      "model": "wall"
     },
     "slug": {
       "type": "string"
     },
     "styles": {
-      "via": "arts",
       "collection": "style",
+      "via": "arts",
       "dominant": true
     },
     "Price": {
       "type": "integer"
     },
-    "subject": {
+    "subjects": {
+      "collection": "subject",
       "via": "arts",
-      "model": "subject"
+      "dominant": true
     }
   }
 }

@@ -13,7 +13,8 @@ export default function Catalog({ arts }) {
   useEffect(() => {
 
     window.addEventListener('resize', resizeThrottled)
-
+	window.addEventListener('load', resizeThrottled)
+	
     return _ => {
       window.removeEventListener('resize', resizeThrottled)
     }
@@ -38,7 +39,7 @@ export default function Catalog({ arts }) {
             <div className="catalog-item__wrapper">
               <div className="catalog-item__img-wrap">
                 <Link href={ '/art/' + art.slug}>
-                  <img className="catalog-item__img" src={ imageUrlBuilder(art.Pictures[0].formats.small.url) } alt={art.Title} onLoad={resizeThrottled}/>
+                  <img className="catalog-item__img" src={ imageUrlBuilder(art.Pictures[0].formats.small.url) } alt={art.Title} onLoad={()=> { console.log('load');resizeThrottled()}}/>
                 </Link>
               </div>
               <Link href={ '/art/' + art.slug}>

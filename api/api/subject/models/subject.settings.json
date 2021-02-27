@@ -17,12 +17,12 @@
     "Description": {
       "type": "richtext"
     },
-    "arts": {
-      "collection": "art",
-      "via": "subject"
-    },
     "slug": {
       "type": "string"
+    },
+    "arts": {
+      "via": "subjects",
+      "collection": "art"
     }
   }
 }
