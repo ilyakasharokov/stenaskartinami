@@ -1,0 +1,21 @@
+{
+  "kind": "collectionType",
+  "collectionName": "cities",
+  "info": {
+    "name": "City"
+  },
+  "options": {
+    "increments": true,
+    "timestamps": true,
+    "draftAndPublish": true
+  },
+  "attributes": {
+    "Title": {
+      "type": "string"
+    },
+    "walls": {
+      "collection": "wall",
+      "via": "city"
+    }
+  }
+}
