@@ -20,7 +20,7 @@ export default function Catalog({ arts }) {
   })
 
   function imageUrlBuilder(url){
-    if( url[0] == '/')
+    if( url && url[0] == '/')
       return API_HOST + url;
     return url
   }
@@ -38,13 +38,13 @@ export default function Catalog({ arts }) {
             <div className="catalog-item__wrapper">
               <div className="catalog-item__img-wrap">
                 <Link href={ '/art/' + art.slug}>
-                  <img className="catalog-item__img" src={ imageUrlBuilder(art.Pictures[0].formats.small.url) } alt={art.Title} onLoad={resizeThrottled}/>
+                  <img className="catalog-item__img" src={ imageUrlBuilder(art.Pictures[0].formats?.small?.url) } alt={art.Title} onLoad={resizeThrottled}/>
                 </Link>
               </div>
               <Link href={ '/art/' + art.slug}>
                 <div className="catalog-item__title">{art.Title}</div>
               </Link>
-              <div className="catalog-item__size">{art.Size.Width} x {art.Size.Height}</div>
+              <div className="catalog-item__size">{art?.Size?.Width} x {art?.Size?.Height}</div>
               <div className="catalog-item__artist-price">
                 { 
                   art.Artist &&
