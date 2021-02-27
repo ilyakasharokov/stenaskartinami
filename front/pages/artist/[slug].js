@@ -1,49 +1,24 @@
-import Head from 'next/head'
-import Link from 'next/link'
 import MainLayout from "../../components/layouts/MainLayout"
-import { useRouter } from "next/router";
 import { useState, useEffect } from "react"
 import { API_HOST } from '../../constants/constants'
+import CatalogCmp from "../../components/catalog/catalog"
+import { Head} from 'next/document'
 
-export default function Art({ art }) {
-
-  console.log(art)
+export default function  Artist({ artist }) {
+  let arts = artist && artist.Arts;
+  console.log(artist)
   return (<MainLayout>
-    <div className="art-page">
-      <h1>Картина "{art.Title}", { art.Artist.full_name}</h1>
-      <div className="art-page__grid">
-        <div className="art-page__gallery">
-          {
-            art.Pictures.length > 1 &&
-            <div className="art-page__thumbnails">
-            {
-              art.Pictures.map((picture, i) => 
-                  i > 0 && 
-                  <div className="art-page__thumbnail" key={picture.id}>
-                    <img src={API_HOST +  picture.formats.small.url}/>
-                  </div>  
-              )
-            }
-            </div>
-          }
-          <div className="art-page__big-picture">
-            <img src={API_HOST +  art.Pictures[0].formats.large.url}/>
-          </div>
-        </div>
-        <div className="art-page__info">
-          <div className="art-page__info-title">{art.Title}</div>
-          <div className="art-page__info-author">{ art.Artist.full_name}</div>
-          <div className="art-page__info-size">Размеры: { art.Size.Width } x { art.Size.Height } </div>
-        </div>
-      </div>
-    </div>
+    <h1>{artist.full_name}, каталог картин.</h1>
+
+    <CatalogCmp arts={arts}></CatalogCmp>
   </MainLayout>
   )
 }
 
-Art.getInitialProps = async ({query}) => {
-  const res = await fetch(API_HOST + '/arts?slug=' + query.id)
+ Artist.getInitialProps = async ({query}) => {
+  let id = query.slug.split('--')[1]
+  const res = await fetch(API_HOST + '/artists/' + id)
   const json = await res.json()
-  const art = json;
-  return { art: art[0] }
+  const artist = json
+  return { artist: artist }
 }

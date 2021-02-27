@@ -10,6 +10,14 @@
     },
     {
       "method": "GET",
+      "path": "/arts/filter",
+      "handler": "art.filter",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "GET",
       "path": "/arts/count",
       "handler": "art.count",
       "config": {
