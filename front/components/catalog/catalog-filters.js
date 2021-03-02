@@ -17,10 +17,11 @@ export default function CatalogFilters(){
         return fetch(API_HOST + '/subjects')
       }).then((response)=> response.json()).then((json)=>{ 
         prefilters.subjects = json
-
+        prefilters.subjects = prefilters.subjects.filter((f)=> f.arts.length > 0)
+        prefilters.styles = prefilters.styles.filter((f)=> f.arts.length > 0)
         for (const [key, value] of Object.entries(Router.query)) {
           if(prefilters[key]){ 
-             prefilters[key].forEach(item => {
+              prefilters[key].forEach(item => {
               if(Router.query[key].findIndex && Router.query[key].findIndex((queryItem)=>{
                 return item.slug === queryItem;
               }) > -1 || Router.query[key] === item.slug){

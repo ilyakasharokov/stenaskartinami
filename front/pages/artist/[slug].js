@@ -15,10 +15,29 @@ export default function  Artist({ artist }) {
   )
 }
 
- Artist.getInitialProps = async ({query}) => {
-  let id = query.slug.split('--')[1]
+export async function getStaticPaths() {
+  const res = await fetch(API_HOST + '/artists/')
+  const json = await res.json()
+  return {
+    paths: json.map(item => { 
+      return {params: { slug: item.slug + '--' + item.id }}
+  }),
+    fallback: false
+  }
+}
+
+export const getStaticProps = async ({params: {
+  slug
+}}) => {
+  let id = slug.split('--')[1]
   const res = await fetch(API_HOST + '/artists/' + id)
   const json = await res.json()
   const artist = json
-  return { artist: artist }
+
+  return {
+    props: {
+      artist,
+    },
+  }
 }
+
