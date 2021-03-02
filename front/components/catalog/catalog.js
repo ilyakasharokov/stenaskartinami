@@ -38,7 +38,7 @@ export default function CatalogCmp({arts}){
           <div className="catalog-item__wrapper">
             <div className="catalog-item__img-wrap">
               <Link href={ '/art/' + art.slug + '--' + art.id}>
-                <img className="catalog-item__img" src={ imageUrlBuilder(art.Pictures[0].formats.small ? art.Pictures[0].formats.small.url: '') } alt={art.Title} onLoad={()=> {resizeThrottled()}}/>
+                <img className="catalog-item__img" src={ imageUrlBuilder(art.Pictures[0].formats.small ? art.Pictures[0].formats.small.url: art.Pictures[0].formats.thumbnail.url) } alt={art.Title} onLoad={()=> {resizeThrottled()}}/>
               </Link>
             </div>
             <Link href={ '/art/' + art.slug}>
