@@ -3,7 +3,6 @@ import { useState, useEffect } from "react"
 import { API_HOST } from '../../constants/constants'
 import CatalogCmp from "../../components/catalog/catalog"
 import Head from 'next/head'
-import serialize from '../../utils/serialize'
 
 export default function Catalog({ arts }) {
 
@@ -17,17 +16,16 @@ export default function Catalog({ arts }) {
   )
 }
 
-Catalog.getInitialProps = async ({ query }) => {
-  const page = query.page || 1;
-  let res = await fetch(API_HOST + '/arts' + serialize(query))
+/* Catalog.getInitialProps = async (ctx) => {
+  const res = await fetch(API_HOST + '/arts')
   const json = await res.json()
-  const arts = json.sort && json.sort((a,b)=> {
+  const arts = json.sort((a,b)=> {
     return a.published_at < b.published_at ? 1: -1;
-  }) || []
+  })
   return { arts: arts } 
-} 
+} */
 
-/*
+
 export const getStaticProps = async () => {
   const res = await fetch(API_HOST + '/arts/')
   const json = await res.json()
@@ -41,4 +39,4 @@ export const getStaticProps = async () => {
     },
   }
 }
-*/
+

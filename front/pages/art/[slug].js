@@ -5,7 +5,7 @@ import { useRouter, Router } from "next/router";
 import { useState, useEffect } from "react"
 import { API_HOST } from '../../constants/constants'
 import ProductList from '../../components/catalog/product-list'
-import Artist from '../artist/[slug]';
+import Artist from '../artists/[slug]';
 import imageUrlBuilder from '../../utils/img-url-builder'
 
 export default function Art({ art }) {
@@ -19,7 +19,7 @@ export default function Art({ art }) {
   console.log(art)
   return (<MainLayout>
     <Head>
-      <title>"{art.Title}", картина художника {art.Artist?.full_name} | Стена с картинами, облачная галерея</title>
+      <title>{art.Title}, картина художника {art.Artist?.full_name} | Стена с картинами, облачная галерея</title>
     </Head>
     <div className="art-page">
       <h1>Картина "{art.Title}"{ art.Artist && ', ' + art.Artist.full_name}</h1>
@@ -42,7 +42,11 @@ export default function Art({ art }) {
         </div>
         <div className="art-page__info">
           <div className="art-page__info-title">{art.Title}</div>
-          <div className="art-page__info-author">{ art.Artist && art.Artist.full_name}</div>
+          <div className="art-page__info-author">
+            <Link href={ '/artists/' + art.Artist.slug + '--' + art.Artist.id}>
+              <a title={art.Artist.full_name}>{art.Artist.full_name}</a>
+              </Link> 
+          </div>
           { 
             art.Size &&
             <div className="art-page__info-size">Размеры: { art.Size.Width } x { art.Size.Height } </div>
@@ -62,10 +66,7 @@ export default function Art({ art }) {
       </div>
       {
         art.Artist && 
-        <div>
-          <h2>Другие работы художника</h2>
-          <ProductList artist={art.Artist}></ProductList>
-        </div>
+        <ProductList artist={art.Artist} except={art.id}></ProductList>
       }
     </div>
   </MainLayout>

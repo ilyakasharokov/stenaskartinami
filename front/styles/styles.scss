@@ -2,6 +2,14 @@
     box-sizing: border-box;
 }
 
+a {
+    color:inherit;
+}
+
+h2 {
+    margin-bottom: 1.5em;
+}
+
 img {
     width: 100%;
 }
@@ -12,7 +20,11 @@ img {
     padding: 0 30px;
 }
 
-.top-navigation{
+main {
+    padding-bottom: 60px;
+}
+
+.top-navigation, .bottom-navigation {
     border-bottom: 1px solid rgb(238, 238, 238);
     position: relative;
     padding-left: 25px;
@@ -38,6 +50,13 @@ img {
         }
     }
 }
+
+.bottom-navigation {
+    padding: 30px;
+    background: #eee;
+}
+
+
 
 .top-menu__item {
     height: 75px;
@@ -109,7 +128,18 @@ img {
             margin-right: 5px;
         }
     }
-    
+    &__no-results {
+        display: block;
+        width: 100%;
+        text-align: center;
+        font-size: 24px;
+    }
+    &__artist-description {
+        background: #eee;
+        padding: 30px;
+        margin-bottom: 30px;
+        color: #333;
+    }
 }
 
 .checkbox{
@@ -208,7 +238,7 @@ img {
     grid-template-areas:
         "gallery sidepanel";
     align-items: flex-start;
-    margin: 20px 0px;
+    margin: 20px 0px 60px;
 }
 
 .art-page__info {
@@ -225,6 +255,9 @@ img {
     font-size: 16px;
     color: #777;
     margin-bottom: 15px;
+    a{
+        text-decoration:none;
+    }
 }
 
 .art-page__info-size {
@@ -315,5 +348,12 @@ img {
 }
 
 .product-list {
-    text-align: center;
+    text-align: left;
+    margin-bottom: 20px;
+
+    &__link {
+        a {color: #777;}
+        text-align: center;
+    }
+
 }

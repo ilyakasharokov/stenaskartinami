@@ -7,7 +7,7 @@ import throttle from '../../utils/throttle'
 import { resizeAllGridItems } from '../../utils/grid-resizer'
 import CatalogFilters from "./catalog-filters"
 
-export default function CatalogCmp({arts}){
+export default function CatalogCmp({arts, hideFilters}){
 
   //console.log(arts)
   const resizeThrottled = throttle(resizeAllGridItems.bind(this, 'catalog-item',  'catalog-grid', '.catalog-item__wrapper'), 100)
@@ -16,6 +16,8 @@ export default function CatalogCmp({arts}){
 
     window.addEventListener('resize', resizeThrottled)
     window.addEventListener('load', resizeThrottled)
+
+    resizeThrottled()
 
     return _ => {
       window.removeEventListener('resize', resizeThrottled)
@@ -30,19 +32,26 @@ export default function CatalogCmp({arts}){
 
   return (
     <div className="catalog">
-    <CatalogFilters></CatalogFilters>
-    <div className="catalog-grid">
     {
-      arts && arts.map((art) =>
+      !hideFilters && 
+      <CatalogFilters arts={arts}></CatalogFilters>
+    }
+    {
+      arts.length > 0 && 
+      <div className="catalog-grid">
+        {
+        arts.map((art) =>
         <div className="catalog-item" key={art.id}>
           <div className="catalog-item__wrapper">
             <div className="catalog-item__img-wrap">
               <Link href={ '/art/' + art.slug + '--' + art.id}>
-                <img className="catalog-item__img" src={ imageUrlBuilder(art.Pictures[0].formats.small ? art.Pictures[0].formats.small.url: art.Pictures[0].formats.thumbnail.url) } alt={art.Title} onLoad={()=> {resizeThrottled()}}/>
+                <a title={art.Title}>
+                  <img className="catalog-item__img" src={ imageUrlBuilder(art.Pictures[0].formats.small ? art.Pictures[0].formats.small.url: art.Pictures[0].formats.thumbnail.url) } alt={art.Title} onLoad={()=> {resizeThrottled()}}/>
+                </a>
               </Link>
             </div>
             <Link href={ '/art/' + art.slug}>
-              <div className="catalog-item__title">{art.Title}</div>
+              <div className="catalog-item__title"><a title={art.Title}>{art.Title}</a></div>
             </Link>
             { 
               art.Size &&
@@ -54,7 +63,7 @@ export default function CatalogCmp({arts}){
                 <div className="catalog-item__artist">
                   {
                     art.Artist.full_name && 
-                    <Link href={ '/artist/' + art.Artist.slug + '--' + art.Artist.id}>{art.Artist.full_name}</Link> 
+                    <Link href={ '/artists/' + art.Artist.slug + '--' + art.Artist.id}><a title={art.Artist.full_name}>{art.Artist.full_name}</a></Link> 
                   }
                   {
                     art.Artist.full_name && art.Year &&
@@ -73,8 +82,15 @@ export default function CatalogCmp({arts}){
           </div>
         </div>
       )
+      }
+      </div>
     }
-    </div>
+    {
+      !arts.length &&
+      <div className="catalog__no-results">
+        Извините, по данным критериям ничего нет :(
+      </div>
+    }
   </div>
   )
 }
