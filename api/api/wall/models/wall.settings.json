@@ -17,10 +17,6 @@
     "Description": {
       "type": "richtext"
     },
-    "art": {
-      "model": "art",
-      "via": "wall"
-    },
     "slug": {
       "type": "string"
     },
@@ -53,6 +49,10 @@
     "city": {
       "via": "walls",
       "model": "city"
+    },
+    "arts": {
+      "via": "wall",
+      "collection": "art"
     }
   }
 }

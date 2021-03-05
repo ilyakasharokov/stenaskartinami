@@ -15,11 +15,17 @@
       "type": "string"
     },
     "arts": {
-      "via": "styles",
-      "collection": "art"
+      "collection": "art",
+      "via": "styles"
     },
     "slug": {
       "type": "string"
+    },
+    "seotitle": {
+      "type": "string"
+    },
+    "description": {
+      "type": "richtext"
     }
   }
 }
