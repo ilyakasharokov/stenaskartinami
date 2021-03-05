@@ -5,9 +5,9 @@ import { useRouter } from "next/router";
 import Router from 'next/router'
 
 
-export default function CatalogFilters(){
+export default function CatalogFilters({arts}){
 
-  const [filters, setFilters] = useState({styles:[], subjects: []})
+  const [filters, setFilters] = useState({styles:[], subjects: [], size: []})
 
   useEffect(()=>{
     function loadFilters(){
@@ -19,6 +19,26 @@ export default function CatalogFilters(){
         prefilters.subjects = json
         prefilters.subjects = prefilters.subjects.filter((f)=> f.arts.length > 0)
         prefilters.styles = prefilters.styles.filter((f)=> f.arts.length > 0)
+        prefilters.size = [{
+          name: 'Маленькие',
+          slug: 'small',
+          max: 20
+        },
+        {
+          name: 'Средние',
+          slug: 'medium',
+          max: 40
+        },
+        {
+          name: 'Большие',
+          slug: 'large',
+          max: 60
+        },
+        {
+          name: 'Огромные',
+          slug: 'huge',
+          max: 1000
+        } ]
         for (const [key, value] of Object.entries(Router.query)) {
           if(prefilters[key]){ 
               prefilters[key].forEach(item => {
@@ -28,10 +48,9 @@ export default function CatalogFilters(){
                 item.active = true;
               }
             });
-            sortByActive(prefilters[key])
+            // sortByActive(prefilters[key])
           }
         }
-
         setFilters(prefilters)
       })
   
@@ -45,14 +64,14 @@ export default function CatalogFilters(){
 
   function сheckboxClick(item, type){
     item.active = !item.active;
-    sortByActive(filters[type])
+    // sortByActive(filters[type])
     let query = {};
     for (const [key, value] of Object.entries(filters)) {
       query[key] = filters[key].filter((item)=> item.active).map((item)=> item.slug)
     }
     Router.push({
-      pathname: '/catalog',
-      query: query,
+      pathname: Router.pathname,
+      query: Router.query ? Object.assign({}, Router.query, query) : query
     })
   }
 
@@ -79,7 +98,17 @@ export default function CatalogFilters(){
             </div>
           )
         }
-        
+      </div>
+      <div className="catalog-filters__section">
+        <div className="catalog-filters__section-title">Размер</div> 
+        {
+          filters.size.map( style => 
+            <div className="catalog-filters__item" key={style.id}>
+              <div className={`checkbox ${style.active ? "checkbox--active": ""}`} onClick={()=>сheckboxClick(style, 'size')}></div>
+              <div>{ style.name }</div>
+            </div>
+          )
+        }
       </div>
     </div>
   )

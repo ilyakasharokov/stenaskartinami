@@ -2,15 +2,21 @@ import MainLayout from "../../components/layouts/MainLayout"
 import { useState, useEffect } from "react"
 import { API_HOST } from '../../constants/constants'
 import CatalogCmp from "../../components/catalog/catalog"
-import { Head} from 'next/document'
+import Head from 'next/head'
 
 export default function  Artist({ artist }) {
   let arts = artist && artist.Arts;
   console.log(artist)
   return (<MainLayout>
+    <Head>
+      <title>Художник {artist.full_name}, каталог картин  | Стена с картинами, облачная галерея</title>
+    </Head>
     <h1>{artist.full_name}, каталог картин.</h1>
-
-    <CatalogCmp arts={arts}></CatalogCmp>
+    {
+      artist.description &&
+      <div className="catalog__artist-description">{artist.description}</div>
+    }
+    <CatalogCmp arts={arts} hideFilters={true}></CatalogCmp>
   </MainLayout>
   )
 }
@@ -33,7 +39,7 @@ export const getStaticProps = async ({params: {
   const res = await fetch(API_HOST + '/artists/' + id)
   const json = await res.json()
   const artist = json
-
+  
   return {
     props: {
       artist,
