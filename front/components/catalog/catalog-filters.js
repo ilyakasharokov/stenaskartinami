@@ -7,7 +7,7 @@ import Router from 'next/router'
 
 export default function CatalogFilters({arts}){
 
-  const [filters, setFilters] = useState({styles:[], subjects: [], size: []})
+  const [filters, setFilters] = useState({styles:[], subjects: [], size: [], mediums: []})
 
   useEffect(()=>{
     function loadFilters(){
@@ -17,27 +17,35 @@ export default function CatalogFilters({arts}){
         return fetch(API_HOST + '/subjects')
       }).then((response)=> response.json()).then((json)=>{ 
         prefilters.subjects = json
+        return fetch(API_HOST + '/mediums')
+      }).then((response)=> response.json()).then((json)=>{
+        prefilters.mediums = json;
+        prefilters.mediums = prefilters.mediums.filter((f)=> f.arts.length > 0)
         prefilters.subjects = prefilters.subjects.filter((f)=> f.arts.length > 0)
         prefilters.styles = prefilters.styles.filter((f)=> f.arts.length > 0)
         prefilters.size = [{
           name: 'Маленькие',
           slug: 'small',
-          max: 20
+          max: 20,
+          id: 1
         },
         {
           name: 'Средние',
           slug: 'medium',
-          max: 40
+          max: 40,
+          id: 2
         },
         {
           name: 'Большие',
           slug: 'large',
-          max: 60
+          max: 60,
+          id: 3
         },
         {
           name: 'Огромные',
           slug: 'huge',
-          max: 1000
+          max: 1000,
+          id: 4
         } ]
         for (const [key, value] of Object.entries(Router.query)) {
           if(prefilters[key]){ 
@@ -84,6 +92,17 @@ export default function CatalogFilters({arts}){
             <div className="catalog-filters__item" key={style.id}>
               <div className={`checkbox ${style.active ? "checkbox--active": ""}`} onClick={()=>сheckboxClick(style, 'styles')}></div>
               <div>{ style.Title }</div>
+            </div>
+          )
+        }
+      </div>
+      <div className="catalog-filters__section">
+        <div className="catalog-filters__section-title">Техника</div> 
+        {
+          filters.mediums.map( style => 
+            <div className="catalog-filters__item" key={style.id}>
+              <div className={`checkbox ${style.active ? "checkbox--active": ""}`} onClick={()=>сheckboxClick(style, 'mediums')}></div>
+              <div>{ style.title }</div>
             </div>
           )
         }

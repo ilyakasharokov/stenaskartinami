@@ -12,6 +12,10 @@ export default function Art({ art }) {
 
   const [currentPicture, setPicture] = useState({index: 0, img: art.Pictures[0]})
 
+  useEffect(()=>{
+    setPicture({index: 0, img: art.Pictures[0]})
+  }, [art])
+
   function setPictureClick(newIndex, newPicture){
     setPicture({index:newIndex, img: newPicture})
   }

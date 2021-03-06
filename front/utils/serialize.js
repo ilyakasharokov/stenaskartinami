@@ -10,16 +10,16 @@ function serialize(obj){
   let i1 = 0;
   for (const [key, value] of Object.entries(obj)) {
       let i2 = 0;
+      
       str += `_where[${i1}][_or][${i2}]`  
-      if(obj[key].forEach){
-        obj[key].forEach && obj[key].forEach((val)=>{
+
+      if (obj[key].forEach) {
+        obj[key].forEach && obj[key].forEach((val) => {
           if(key === 'size'){
-            str += `_where[${i1}][_or][${i2}][Size.Height_gte]=${size[val][0]}&`;
-            str += `_where[${i1}][_or][${i2 + 1}][Size.Height_lt]=${size[val][1]}&`;
-            str += `_where[${i1}][_or][${i2 + 2}][Size.Height_gte]=${size[val][0]}&`;
-            str += `_where[${i1}][_or][${i2 + 3}][Size.Height_lt]=${size[val][1]}&`;
-            i2 += 4;
-          }else{
+            str += `_where[${i1}][square_gte]=${size[val][0]**2}&`;
+            str += `_where[${i1}][square_lt]=${size[val][1]**2}&`;
+            i2 += 2;
+          }else{ 
             str += `_where[${i1}][_or][${i2}][${key}.slug]=${val}&`
             i2++;
           }
@@ -27,12 +27,9 @@ function serialize(obj){
         })
       }else{
         if(key === 'size'){
-          str += `_where[${i1}][_or][${i2}][Size.Height_gte]=${size[value][0]}&`;
-          str += `_where[${i1}][_or][${i2 + 1}][Size.Height_lt]=${size[value][1]}&`;
-          str += `_where[${i1}][_or][${i2 + 2}][Size.Height_gte]=${size[value][0]}&`;
-          str += `_where[${i1}][_or][${i2 + 3}][Size.Height_lt]=${size[value][1]}&`;
-          i2 += 4;
-        }else{
+          str += `&square_gte=${(size[value][0]**2)}&square_lte=${(size[value][1]**2)}&`
+          i2 += 1;
+        }else{ 
           str += `_where[${i1}][_or][${i2}][${key}.slug]=${value}&`
         }
       }
