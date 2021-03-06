@@ -53,15 +53,15 @@
       "private": true
     },
     "wall": {
-      "via": "art",
-      "model": "wall"
+      "model": "wall",
+      "via": "arts"
     },
     "slug": {
       "type": "string"
     },
     "styles": {
-      "collection": "style",
       "via": "arts",
+      "collection": "style",
       "dominant": true
     },
     "Price": {
