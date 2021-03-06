@@ -120,9 +120,9 @@ main {
         }
     }
     &-filters__item {
-        font-size: 14px;
+        font-size: 13px;
         display: flex;
-        margin-bottom: 5px;
+        margin-bottom: 7px;
         align-items: center;
         div{
             margin-right: 5px;
@@ -233,7 +233,7 @@ main {
 
 .art-page__grid {
     display: grid;
-    grid-template-columns: auto 340px;
+    grid-template-columns: auto 430px;
     gap: 20px;
     grid-template-areas:
         "gallery sidepanel";
@@ -329,6 +329,7 @@ main {
     background-position: center;
     background-size: cover;
     margin-bottom: 10px;
+    cursor: pointer;
 }
 
 .product-list .catalog-item {

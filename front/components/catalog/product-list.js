@@ -44,15 +44,17 @@ export default function ProductList({artist, except}){
           arts.map((art) =>
             <div className="catalog-item" key={art.id}>
               <div className="catalog-item__wrapper">
-                  <Link href={ '/art/' + art.slug + '--' + art.id}>
-                  <div>
-                    <div className="catalog-item__bg-img" style={{backgroundImage : `url(${(imageUrlBuilder(art.Pictures[0].formats.small ? art.Pictures[0].formats.small.url: ''))} )`, 
-                  backgroundSize: `cover`, backgroundPosition: `center` } }>
-                      <img className="catalog-item__invisible-img" src="/favicon.png"/>
+                <Link href={ '/art/' + art.slug + '--' + art.id}>
+                    <a>
+                    <div>
+                      <div className="catalog-item__bg-img" style={{backgroundImage : `url(${(imageUrlBuilder(art.Pictures[0].formats.small ? art.Pictures[0].formats.small.url: ''))} )`, 
+                    backgroundSize: `cover`, backgroundPosition: `center` } }>
+                        <img className="catalog-item__invisible-img" src="/favicon.png"/>
+                      </div>
+                  
+                      <div className="catalog-item__title">{art.Title}</div>
                     </div>
-                
-                    <div className="catalog-item__title">{art.Title}</div>
-                  </div>
+                  </a>
                 </Link>
                 <div className="catalog-item__size">
                 { 
