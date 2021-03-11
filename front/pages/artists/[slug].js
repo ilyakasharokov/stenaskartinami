@@ -11,12 +11,7 @@ export default function  Artist({ artist }) {
     <Head>
       <title>Художник {artist.full_name}, каталог картин  | Стена с картинами, облачная галерея</title>
     </Head>
-    <h1>{artist.full_name}, каталог картин.</h1>
-    {
-      artist.description &&
-      <div className="catalog__artist-description">{artist.description}</div>
-    }
-    <CatalogCmp arts={arts} hideFilters={true}></CatalogCmp>
+    <CatalogCmp arts={arts} hideFilters={true} title={`${artist.full_name}, каталог картин.`} description={artist.description}></CatalogCmp>
   </MainLayout>
   )
 }

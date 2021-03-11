@@ -110,6 +110,17 @@ main {
     -webkit-box-align: center;
     align-items: flex-start;
     margin-bottom: 50px;
+    &-filters__preloader{
+        text-align: center;
+        
+    }
+
+    &-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
     &-filters__section {
         border-bottom: 1px solid #eee;
         padding-bottom: 10px;
@@ -142,6 +153,7 @@ main {
     }
 }
 
+
 .checkbox{
     display:block;
     width: 15px;
@@ -166,7 +178,7 @@ main {
 }
 
 .catalog-item__wrapper {
-    padding-bottom: 35px;
+    padding-bottom: 40px;
 }
 
 .catalog-item__title {
@@ -224,6 +236,40 @@ main {
     flex-direction: column;
 }
 
+
+@media screen and (max-width: 994px) {
+    .top-menu {
+        display: none;
+    }
+    
+    .top-navigation {
+        padding: 15px 25px;
+    }
+
+    
+    .catalog {
+        display: block;
+    }    
+    
+    .catalog-filters {
+        width: 100%;
+        max-width: none;
+        position: fixed;
+        z-index: 9;
+        background: #fff;
+        height: 100%;
+        top: 75px;
+        left: 0;
+        padding: 30px;
+        overflow-y: auto;
+        display: none;
+    }
+    
+    .catalog-filters__item {
+        font-size: 14px;
+    }
+}
+
 .art-page {
     width: 100%;
     max-width: 1060px;
@@ -258,6 +304,11 @@ main {
     a{
         text-decoration:none;
     }
+}
+
+.art-page__info-blocks{
+    margin-bottom: 15px;
+    overflow: hidden;
 }
 
 .art-page__info-size {
@@ -357,4 +408,44 @@ main {
         text-align: center;
     }
 
+}
+
+.stena-select {
+    display: block;
+    padding: 9px 35px 9px 11px;
+    margin: 0px 0px 0 1px;
+    -webkit-flex: 1 1;
+    -moz-box-flex: 1;
+    flex: 1 1;
+    width: 100%;
+    -webkit-appearance: none;
+    height: 40px;
+    background: #fff;
+    background-image: -moz-linear-gradient(45deg, rgba(0, 0, 0, 0) 50%, #ffffff 50%), -moz-linear-gradient(315deg, #ffffff 50%, rgba(0, 0, 0, 0) 50%);
+    background-image: linear-gradient(
+45deg
+, rgba(0, 0, 0, 0) 50%, #333 50%), linear-gradient(
+135deg
+, #333 50%, rgba(0, 0, 0, 0) 50%);
+    background-position: -moz-calc(100% - 20px) -moz-calc(22px), -moz-calc(100% - 15px) -moz-calc( 22px), -moz-calc(100% - 2.5em) 0.5em;
+    background-position: calc(100% - 17px) calc(19px), calc(100% - 12px) calc( 19px), calc(100% - 2.5em) 0.5em;
+    background-size: 5px 5px, 5px 5px, 1px 1.5em;
+    background-repeat: no-repeat;
+    border-radius: 0;
+    outline: none;
+}
+
+.overlay {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    background: rgba(255,255,255,0.5);
+    .preloader{
+        position: fixed;
+        left: 50%;
+        z-index: 9;
+        top: 50%;
+        transform: translate(-50%, -50%);
+    }
 }

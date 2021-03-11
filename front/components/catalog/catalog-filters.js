@@ -3,63 +3,84 @@ import { useState, useEffect } from 'react'
 import { API_HOST } from '../../constants/constants'
 import { useRouter } from "next/router";
 import Router from 'next/router'
+import Preloader from '../preloader/preloader';
+
 
 
 export default function CatalogFilters({arts}){
 
-  const [filters, setFilters] = useState({styles:[], subjects: [], size: [], mediums: []})
+  const [filters, setFilters] = useState({
+    styles:{
+      title: 'Стиль',
+      items: []
+    }, 
+    subjects: {
+      title: 'Теги',
+      items: []
+    }, 
+      mediums: {
+      title: 'Техника',
+      items: []
+    }, 
+    size: {
+      title: 'Размер',
+      items: []
+    },  
+
+  })
+
+  const keys = Object.keys(filters)
 
   useEffect(()=>{
+    let newFilters = Object.assign({}, filters)
     function loadFilters(){
-      let prefilters = {};
       fetch(API_HOST + '/styles').then((response)=> response.json()).then((json)=>{ 
-        prefilters.styles = json
+        newFilters.styles.items = json.filter((f)=> f.arts.length > 0)
         return fetch(API_HOST + '/subjects')
       }).then((response)=> response.json()).then((json)=>{ 
-        prefilters.subjects = json
+        newFilters.subjects.items = json.filter((f)=> f.arts.length > 0)
         return fetch(API_HOST + '/mediums')
       }).then((response)=> response.json()).then((json)=>{
-        prefilters.mediums = json;
-        prefilters.mediums = prefilters.mediums.filter((f)=> f.arts.length > 0)
-        prefilters.subjects = prefilters.subjects.filter((f)=> f.arts.length > 0)
-        prefilters.styles = prefilters.styles.filter((f)=> f.arts.length > 0)
-        prefilters.size = [{
-          name: 'Маленькие',
+        newFilters.mediums.items = json.filter((f)=> f.arts.length > 0)
+        newFilters.size.items = [{
+          title: 'Маленькие',
           slug: 'small',
           max: 20,
           id: 1
         },
         {
-          name: 'Средние',
+          title: 'Средние',
           slug: 'medium',
           max: 40,
           id: 2
         },
         {
-          name: 'Большие',
+          title: 'Большие',
           slug: 'large',
           max: 60,
           id: 3
         },
         {
-          name: 'Огромные',
+          title: 'Огромные',
           slug: 'huge',
           max: 1000,
           id: 4
         } ]
         for (const [key, value] of Object.entries(Router.query)) {
-          if(prefilters[key]){ 
-              prefilters[key].forEach(item => {
+          if(newFilters[key]){ 
+            newFilters[key].activeCount = 0;
+            newFilters[key].items.forEach(item => {
               if(Router.query[key].findIndex && Router.query[key].findIndex((queryItem)=>{
                 return item.slug === queryItem;
               }) > -1 || Router.query[key] === item.slug){
                 item.active = true;
+                newFilters[key].activeCount ++;
               }
             });
-            // sortByActive(prefilters[key])
+            sortByActive(newFilters[key].items)
           }
         }
-        setFilters(prefilters)
+        setFilters(newFilters)
       })
   
     }
@@ -75,7 +96,7 @@ export default function CatalogFilters({arts}){
     // sortByActive(filters[type])
     let query = {};
     for (const [key, value] of Object.entries(filters)) {
-      query[key] = filters[key].filter((item)=> item.active).map((item)=> item.slug)
+      query[key] = filters[key].items.filter((item)=> item.active).map((item)=> item.slug)
     }
     Router.push({
       pathname: Router.pathname,
@@ -85,50 +106,27 @@ export default function CatalogFilters({arts}){
 
   return (
     <div className="catalog-filters">
-      <div className="catalog-filters__section">
-        <div className="catalog-filters__section-title">Стиль</div> 
-        {
-          filters.styles.map( style => 
-            <div className="catalog-filters__item" key={style.id}>
-              <div className={`checkbox ${style.active ? "checkbox--active": ""}`} onClick={()=>сheckboxClick(style, 'styles')}></div>
-              <div>{ style.Title }</div>
-            </div>
-          )
-        }
-      </div>
-      <div className="catalog-filters__section">
-        <div className="catalog-filters__section-title">Техника</div> 
-        {
-          filters.mediums.map( style => 
-            <div className="catalog-filters__item" key={style.id}>
-              <div className={`checkbox ${style.active ? "checkbox--active": ""}`} onClick={()=>сheckboxClick(style, 'mediums')}></div>
-              <div>{ style.title }</div>
-            </div>
-          )
-        }
-      </div>
-      <div className="catalog-filters__section">
-        <div className="catalog-filters__section-title">Теги</div> 
-        {
-          filters.subjects.map( style => 
-            <div className="catalog-filters__item" key={style.id}>
-              <div className={`checkbox ${style.active ? "checkbox--active": ""}`} onClick={()=>сheckboxClick(style, 'subjects')}></div>
-              <div>{ style.Title }</div>
-            </div>
-          )
-        }
-      </div>
-      <div className="catalog-filters__section">
-        <div className="catalog-filters__section-title">Размер</div> 
-        {
-          filters.size.map( style => 
-            <div className="catalog-filters__item" key={style.id}>
-              <div className={`checkbox ${style.active ? "checkbox--active": ""}`} onClick={()=>сheckboxClick(style, 'size')}></div>
-              <div>{ style.name }</div>
-            </div>
-          )
-        }
-      </div>
+      {
+        Object.keys(filters).map((key) => 
+          <div className="catalog-filters__section" key={key}>
+            <div className="catalog-filters__section-title">{filters[key].title}</div> 
+            {
+              filters[key].items && filters[key].items.map( (item) => 
+                <div className="catalog-filters__item" key={item.id}>
+                  <div className={`checkbox ${item.active ? "checkbox--active": ""}`} onClick={()=>сheckboxClick(item, key)}></div>
+                  <div>{ item.Title || item.title }</div>
+                </div>
+              )
+            }
+            {
+              !filters[key].items.length &&
+              <div className="catalog-filters__preloader">
+                <Preloader></Preloader>
+              </div>
+            }
+          </div>
+        )
+      }
     </div>
   )
 }

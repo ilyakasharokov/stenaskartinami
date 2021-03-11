@@ -14,15 +14,16 @@ function serialize(obj){
   for (const [key, value] of Object.entries(obj)) {
       let i2 = 0;
       
-      //str += `_where[${i1}][_or][${i2}]`  
+      str += `_where[${i1}][_or][${i2}]`  
 
       if (obj[key].forEach) {
         obj[key].forEach && obj[key].forEach((val) => {
           switch ( key ){
             case 'size':
               str += `_where[${i1}][square_gte]=${size[val][0]**2}&`;
-              str += `_where[${i1}][square_lte]=${size[val][1]**2}&`;
+              str += `_where[${i1}][square_lt]=${size[val][1]**2}&`;
               i2 += 2;
+              i1 += 2;
               break;
             case '_sort':
               str += `&${key}=${value}&`
