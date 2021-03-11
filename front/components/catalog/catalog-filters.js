@@ -7,7 +7,7 @@ import Preloader from '../preloader/preloader';
 
 
 
-export default function CatalogFilters({arts}){
+export default function CatalogFilters({arts, onChange}){
 
   const [filters, setFilters] = useState({
     styles:{
@@ -98,6 +98,7 @@ export default function CatalogFilters({arts}){
     for (const [key, value] of Object.entries(filters)) {
       query[key] = filters[key].items.filter((item)=> item.active).map((item)=> item.slug)
     }
+    onChange()
     Router.push({
       pathname: Router.pathname,
       query: Router.query ? Object.assign({}, Router.query, query) : query
