@@ -1,0 +1,29 @@
+{
+  "kind": "collectionType",
+  "collectionName": "mediums",
+  "info": {
+    "name": " Medium",
+    "description": ""
+  },
+  "options": {
+    "increments": true,
+    "timestamps": true,
+    "draftAndPublish": true
+  },
+  "attributes": {
+    "title": {
+      "type": "string"
+    },
+    "description": {
+      "type": "richtext"
+    },
+    "arts": {
+      "collection": "art",
+      "via": "mediums",
+      "dominant": true
+    },
+    "slug": {
+      "type": "string"
+    }
+  }
+}
