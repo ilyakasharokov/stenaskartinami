@@ -60,8 +60,8 @@
       "type": "string"
     },
     "styles": {
-      "via": "arts",
       "collection": "style",
+      "via": "arts",
       "dominant": true
     },
     "Price": {
@@ -71,6 +71,24 @@
       "collection": "subject",
       "via": "arts",
       "dominant": true
+    },
+    "width": {
+      "type": "decimal",
+      "required": false
+    },
+    "height": {
+      "type": "decimal",
+      "required": false
+    },
+    "square": {
+      "type": "decimal"
+    },
+    "isSquare": {
+      "type": "boolean"
+    },
+    "mediums": {
+      "via": "arts",
+      "collection": "medium"
     }
   }
 }

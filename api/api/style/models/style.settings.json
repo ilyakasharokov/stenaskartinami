@@ -15,8 +15,8 @@
       "type": "string"
     },
     "arts": {
-      "collection": "art",
-      "via": "styles"
+      "via": "styles",
+      "collection": "art"
     },
     "slug": {
       "type": "string"
