@@ -51,14 +51,16 @@ export default function Art({ art }) {
               <a title={art.Artist.full_name}>{art.Artist.full_name}</a>
               </Link> 
           </div>
-          { 
-            art.Size &&
-            <div className="art-page__info-size">Размеры: { art.Size.Width } x { art.Size.Height } </div>
-          }
-          {
-            art.Materials && 
-            <div className="art-page__info-materials">Техника: {art.Materials}</div>
-          }
+          <div className="art-page__info-blocks">
+            { 
+              art.Size &&
+              <div className="art-page__info-size">Размеры: { art.Size.Width } x { art.Size.Height } </div>
+            }
+            {
+              art.Materials && 
+              <div className="art-page__info-materials">Техника: {art.Materials}</div>
+            }
+          </div>
           <div className="art-page__buy-block">
             <div className="art-page__price">{art.Price} P</div>
             <div className="btn buy-btn">Купить</div>
@@ -67,6 +69,12 @@ export default function Art({ art }) {
             { art.Description }
           </div>
         </div>
+        {
+          art.Wall &&
+          <div class="art-page__wall-block">
+            
+          </div>
+        }
       </div>
       {
         art.Artist && 
