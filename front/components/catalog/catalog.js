@@ -8,7 +8,7 @@ import { resizeAllGridItems } from '../../utils/grid-resizer'
 import CatalogFilters from "./catalog-filters"
 import Preloader from '../preloader/preloader';
 
-export default function CatalogCmp({arts, hideFilters, title, description}){
+export default function CatalogCmp({arts, hideFilters, title, description, filters}){
 
   //console.log(arts)
   const [state, setState] = useState({showPreloader: false, selectValue: ""})
@@ -71,7 +71,7 @@ export default function CatalogCmp({arts, hideFilters, title, description}){
       <div className="catalog">
       {
         !hideFilters && 
-        <CatalogFilters arts={arts} onChange={() => setState({showPreloader: true})}></CatalogFilters>
+        <CatalogFilters arts={arts} onChange={() => setState({showPreloader: true})} filtersPreloaded={filters}></CatalogFilters>
       }
       {
         state.showPreloader &&

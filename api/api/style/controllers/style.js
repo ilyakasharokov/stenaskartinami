@@ -5,4 +5,17 @@
  * to customize this controller
  */
 
-module.exports = {};
+module.exports = {
+    async filters() {
+        let filters = {
+            styles: [],
+            subjects: [],
+            mediums: []
+        };
+        for( let key of filters){
+            let entities = await strapi.services[key.slice(0,-1)].find();
+            filters[key] = entities
+        }
+        return filters
+    }
+}
