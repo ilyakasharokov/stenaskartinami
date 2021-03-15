@@ -12,9 +12,11 @@ module.exports = {
             subjects: [],
             mediums: []
         };
-        for( let key of filters){
-            let entities = await strapi.services[key.slice(0,-1)].find();
+        console.log('test')
+        for( let key in filters){
+            let entities = await strapi.services[key.slice(0,-1)].find({_limit: -1});
             filters[key] = entities
+            console.log(entities)
         }
         return filters
     }
