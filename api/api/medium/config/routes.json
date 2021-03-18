@@ -2,56 +2,48 @@
   "routes": [
     {
       "method": "GET",
-      "path": "/styles",
-      "handler": "style.find",
+      "path": "/mediums",
+      "handler": "medium.find",
       "config": {
         "policies": []
       }
     },
     {
       "method": "GET",
-      "path": "/styles/filters",
-      "handler": "style.filters",
+      "path": "/mediums/count",
+      "handler": "medium.count",
       "config": {
         "policies": []
       }
     },
     {
       "method": "GET",
-      "path": "/styles/count",
-      "handler": "style.count",
-      "config": {
-        "policies": []
-      }
-    },
-    {
-      "method": "GET",
-      "path": "/styles/:id",
-      "handler": "style.findOne",
+      "path": "/mediums/:id",
+      "handler": "medium.findOne",
       "config": {
         "policies": []
       }
     },
     {
       "method": "POST",
-      "path": "/styles",
-      "handler": "style.create",
+      "path": "/mediums",
+      "handler": "medium.create",
       "config": {
         "policies": []
       }
     },
     {
       "method": "PUT",
-      "path": "/styles/:id",
-      "handler": "style.update",
+      "path": "/mediums/:id",
+      "handler": "medium.update",
       "config": {
         "policies": []
       }
     },
     {
       "method": "DELETE",
-      "path": "/styles/:id",
-      "handler": "style.delete",
+      "path": "/mediums/:id",
+      "handler": "medium.delete",
       "config": {
         "policies": []
       }

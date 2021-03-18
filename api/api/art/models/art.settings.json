@@ -53,8 +53,8 @@
       "private": true
     },
     "wall": {
-      "via": "art",
-      "model": "wall"
+      "model": "wall",
+      "via": "arts"
     },
     "slug": {
       "type": "string"
@@ -71,6 +71,24 @@
       "collection": "subject",
       "via": "arts",
       "dominant": true
+    },
+    "width": {
+      "type": "decimal",
+      "required": false
+    },
+    "height": {
+      "type": "decimal",
+      "required": false
+    },
+    "square": {
+      "type": "decimal"
+    },
+    "isSquare": {
+      "type": "boolean"
+    },
+    "mediums": {
+      "via": "arts",
+      "collection": "medium"
     }
   }
 }

@@ -1,39 +1,49 @@
 import MainLayout from "../../components/layouts/MainLayout"
 import { useState, useEffect } from "react"
-
 import { API_HOST } from '../../constants/constants'
-
 import CatalogCmp from "../../components/catalog/catalog"
+import Head from 'next/head'
+import serialize from '../../utils/serialize'
 
-export default function Catalog({ arts }) {
+export default function Catalog({ arts, filters }) {
 
   return (<MainLayout>
-    <h1>Каталог</h1>
-    <CatalogCmp arts={arts}></CatalogCmp>
+    <Head>
+      <title>Купить искусство, каталог картин | Стена с картинами, облачная галерея</title>
+    </Head>
+    <CatalogCmp arts={ arts } title={'Каталог'} filters={ filters }></CatalogCmp>
   </MainLayout>
   )
 }
 
-Catalog.getInitialProps = async (ctx) => {
-  const res = await fetch(API_HOST + '/arts')
+Catalog.getInitialProps = async ({ query }) => {
+  let res = await fetch(API_HOST + '/arts' + serialize(Object.assign({_start: 1 }, query) ) )
   const json = await res.json()
-  const arts = json.sort((a,b)=> {
-    return a.published_at < b.published_at ? 1: -1;
-  })
-  return { arts: arts }
-}
+  const arts = json || []
+  return { arts: arts } 
+} 
 
 /*
 export const getStaticProps = async () => {
-  const res = await fetch(API_HOST + '/arts/')
-  const json = await res.json()
+  let res = await fetch(API_HOST + '/arts/')
+  let json = await res.json()
   const arts = json.sort((a,b)=> {
     return a.published_at < b.published_at ? 1: -1;
   })
-
+  const filters = {
+    styles: [],
+    mediums: [],
+    subjects: []
+  }
+  for( let key in filters){
+    res = await fetch(API_HOST + '/' + key + '/')
+    json = await res.json()
+    filters[key] = json
+  }
   return {
     props: {
       arts,
+      filters
     },
   }
 }

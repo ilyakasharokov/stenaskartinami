@@ -1,8 +1,8 @@
 {
   "kind": "collectionType",
-  "collectionName": "styles",
+  "collectionName": "mediums",
   "info": {
-    "name": "Style",
+    "name": "Medium",
     "description": ""
   },
   "options": {
@@ -11,21 +11,19 @@
     "draftAndPublish": true
   },
   "attributes": {
-    "Title": {
-      "type": "string"
-    },
-    "arts": {
-      "via": "styles",
-      "collection": "art"
-    },
-    "slug": {
-      "type": "string"
-    },
-    "seotitle": {
+    "title": {
       "type": "string"
     },
     "description": {
       "type": "richtext"
+    },
+    "arts": {
+      "collection": "art",
+      "via": "mediums",
+      "dominant": true
+    },
+    "slug": {
+      "type": "string"
     }
   }
 }

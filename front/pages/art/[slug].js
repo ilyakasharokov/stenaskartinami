@@ -5,17 +5,16 @@ import { useRouter, Router } from "next/router";
 import { useState, useEffect } from "react"
 import { API_HOST } from '../../constants/constants'
 import ProductList from '../../components/catalog/product-list'
-import Artist from '../artist/[slug]';
+import Artist from '../artists/[slug]';
+import imageUrlBuilder from '../../utils/img-url-builder'
 
 export default function Art({ art }) {
 
   const [currentPicture, setPicture] = useState({index: 0, img: art.Pictures[0]})
 
-  function imageUrlBuilder(url){
-    if( url[0] == '/')
-      return API_HOST + url;
-    return url
-  }
+  useEffect(()=>{
+    setPicture({index: 0, img: art.Pictures[0]})
+  }, [art])
 
   function setPictureClick(newIndex, newPicture){
     setPicture({index:newIndex, img: newPicture})
@@ -24,7 +23,7 @@ export default function Art({ art }) {
   console.log(art)
   return (<MainLayout>
     <Head>
-      <title>"{art.Title}", картина художника {art.Artist.full_name} | Стена с картинами, облачная галерея</title>
+      <title>{art.Title}, картина художника {art.Artist?.full_name} | Стена с картинами, облачная галерея</title>
     </Head>
     <div className="art-page">
       <h1>Картина "{art.Title}"{ art.Artist && ', ' + art.Artist.full_name}</h1>
@@ -36,26 +35,32 @@ export default function Art({ art }) {
             {
               art.Pictures.map((picture, i) => 
                   <div className={ `art-page__thumbnail ${ currentPicture.index === i ? 'art-page__thumbnail--active': null} `} 
-                  key={picture.id} style={{ backgroundImage: 'url(' + imageUrlBuilder( picture.formats.small.url) + ')'}} onClick={ setPictureClick.bind(this, i, picture)}></div>  
+                  key={picture.id} style={{ backgroundImage: 'url(' + imageUrlBuilder( picture.formats.small ?  picture.formats.small.url:  picture.formats.thumbnail.url) + ')'}} onClick={ setPictureClick.bind(this, i, picture)}></div>  
               )
             }
             </div>
           }
           <div className="art-page__big-picture">
-            <img src={ imageUrlBuilder( currentPicture.img.formats.large ? currentPicture.img.formats.large.url: (currentPicture.img.formats.medium ? currentPicture.img.formats.medium.url: currentPicture.img.formats.small.url)) }/>
+            <img src={ imageUrlBuilder( currentPicture.img.formats.large ? currentPicture.img.formats.large.url: (currentPicture.img.formats.medium ? currentPicture.img.formats.medium.url: currentPicture.img.formats.small ?  currentPicture.img.formats.small.url:  currentPicture.img.formats.thumbnail.url)) }/>
           </div>
         </div>
         <div className="art-page__info">
           <div className="art-page__info-title">{art.Title}</div>
-          <div className="art-page__info-author">{ art.Artist && art.Artist.full_name}</div>
-          { 
-            art.Size &&
-            <div className="art-page__info-size">Размеры: { art.Size.Width } x { art.Size.Height } </div>
-          }
-          {
-            art.Materials && 
-            <div className="art-page__info-materials">Техника: {art.Materials}</div>
-          }
+          <div className="art-page__info-author">
+            <Link href={ '/artists/' + art.Artist.slug + '--' + art.Artist.id}>
+              <a title={art.Artist.full_name}>{art.Artist.full_name}</a>
+              </Link> 
+          </div>
+          <div className="art-page__info-blocks">
+            { 
+              art.Size &&
+              <div className="art-page__info-size">Размеры: { art.Size.Width } x { art.Size.Height } </div>
+            }
+            {
+              art.Materials && 
+              <div className="art-page__info-materials">Техника: {art.Materials}</div>
+            }
+          </div>
           <div className="art-page__buy-block">
             <div className="art-page__price">{art.Price} P</div>
             <div className="btn buy-btn">Купить</div>
@@ -64,9 +69,17 @@ export default function Art({ art }) {
             { art.Description }
           </div>
         </div>
+        {
+          art.Wall &&
+          <div class="art-page__wall-block">
+            
+          </div>
+        }
       </div>
-      <h2>Другие работы художника</h2>
-      <ProductList artist={art.Artist}></ProductList>
+      {
+        art.Artist && 
+        <ProductList artist={art.Artist} except={art.id}></ProductList>
+      }
     </div>
   </MainLayout>
   )
