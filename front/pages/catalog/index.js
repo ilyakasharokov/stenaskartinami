@@ -17,8 +17,7 @@ export default function Catalog({ arts, filters }) {
 }
 
 Catalog.getInitialProps = async ({ query }) => {
-  const page = query.page || 1;
-  let res = await fetch(API_HOST + '/arts' + serialize(query))
+  let res = await fetch(API_HOST + '/arts' + serialize(Object.assign({_start: 1 }, query) ) )
   const json = await res.json()
   const arts = json || []
   return { arts: arts } 
