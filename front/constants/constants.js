@@ -1,4 +1,4 @@
-const API_HOST = 'http://18.157.84.41:1337'
+const API_HOST = 'https://stenaskartinamiapi.ru'
 
 export {
     API_HOST
