@@ -131,9 +131,9 @@ export default function CatalogFilters({arts, onChange}){
       {
         Object.keys(filters).map((key) => 
           <div className="catalog-filters__section" key={key}>
-            <div className="catalog-filters__section-top">
+            <div className="catalog-filters__section-top" onClick={ ()=> toggleCollapse(key)}>
               <div className="catalog-filters__section-title">{filters[key].title}</div> 
-              <div className="catalog-filters__section-expand-btn" onClick={ ()=> toggleCollapse(key)}>
+              <div className="catalog-filters__section-expand-btn">
               {
                 filters[key].open && 
                 <svg className="minus" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 1"><path d="M0 0h10v1H0V0z" fill="#333"></path></svg>
@@ -159,10 +159,10 @@ export default function CatalogFilters({arts, onChange}){
             }
             </div>
             {
-              /* !filters[key].items.length &&
+              !filters[key].items.length &&
               <div className="catalog-filters__preloader">
                 <Preloader></Preloader>
-              </div> */
+              </div> 
             }
           </div>
         )

@@ -22,10 +22,11 @@ img {
 
 main {
     padding-bottom: 60px;
+    min-height: calc(100vh - 200px);
 }
 
 .top-navigation, .bottom-navigation {
-    border-bottom: 1px solid rgb(238, 238, 238);
+    border-bottom: 1px solid #eee;
     position: relative;
     padding-left: 25px;
     padding-right: 25px;
@@ -260,6 +261,7 @@ main {
         align-content: space-between;
         justify-content: space-between;
         align-items: center;
+        cursor: pointer;
     }
 }
 
@@ -454,12 +456,13 @@ main {
 , rgba(0, 0, 0, 0) 50%, #333 50%), linear-gradient(
 135deg
 , #333 50%, rgba(0, 0, 0, 0) 50%);
-    background-position: -moz-calc(100% - 20px) -moz-calc(22px), -moz-calc(100% - 15px) -moz-calc( 22px), -moz-calc(100% - 2.5em) 0.5em;
-    background-position: calc(100% - 17px) calc(19px), calc(100% - 12px) calc( 19px), calc(100% - 2.5em) 0.5em;
+    background-position: calc(100% - 17px) calc(17px), calc(100% - 12px) calc( 17px), calc(100% - 2.5em) 0.5em;
     background-size: 5px 5px, 5px 5px, 1px 1.5em;
     background-repeat: no-repeat;
     border-radius: 0;
     outline: none;
+    font-size: 12px;
+
 }
 
 .overlay {

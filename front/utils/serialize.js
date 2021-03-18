@@ -25,6 +25,7 @@ function serialize(obj){
               i2 += 2;
               break;
             case '_sort':
+            case '_start':
               str += `&${key}=${value}&`
               break;
             default:
@@ -39,6 +40,7 @@ function serialize(obj){
             i2 += 1;
             break;
           case '_sort':
+          case '_start':
             str += `&${key}=${value}&`
             break;
           default:

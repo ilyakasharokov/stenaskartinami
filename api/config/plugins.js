@@ -1,13 +1,15 @@
 module.exports = ({ env }) => ({
-  _upload: {
-    provider: 'aws-s3',
+  // ...
+  email: {
+    provider: 'mailgun',
     providerOptions: {
-      accessKeyId: env('AWS_ACCESS_KEY_ID'),
-      secretAccessKey: env('AWS_ACCESS_SECRET'),
-      region: env('AWS_REGION'),
-      params: {
-        Bucket: env('AWS_BUCKET_NAME'),
-      },
+      apiKey: env('MAILGUN_API_KEY'),
+      domain: env('MAILGUN_YOUR_DOMAIN')
+    },
+    settings: {
+      defaultFrom: 'no-reply@stenaskartinami.com',
+      defaultReplyTo: 'admin@stenaskartinami.com',
     },
   },
+  // ...
 });
