@@ -1,0 +1,26 @@
+.pagination {
+    text-align: right;
+    padding-top: 10px;
+    border-top: 1px solid #eee;
+}
+
+.pagination__item {
+    display: inline-block;
+    padding: 10px 15px;
+    cursor: pointer;
+    color: #777;
+}
+
+.pagination__item-active {
+    color: #000;
+    font-weight: bold;
+}
+
+.pagination__arrow {
+    cursor: pointer;
+    margin-left: 10px;
+    height: 20px;
+    vertical-align: middle;
+    padding-bottom: 3px;
+    margin-right: 10px;
+}

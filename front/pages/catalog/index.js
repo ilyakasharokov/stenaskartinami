@@ -1,26 +1,31 @@
 import MainLayout from "../../components/layouts/MainLayout"
 import { useState, useEffect } from "react"
-import { API_HOST } from '../../constants/constants'
+import { API_HOST, CATALOG_ITEMS_PER_PAGE } from '../../constants/constants'
 import CatalogCmp from "../../components/catalog/catalog"
 import Head from 'next/head'
 import serialize from '../../utils/serialize'
 
-export default function Catalog({ arts, filters }) {
+export default function Catalog({ arts, filters, count }) {
 
   return (<MainLayout>
     <Head>
       <title>Купить искусство, каталог картин | Стена с картинами, облачная галерея</title>
     </Head>
-    <CatalogCmp arts={ arts } title={'Каталог'} filters={ filters }></CatalogCmp>
+    <CatalogCmp arts={ arts } title={'Каталог'} filters={ filters } count={count}></CatalogCmp>
   </MainLayout>
   )
 }
 
 Catalog.getInitialProps = async ({ query }) => {
-  let res = await fetch(API_HOST + '/arts' + serialize(Object.assign({_start: 1 }, query) ) )
+  const _start = query.page ? ( query.page - 1)  * CATALOG_ITEMS_PER_PAGE: 0;
+  const newQuery = Object.assign({_start, _limit: CATALOG_ITEMS_PER_PAGE }, query) ;
+  delete newQuery.page;
+  let res = await fetch(API_HOST + '/arts' + serialize(newQuery) )
   const json = await res.json()
   const arts = json || []
-  return { arts: arts } 
+  res = await fetch(API_HOST + '/arts/count' + serialize(newQuery ) )
+  const count = await res.json()
+  return { arts: arts, count } 
 } 
 
 /*
