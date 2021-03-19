@@ -15,7 +15,7 @@ export default function CatalogCmp({arts, hideFilters, title, description, filte
 
   const resizeThrottled = throttle(resizeAllGridItems.bind(this, 'catalog-item',  'catalog-grid', '.catalog-item__wrapper'), 100)
 
-  let pagination = [...Array(Math.ceil(count / CATALOG_ITEMS_PER_PAGE))]
+  let pagination = count ? [...Array(Math.ceil(count / CATALOG_ITEMS_PER_PAGE))]: []
 
   useEffect(() => {
 
