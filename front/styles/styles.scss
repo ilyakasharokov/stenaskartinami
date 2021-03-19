@@ -103,6 +103,8 @@ main {
     width: 100%;
 }
 
+
+
 .catalog {
     width: 100%;
     display: flex;
@@ -112,6 +114,9 @@ main {
     align-items: flex-start;
     margin-bottom: 50px;
     position: relative;
+    &-wrapper{
+        width: 100%;
+    }
     &-filters__preloader{
         text-align: center;
         

@@ -39,6 +39,8 @@ export default function CatalogFilters({arts, onChange}){
 
   const keys = Object.keys(filters)
 
+  const fetcher = url => fetch(url).then(r => r.json())
+
   useEffect(()=>{
     let newFilters = Object.assign({}, filters)
     function loadFilters(){
@@ -120,9 +122,11 @@ export default function CatalogFilters({arts, onChange}){
       query[key] = filters[key].items.filter((item)=> item.active).map((item)=> item.slug)
     }
     onChange()
+    const newQuery = Router.query ? Object.assign({}, Router.query, query) : query
+    delete newQuery.page;
     Router.push({
       pathname: Router.pathname,
-      query: Router.query ? Object.assign({}, Router.query, query) : query
+      query: newQuery
     })
   } 
 

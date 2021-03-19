@@ -7,6 +7,8 @@ import { API_HOST } from '../../constants/constants'
 import ProductList from '../../components/catalog/product-list'
 import Artist from '../artists/[slug]';
 import imageUrlBuilder from '../../utils/img-url-builder'
+import { YMaps, Map, Placemark } from 'react-yandex-maps';
+import { isLocalURL } from 'next/dist/next-server/lib/router/router';
 
 export default function Art({ art }) {
 
@@ -25,6 +27,7 @@ export default function Art({ art }) {
     <Head>
       <title>{art.Title}, картина художника {art.Artist?.full_name} | Стена с картинами, облачная галерея</title>
     </Head>
+    <YMaps>
     <div className="art-page">
       <h1>Картина "{art.Title}"{ art.Artist && ', ' + art.Artist.full_name}</h1>
       <div className="art-page__grid">
@@ -68,19 +71,25 @@ export default function Art({ art }) {
           <div className="art-page__description">
             { art.Description }
           </div>
-        </div>
-        {
-          art.Wall &&
-          <div class="art-page__wall-block">
-            
+          {
+          art.wall &&
+          <div className="art-page__wall-block">
+            <div className="art-page__wall-block-text">
+              Картина находится на стене в <Link href={ '/walls/' + art.wall.slug + '--' + art.wall.id }><a>{ art.wall.Title }</a></Link>
+            </div>
+            <Map defaultState={art.wall.Coordinates} style={{width: '100%', height: '200px'}} >
+              <Placemark geometry={art.wall.Coordinates.center} options={{ iconLayout: 'default#image', iconImageHref: '/images/Logo_stenaskartinami_black_sqr.svg', iconImageSize: [30, 30], iconImageOffset: [-15, -15]}} />
+            </Map>
           </div>
-        }
+          }
+        </div>
+        
       </div>
       {
         art.Artist && 
         <ProductList artist={art.Artist} except={art.id}></ProductList>
       }
-    </div>
+    </div></YMaps>
   </MainLayout>
   )
 }
@@ -111,7 +120,7 @@ export const getStaticProps = async ({params: {
   slug
 }}) => {
   let id = slug.split('--')[1]
-  console.log(id)
+  // console.log(id)
   const res = await fetch(API_HOST + '/arts/' + id)
   const json = await res.json()
 
