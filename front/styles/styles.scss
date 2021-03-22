@@ -25,6 +25,14 @@ main {
     min-height: calc(100vh - 200px);
 }
 
+.align-right{
+    text-align: right;
+}
+
+.align-left {
+    text-align: left;
+}
+
 .top-navigation, .bottom-navigation {
     border-bottom: 1px solid #eee;
     position: relative;
@@ -322,8 +330,14 @@ main {
 }
 
 .art-page__info {
-    padding: 15px;
+    padding: 15px 15px 0 15px;
     background: #eee;
+    margin-bottom: 30px;
+}
+
+.art-page__wall-block-text {
+    margin-bottom: 10px;
+    
 }
 
 .art-page__info-title {
@@ -354,15 +368,14 @@ main {
 }
 
 .btn {
-    cursor: pointer;
-}
-
-.buy-btn {
-    background: rgb(220, 58, 15);
+    background: #dc3a0f;
     display: inline-block;
     color: #fff;
-    font-size: 24px;
-    padding: 7px 30px;
+    font-size: 18px;
+    padding: 15px 35px;
+    border-radius: 3px;
+    outline: none;
+    border:none;
 }
 
 .art-page__buy-block {

@@ -113,8 +113,8 @@ export default function CatalogCmp({arts, hideFilters, title, description, filte
                   <div className="catalog-item__title"><a title={art.Title}>{art.Title}</a></div>
                 </Link>
                 { 
-                  art.Size &&
-                  <div className="catalog-item__size">{art.Size.Width} x {art.Size.Height}</div>
+                  art.width && art.height &&
+                  <div className="catalog-item__size">{art.width} x {art.height}</div>
                 }
                 <div className="catalog-item__artist-price">
                   { 

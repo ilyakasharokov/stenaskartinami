@@ -58,9 +58,9 @@ export default function ProductList({artist, except}){
                 </Link>
                 <div className="catalog-item__size">
                 { 
-                  art.Size &&
+                  art.width && art.height &&
                   <div>
-                    {art.Size.Width} x {art.Size.Height}
+                    {art.width} x {art.height}
                   </div>
                 }
                 </div>
