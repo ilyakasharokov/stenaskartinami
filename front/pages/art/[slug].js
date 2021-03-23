@@ -9,10 +9,13 @@ import Artist from '../artists/[slug]';
 import imageUrlBuilder from '../../utils/img-url-builder'
 import { YMaps, Map, Placemark } from 'react-yandex-maps';
 import { isLocalURL } from 'next/dist/next-server/lib/router/router';
+import BuyBlock from '../../components/art/buy-block';
 
 export default function Art({ art }) {
 
   const [currentPicture, setPicture] = useState({index: 0, img: art.Pictures[0]})
+
+  const sent = false;
 
   useEffect(()=>{
     setPicture({index: 0, img: art.Pictures[0]})
@@ -71,10 +74,7 @@ export default function Art({ art }) {
                 </div>
               }
             </div>
-            <div className="art-page__buy-block">
-              <div className="art-page__price">{art.Price} P</div>
-              <div className="btn buy-btn">Купить</div>
-            </div>
+            <BuyBlock art={art}></BuyBlock>
       
           </div>
           {

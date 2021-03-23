@@ -28,13 +28,12 @@ export default function AddArt({ Component, pageProps }) {
       <title>Аренда картин бесплатно? | Стена с картинами, облачная галерея</title>
     </Head>
     <div className="form-page">
-      <h1>Добавить картину</h1>
+      <h1>Добавить стену</h1>
       <div class="form-page__wrapper">
         <div class="form-page__left">
           <img className="form-page__image" src={ API_HOST + '/uploads/photo_2021_03_22_17_26_34_1769d88fce.jpeg?14694382.854999974'}></img>
         </div>
         <div className="form-page__right">
-          <p>Общественные пространства, ВАМ!</p>
           <p>Облачная галерея "Стена с картинами" открыта к сотрудничеству.
           Если вы или ваши знакомые,  являетесь владельцами, управляющими  площадок, т.к </p>
           <ul>

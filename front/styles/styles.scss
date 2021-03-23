@@ -6,6 +6,10 @@ a {
     color:inherit;
 }
 
+p{
+    margin-block-start: 0;
+}
+
 h2 {
     margin-bottom: 1.5em;
 }
@@ -317,6 +321,10 @@ main {
     max-width: 1060px;
     margin: 0px auto;
     padding: 0px;
+    &__sent {
+        font-size: 24px;
+        color: #FFF;
+    }
 }
 
 .art-page__grid {
@@ -376,19 +384,36 @@ main {
     border-radius: 3px;
     outline: none;
     border:none;
+    cursor: pointer;
 }
 
 .art-page__buy-block {
-    display: -webkit-flex;
-    display: -moz-box;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
     padding: 15px 15px 15px 15px;
     background: #333;
     margin-right: -15px;
     margin-bottom: 15px;
     margin-left: -15px;
+}
+
+.art-page__buy-expand {
+    &.active{
+        max-height: 290px;
+    }
+    max-height: 0;
+    overflow: hidden;
+    transition: all 0.2s;
+    will-change: max-height;
+}
+
+.art-page__buy-text {
+    color: #fff;
+    margin-bottom: 15px;
+}
+
+.art-page__buy-block-btns {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 }
 
 .art-page__price {
