@@ -7,7 +7,9 @@ import Preloader from '../preloader/preloader';
 
 const FILTER_ITEMS_NUM = 6;
 
-export default function CatalogFilters({arts, onChange}){
+export default function CatalogFilters({filtersPreloaded, onChange}){
+
+  const router = useRouter();
 
   const [filters, setFilters] = useState({
     styles:{
@@ -39,19 +41,14 @@ export default function CatalogFilters({arts, onChange}){
 
   const keys = Object.keys(filters)
 
-  const fetcher = url => fetch(url).then(r => r.json())
-
   useEffect(()=>{
     let newFilters = Object.assign({}, filters)
     function loadFilters(){
-      fetch(API_HOST + '/styles').then((response)=> response.json()).then((json)=>{ 
-        newFilters.styles.items = json.filter((f)=> f.arts.length > 0)
-        return fetch(API_HOST + '/subjects')
-      }).then((response)=> response.json()).then((json)=>{ 
-        newFilters.subjects.items = json.filter((f)=> f.arts.length > 0)
-        return fetch(API_HOST + '/mediums')
-      }).then((response)=> response.json()).then((json)=>{
-        newFilters.mediums.items = json.filter((f)=> f.arts.length > 0)
+        keys.forEach(key=>{
+          if(filtersPreloaded[key]){
+            newFilters[key].items = [...filtersPreloaded[key]]
+          }
+        })
         newFilters.size.items = [{
           title: 'Маленькие',
           slug: 'small',
@@ -92,11 +89,9 @@ export default function CatalogFilters({arts, onChange}){
           }
         }
         setFilters(newFilters)
-      })
-  
     }
     loadFilters()
-  }, [])
+  }, [filtersPreloaded, router.query])
 
   function sortByActive(arr){
     arr.sort((a,b)=> a.active === b.active ? 0: a.active ? -1: 1)

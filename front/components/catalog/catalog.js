@@ -7,34 +7,50 @@ import throttle from '../../utils/throttle'
 import { resizeAllGridItems } from '../../utils/grid-resizer'
 import CatalogFilters from "./catalog-filters"
 import Preloader from '../preloader/preloader';
+import serialize from '../../utils/serialize'
+import Pagination from './pagination'
 
 export default function CatalogCmp({arts, hideFilters, title, description, filters, count}){
 
   //console.log(arts)
-  const [state, setState] = useState({showPreloader: false, selectValue: ""})
+  const router = useRouter()
+  const [state, setState] = useState({showPreloader: false, selectedSortValue: "", arts:arts, count: count})
 
   const resizeThrottled = throttle(resizeAllGridItems.bind(this, 'catalog-item',  'catalog-grid', '.catalog-item__wrapper'), 100)
 
-  let pagination = count ? [...Array(Math.ceil(count / CATALOG_ITEMS_PER_PAGE))]: []
-
   useEffect(() => {
-
-    window.addEventListener('resize', resizeThrottled)
-    window.addEventListener('load', resizeThrottled)
-
-    resizeThrottled()
+    async function loadArts(){
+      window.addEventListener('resize', resizeThrottled)
+      window.addEventListener('load', resizeThrottled)
+      resizeThrottled()
     
-    let selectValue = (Router && Router.query || {})._sort;
-    
-    setState({showPreloader:false, selectValue, page: parseInt(Router.query && Router.query.page, 10) || 1})
+      let selectedSortValue = (Router && Router.query || {})._sort;
+      
+      if(Router && Router.query && Object.entries(Router.query).length){
+        const query = Router.query;
+        const _start = query.page ? ( query.page - 1)  * CATALOG_ITEMS_PER_PAGE: 0;
+        const newQuery = Object.assign({_start, _limit: CATALOG_ITEMS_PER_PAGE }, query) ;
+        delete newQuery.page;
+        let res = await fetch(API_HOST + '/arts' + serialize(newQuery) )
+        const json = await res.json()
+        const arts = json || []
+        res = await fetch(API_HOST + '/arts/count' + serialize(newQuery ) )
+        const newCount = await res.json()
+        setState({arts, showPreloader:false, selectedSortValue, page: parseInt(Router.query && Router.query.page, 10) || 1, count: newCount})
+      }else{
+        setState({arts, showPreloader:false, selectedSortValue, page: parseInt(Router.query && Router.query.page, 10) || 1, count: count})
+      }
 
-    window.scrollTo(0, 0)
+      window.scrollTo(0, 0)
+    }
+
+    loadArts()
 
     return _ => {
       window.removeEventListener('resize', resizeThrottled)
       window.removeEventListener('load', resizeThrottled)
     }
-  }, [arts])
+  }, [arts, router.query])
 
   function imageUrlBuilder(url){
     if( url[0] == '/')
@@ -44,14 +60,14 @@ export default function CatalogCmp({arts, hideFilters, title, description, filte
 
   function changeSort(event){
     let queryObj = Router.query || {};
-    let selectValue = event.target.value
+    let selectedSortValue = event.target.value
     if(event.target.value){
         Object.assign(queryObj, {_sort: event.target.value})
     } else {
       delete queryObj._sort
     }
     delete queryObj.page;
-    setState({showPreloader: true, selectValue, page: state.page})
+    setState({showPreloader: true, selectedSortValue, page: state.page, arts: [...state.arts], count: state.count})
     Router.push({
       pathname: Router.pathname,
       query: queryObj
@@ -60,7 +76,7 @@ export default function CatalogCmp({arts, hideFilters, title, description, filte
 
   function setPage(num){
     let queryObj = Router.query || {};
-    setState({showPreloader: true, page: num})
+    setState({showPreloader: true, page: num, arts: [...state.arts], count: state.count})
     Router.push({
       pathname: Router.pathname,
       query: Object.assign(queryObj, { page: num})
@@ -72,7 +88,7 @@ export default function CatalogCmp({arts, hideFilters, title, description, filte
       <div className="catalog-top">
         <h1>{title}</h1>
         <div className="catalog__sort">
-          <select className="stena-select" value={ state.selectValue } onChange={(event)=>changeSort(event)}>
+          <select className="stena-select" value={ state.selectedSortValue } onChange={(event)=>changeSort(event)}>
             <option value="">По новизне</option>
             <option value="Price:asc">Цена: по возрастанию</option>
             <option value="Price:desc">Цена: по убыванию</option>
@@ -86,7 +102,7 @@ export default function CatalogCmp({arts, hideFilters, title, description, filte
       <div className="catalog">
       {
         !hideFilters && 
-        <CatalogFilters arts={arts} onChange={() => setState({showPreloader: true})} filtersPreloaded={filters}></CatalogFilters>
+        <CatalogFilters arts={state.arts} onChange={() => setState({showPreloader: true, arts: [...state.arts], count: state.count})} filtersPreloaded={filters}></CatalogFilters>
       }
       {
         state.showPreloader &&
@@ -95,11 +111,11 @@ export default function CatalogCmp({arts, hideFilters, title, description, filte
         </div>
       }
       {
-        arts.length > 0 && 
+        state.arts && state.arts.length > 0 && 
         <div class="catalog-wrapper">
           <div className="catalog-grid">
             {
-            arts.map((art) =>
+            state.arts.map((art) =>
             <div className="catalog-item" key={art.id}>
               <div className="catalog-item__wrapper">
                 <div className="catalog-item__img-wrap">
@@ -144,27 +160,13 @@ export default function CatalogCmp({arts, hideFilters, title, description, filte
           }
           </div>
           {
-            count && count > CATALOG_ITEMS_PER_PAGE &&
-            <div class="catalog__pagination pagination">
-              {
-                state.page > 1 &&
-                <svg class="pagination__arrow" xmlns="http://www.w3.org/2000/svg" width="11" height="28" viewBox="0 0 11 28" onClick={ ()=> setPage( state.page - 1)}><title>angle-left</title><path d="M9.797 8.5a.54.54 0 0 1-.156.359L3.5 15l6.141 6.141c.094.094.156.234.156.359s-.063.266-.156.359l-.781.781c-.094.094-.234.156-.359.156s-.266-.063-.359-.156L.861 15.359C.767 15.265.705 15.125.705 15s.063-.266.156-.359L8.142 7.36c.094-.094.234-.156.359-.156s.266.063.359.156l.781.781a.508.508 0 0 1 .156.359z" fill="#666" stroke="#666"></path></svg>
-              }
-              {
-                pagination.map((num, i) => 
-                  <div className={`pagination__item ${ (state.page === i + 1 ? 'pagination__item-active': '')}`} key={i} onClick={ ()=> setPage(i + 1)}>{i + 1}</div>  
-                )
-              }
-              {
-              state.page < pagination.length && 
-              <svg class="pagination__arrow" xmlns="http://www.w3.org/2000/svg" width="9" height="28" viewBox="0 0 9 28" onClick={ ()=> setPage( state.page + 1)}><title>angle-right</title><path d="M9.297 15a.54.54 0 0 1-.156.359L1.86 22.64c-.094.094-.234.156-.359.156s-.266-.063-.359-.156l-.781-.781a.508.508 0 0 1-.156-.359.54.54 0 0 1 .156-.359L6.502 15 .361 8.859C.267 8.765.205 8.625.205 8.5s.063-.266.156-.359l.781-.781c.094-.094.234-.156.359-.156s.266.063.359.156l7.281 7.281a.536.536 0 0 1 .156.359z" fill="#666" stroke="#666"></path></svg>
-              }
-            </div>
+            state.count && state.count > CATALOG_ITEMS_PER_PAGE &&
+            <Pagination currentPage={state.page} count={state.count} setPage={(num)=> setPage(num)}></Pagination>
           }
         </div>
       }
       {
-        !arts.length &&
+        !state.arts?.length &&
         <div className="catalog__no-results">
           Извините, по данным критериям ничего нет :(
         </div>
