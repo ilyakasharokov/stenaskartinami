@@ -9,6 +9,7 @@ import CatalogFilters from "./catalog-filters"
 import Preloader from '../preloader/preloader';
 import serialize from '../../utils/serialize'
 import Pagination from './pagination'
+import imageUrlBuilder from '../../utils/img-url-builder'
 
 export default function CatalogCmp({arts, hideFilters, title, description, filters, count, useURLParams}){
 
@@ -51,12 +52,6 @@ export default function CatalogCmp({arts, hideFilters, title, description, filte
       window.removeEventListener('load', resizeThrottled)
     }
   }, [arts, router.query])
-
-  function imageUrlBuilder(url){
-    if( url[0] == '/')
-      return API_HOST + url;
-    return url
-  }
 
   function changeSort(event){
     let queryObj = Router.query || {};

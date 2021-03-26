@@ -36,7 +36,12 @@ export default function CatalogFilters({filtersPreloaded, onChange}){
       open: false,
       showAll: false,
     },  
-
+    wall: {
+      title: 'Стена',
+      items: [],
+      open: false,
+      showAll: false,
+    }, 
   })
 
   const keys = Object.keys(filters)

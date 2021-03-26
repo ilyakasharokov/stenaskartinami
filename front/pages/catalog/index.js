@@ -41,11 +41,15 @@ export const getStaticProps = async () => {
   const filters = {
     styles: [],
     mediums: [],
-    subjects: []
+    subjects: [],
+    walls: []
   }
   for( let key in filters){
     res = await fetch(API_HOST + '/' + key + '/')
     json = await res.json()
+    if(key === 'walls'){
+      key = 'wall'
+    }
     filters[key] = json
   }
   return {

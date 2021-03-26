@@ -29,6 +29,21 @@ main {
     min-height: calc(100vh - 200px);
 }
 
+.content-page{
+    width: 1060px;
+    margin: 0 auto;
+}
+
+.content-page__wrapper {
+    display: flex;
+    margin-bottom: 30px;
+}
+
+.content-page__left {
+    width: 430px;
+    padding-right: 30px;
+}
+
 .align-right{
     text-align: right;
 }
