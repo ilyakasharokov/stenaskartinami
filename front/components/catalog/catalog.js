@@ -10,7 +10,7 @@ import Preloader from '../preloader/preloader';
 import serialize from '../../utils/serialize'
 import Pagination from './pagination'
 
-export default function CatalogCmp({arts, hideFilters, title, description, filters, count}){
+export default function CatalogCmp({arts, hideFilters, title, description, filters, count, useURLParams}){
 
   //console.log(arts)
   const router = useRouter()
@@ -26,7 +26,7 @@ export default function CatalogCmp({arts, hideFilters, title, description, filte
     
       let selectedSortValue = (Router && Router.query || {})._sort;
       
-      if(Router && Router.query && Object.entries(Router.query).length){
+      if(useURLParams && Router && Router.query && Object.entries(Router.query).length){
         const query = Router.query;
         const _start = query.page ? ( query.page - 1)  * CATALOG_ITEMS_PER_PAGE: 0;
         const newQuery = Object.assign({_start, _limit: CATALOG_ITEMS_PER_PAGE }, query) ;

@@ -11,7 +11,7 @@ export default function Catalog({ arts, filters, count }) {
     <Head>
       <title>Купить искусство, каталог картин | Стена с картинами, облачная галерея</title>
     </Head>
-    <CatalogCmp arts={ arts } title={'Каталог'} filters={ filters } count={count}></CatalogCmp>
+    <CatalogCmp arts={ arts } title={'Каталог'} filters={ filters } count={count} useURLParams={true}></CatalogCmp>
   </MainLayout>
   )
 }
