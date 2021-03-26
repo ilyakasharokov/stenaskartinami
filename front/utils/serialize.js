@@ -20,8 +20,8 @@ function serialize(obj){
         obj[key].forEach && obj[key].forEach((val) => {
           switch ( key ){
             case 'size':
-              str += `_where[${i1}][square_gte]=${size[val][0]**2}&`;
-              str += `_where[${i1}][square_lte]=${size[val][1]**2}&`;
+              str += `_where[${i1}][_or][${i2}][square_gte]=${size[val][0]**2}&`;
+              str += `_where[${i1}][_or][${i2}][square_lte]=${size[val][1]**2}&`;
               i2 += 2;
               break;
             case '_sort':
