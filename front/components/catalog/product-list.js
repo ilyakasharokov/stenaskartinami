@@ -6,7 +6,7 @@ import Router from 'next/router'
 import throttle from '../../utils/throttle'
 import { resizeAllGridItems } from '../../utils/grid-resizer'
 import CatalogFilters from "./catalog-filters"
-import { imageUrlBuilder } from "../../utils/img-url-builder"
+import imageUrlBuilder from "../../utils/img-url-builder"
 
 export default function ProductList({artist, except}){
 
