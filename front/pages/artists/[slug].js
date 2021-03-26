@@ -39,6 +39,7 @@ export const getStaticProps = async ({params: {
     props: {
       artist,
     },
+    revalidate: 60,
   }
 }
 

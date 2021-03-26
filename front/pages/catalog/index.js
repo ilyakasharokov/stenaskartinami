@@ -54,5 +54,6 @@ export const getStaticProps = async () => {
       filters,
       count
     },
+    revalidate: 60,
   }
 }
