@@ -18,7 +18,10 @@ export default function Catalog({ wall }) {
       <h1>{wall.Title}</h1>
       <div className="content-page__wrapper">
         <div className="content-page__left">
-        <ImageGallery images={wall.Images}></ImageGallery>
+        {
+          wall.Images.length && 
+          <ImageGallery images={wall.Images}></ImageGallery>
+        }
         </div>
         <div className="content-page__right wall-page__info">
           <div className="wall-page__description wall-page__info-line">{wall.Description}</div>
