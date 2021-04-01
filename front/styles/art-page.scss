@@ -1,0 +1,148 @@
+ .art-page{
+    width: 100%;
+    max-width: 1060px;
+    margin: 0px auto;
+    padding: 0px;
+    &__sent {
+        font-size: 24px;
+        color: #FFF;
+    }
+}
+
+.art-page__grid {
+    display: grid;
+    grid-template-columns: auto 430px;
+    gap: 20px;
+    grid-template-areas:
+        "gallery sidepanel";
+    align-items: flex-start;
+    margin: 20px 0px 60px;
+}
+
+.art-page__info {
+    padding: 15px 15px 0 15px;
+    background: #eee;
+    margin-bottom: 30px;
+}
+
+.art-page__wall-block-text {
+    margin-bottom: 10px;
+    
+}
+
+.art-page__info-title {
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.art-page__info-author {
+    font-size: 16px;
+    color: #777;
+    margin-bottom: 15px;
+    a{
+        text-decoration:none;
+    }
+}
+
+.art-page__info-blocks{
+    margin-bottom: 15px;
+    overflow: hidden;
+}
+
+.art-page__info-size {
+    margin-bottom: 10px;
+}
+
+.art-page__info-size {
+    margin-bottom: 10px;
+}
+
+.art-page__buy-block {
+    padding: 15px 15px 15px 15px;
+    background: #333;
+    margin-right: -15px;
+    margin-bottom: 15px;
+    margin-left: -15px;
+}
+
+.art-page__buy-expand {
+    &.active{
+        max-height: 290px;
+    }
+    max-height: 0;
+    overflow: hidden;
+    transition: all 0.2s;
+    will-change: max-height;
+}
+
+.art-page__buy-text {
+    color: #fff;
+    margin-bottom: 15px;
+}
+
+.art-page__buy-block-btns {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.art-page__price {
+    color: #fff;
+    font-size: 22px;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.art-page__info-materials {
+    margin-bottom: 15px;
+}
+
+.art-page__description {
+    color: #555;
+}
+
+.art-page__thumbnails {
+    position: absolute;
+    width: 80px;
+    left: -80px;
+    top:0;
+}
+
+.art-page__gallery {
+    position: relative;
+}
+
+.art-page__thumbnail {
+    &--active{
+        border: 3px solid #555;
+    }
+    width: 70px;
+    height: 70px;
+    overflow: hidden;
+    border: 1px solid #aaa;
+    background-position: center;
+    background-size: cover;
+    margin-bottom: 10px;
+    cursor: pointer;
+}
+
+
+@media screen and (max-width: 994px) {
+    .art-page__grid {
+        display: block;
+    }
+
+    .art-page__thumbnails {
+        position: static;
+        width: 100%;
+    }
+
+    .art-page__thumbnail {
+        display: inline-block;
+        margin-right: 5px;
+    }
+
+    .art-page__info-title {
+        font-size: 24px;
+    }
+}

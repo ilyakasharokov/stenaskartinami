@@ -1,4 +1,4 @@
-const API_HOST = 'https://stenaskartinamiapi.ru';
+const API_HOST = 'https://api.stenaskartinami.com';
 const CATALOG_ITEMS_PER_PAGE = 20;
 const FREE_ID = 4;
 

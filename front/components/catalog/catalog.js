@@ -1,4 +1,3 @@
-import Link from 'next/link'
 import { useState, useEffect } from 'react'
 import { API_HOST, CATALOG_ITEMS_PER_PAGE } from '../../constants/constants'
 import { useRouter } from "next/router";
@@ -9,13 +8,15 @@ import CatalogFilters from "./catalog-filters"
 import Preloader from '../preloader/preloader';
 import serialize from '../../utils/serialize'
 import Pagination from './pagination'
-import imageUrlBuilder from '../../utils/img-url-builder'
+import CatalogItem from './catalog-item'
 
-export default function CatalogCmp({arts, hideFilters, title, description, filters, count, useURLParams}){
+
+export default function CatalogCmp({arts, hideFiltersForce, title, description, filters, count, useURLParams, hideSort}){
 
   //console.log(arts)
   const router = useRouter()
   const [state, setState] = useState({showPreloader: false, selectedSortValue: "", arts:arts, count: count})
+  const [showFilters, setShowFilters] = useState(false)
 
   const resizeThrottled = throttle(resizeAllGridItems.bind(this, 'catalog-item',  'catalog-grid', '.catalog-item__wrapper'), 100)
 
@@ -78,26 +79,41 @@ export default function CatalogCmp({arts, hideFilters, title, description, filte
     })
   }
 
+  function hideFilters(){
+    setShowFilters(false);
+  }
+
   return (
     <div>
       <div className="catalog-top">
         <h1>{title}</h1>
-        <div className="catalog__sort">
-          <select className="stena-select" value={ state.selectedSortValue } onChange={(event)=>changeSort(event)}>
-            <option value="">По новизне</option>
-            <option value="Price:asc">Цена: по возрастанию</option>
-            <option value="Price:desc">Цена: по убыванию</option>
-          </select>
-        </div>
+        {
+          !hideSort &&
+          <div className="catalog__sort">
+            <select className="stena-select" value={ state.selectedSortValue } onChange={(event)=>changeSort(event)}>
+              <option value="">По новизне</option>
+              <option value="Price:asc">Цена: по возрастанию</option>
+              <option value="Price:desc">Цена: по убыванию</option>
+            </select>
+          </div>
+        }
       </div>
+
       {
         description &&
         <div className="catalog__artist-description">{description}</div>
       }
-      <div className="catalog">
+
+      <div className={`catalog ${showFilters ? 'catalog--show-filters': ''}`}>
       {
-        !hideFilters && 
-        <CatalogFilters arts={state.arts} onChange={() => setState({showPreloader: true, arts: [...state.arts], count: state.count})} filtersPreloaded={filters}></CatalogFilters>
+        !hideFiltersForce && 
+        <div>
+        <div className="catalog__toggle-filters" onClick={() => setShowFilters(!showFilters)}>
+            <img src="/images/filter.png"/>
+            <div>Фильтры </div>
+        </div>
+        <CatalogFilters arts={state.arts} onChange={() => setState({showPreloader: true, arts: [...state.arts], count: state.count})} filtersPreloaded={filters} hideFilters={() => hideFilters()}></CatalogFilters>
+        </div>
       }
       {
         state.showPreloader &&
@@ -111,46 +127,7 @@ export default function CatalogCmp({arts, hideFilters, title, description, filte
           <div className="catalog-grid">
             {
             state.arts.map((art) =>
-            <div className="catalog-item" key={art.id}>
-              <div className="catalog-item__wrapper">
-                <div className="catalog-item__img-wrap">
-                  <Link href={ '/art/' + art.slug + '--' + art.id}>
-                    <a title={art.Title}>
-                      <img className="catalog-item__img" src={ imageUrlBuilder(art.Pictures[0].formats.small ? art.Pictures[0].formats.small.url: art.Pictures[0].formats.thumbnail.url) } alt={art.Title} onLoad={()=> {resizeThrottled()}}/>
-                    </a>
-                  </Link>
-                </div>
-                <Link href={ '/art/' + art.slug}>
-                  <div className="catalog-item__title"><a title={art.Title}>{art.Title}</a></div>
-                </Link>
-                { 
-                  art.width && art.height &&
-                  <div className="catalog-item__size">{art.width} x {art.height}</div>
-                }
-                <div className="catalog-item__artist-price">
-                  { 
-                    art.Artist && 
-                    <div className="catalog-item__artist">
-                      {
-                        art.Artist.full_name && 
-                        <Link href={ '/artists/' + art.Artist.slug + '--' + art.Artist.id}><a title={art.Artist.full_name}>{art.Artist.full_name}</a></Link> 
-                      }
-                      {
-                        art.Artist.full_name && art.Year &&
-                        <span>, </span>
-                      }
-                      {
-                        art.Year && 
-                        <span>{ (new Date(art.Year)).getFullYear()}</span>
-                      }
-                    </div>
-                  }
-                  <div className="catalog-item__price">
-                    { art.Price ? art.Price  + ' P' : ''} 
-                  </div>
-                </div>
-              </div>
-            </div>
+            <CatalogItem art={art} imageOnLoad={()=> resizeThrottled() } key={art.id}></CatalogItem>
           )
           }
           </div>

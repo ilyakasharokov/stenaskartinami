@@ -7,7 +7,7 @@ import Preloader from '../preloader/preloader';
 
 const FILTER_ITEMS_NUM = 6;
 
-export default function CatalogFilters({filtersPreloaded, onChange}){
+export default function CatalogFilters({filtersPreloaded, onChange, hideFilters}){
 
   const router = useRouter();
 
@@ -130,8 +130,17 @@ export default function CatalogFilters({filtersPreloaded, onChange}){
     })
   } 
 
+  function getMaxHeight(key){
+    const ITEM_HEIGHT = 45;
+    return (filters[key].open && ((!filters[key].showAll && FILTER_ITEMS_NUM || filters[key].items.length ) + 1) * ITEM_HEIGHT) || 0 + 'px'
+  }
+
   return (
     <div className="catalog-filters">
+      <div className="align-right">
+        <div className="close-btn" onClick={() => hideFilters() }></div>
+      </div>
+      <div className="catalog-filters__sections">
       {
         Object.keys(filters).map((key) => 
           <div className="catalog-filters__section" key={key}>
@@ -148,7 +157,7 @@ export default function CatalogFilters({filtersPreloaded, onChange}){
               }
               </div> 
             </div> 
-            <div className="catalog-filters__collapsable" style={ { maxHeight: (filters[key].open && ((!filters[key].showAll && FILTER_ITEMS_NUM || filters[key].items.length ) + 1) * 25) || 0 + 'px'  }} length={!filters[key].showAll && FILTER_ITEMS_NUM || filters[key].items.length}>
+            <div className="catalog-filters__collapsable" style={ { maxHeight: getMaxHeight(key)  }} length={!filters[key].showAll && FILTER_ITEMS_NUM || filters[key].items.length}>
             {
               (!filters[key].showAll && filters[key].items && filters[key].items.slice(0, FILTER_ITEMS_NUM) || filters[key].items && filters[key].items).map( (item) => 
                 <div className="catalog-filters__item" key={item.id}>
@@ -171,6 +180,10 @@ export default function CatalogFilters({filtersPreloaded, onChange}){
           </div>
         )
       }
+      </div>
+      <div className="align-center">
+        <div className="btn hide-big" onClick={ () => hideFilters()}>Применить</div>
+      </div>
     </div>
   )
 }

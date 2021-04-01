@@ -1,0 +1,20 @@
+.top-bar {
+    display: flex;
+    justify-content: space-between;
+    padding: 0 30px;
+    border-bottom: 1px solid #eee;
+}
+
+.top-bar__right {
+    padding: 10px 0;
+    font-size: 14px;
+}
+
+a.top-bar__auth-link {
+    padding-left: 10px;
+}
+
+span.top-bar__user-name {
+    margin-right: 10px;
+    font-weight: bold;
+}

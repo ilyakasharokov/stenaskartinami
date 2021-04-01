@@ -23,7 +23,7 @@ export default function Art({ art }) {
     </Head>
     
     <div className="art-page">
-      <h1>Картина "{art.Title}"{ art.Artist && ', ' + art.Artist.full_name}</h1>
+      <h1>"{art.Title}"{ art.Artist && ', ' + art.Artist.full_name}</h1>
       <div className="art-page__grid">
         <ImagesGallery images={art.Pictures}></ImagesGallery>
         <div className="art-page__right">
@@ -32,7 +32,7 @@ export default function Art({ art }) {
             <div className="art-page__info-author">
               <Link href={ '/artists/' + art.Artist.slug + '--' + art.Artist.id}>
                 <a title={art.Artist.full_name}>{art.Artist.full_name}</a>
-                </Link> 
+              </Link> 
             </div>
             <div className="art-page__info-blocks">
               { 

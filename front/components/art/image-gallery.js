@@ -15,7 +15,9 @@ export default function ImageGallery({images}){
 
     return (
     <div className="art-page__gallery">
-    {
+        <div className="art-page__big-picture">
+            <img src={ imageUrlBuilder( currentPicture.img.formats.large ? currentPicture.img.formats.large.url: (currentPicture.img.formats.medium ? currentPicture.img.formats.medium.url: currentPicture.img.formats.small ?  currentPicture.img.formats.small.url:  currentPicture.img.formats.thumbnail.url)) }/>
+        </div>
         <div className="art-page__thumbnails">
         {
             images.map((picture, i) => 
@@ -24,10 +26,6 @@ export default function ImageGallery({images}){
             )
         }
         </div>
-    }
-    <div className="art-page__big-picture">
-        <img src={ imageUrlBuilder( currentPicture.img.formats.large ? currentPicture.img.formats.large.url: (currentPicture.img.formats.medium ? currentPicture.img.formats.medium.url: currentPicture.img.formats.small ?  currentPicture.img.formats.small.url:  currentPicture.img.formats.thumbnail.url)) }/>
-    </div>
     </div>
     )
 }

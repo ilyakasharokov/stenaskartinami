@@ -3,15 +3,29 @@ import { useState, useEffect } from "react"
 import { API_HOST } from '../../constants/constants'
 import CatalogCmp from "../../components/catalog/catalog"
 import Head from 'next/head'
+import { YMaps, Map, Placemark, ZoomControl } from 'react-yandex-maps';
 
-export default function Catalog({ arts }) {
+export default function Catalog({ walls }) {
 
   return (<MainLayout>
     <Head>
-      <title>Купить искусство, каталог картин | Стена с картинами, облачная галерея</title>
+      <title>Галереи картин на карте | Стена с картинами, облачная галерея</title>
     </Head>
-    <h1>Каталог</h1>
-    <CatalogCmp arts={arts}></CatalogCmp>
+    <div className="content-page">
+      <h1>Стены на карте</h1>
+      <YMaps>
+        <Map defaultState={walls[0].Coordinates} style={{width: '100%', height: '500px'}} >
+        <ZoomControl/>
+        {
+          walls.map( wall =>
+            wall.Coordinates &&
+            <Placemark geometry={wall.Coordinates.center} options={{ iconLayout: 'default#image', iconImageHref: '/images/Logo_stenaskartinami_black_sqr.svg', iconImageSize: [30, 30], iconImageOffset: [-15, -15]}} />
+          )
+        }
+        </Map>
+      </YMaps>
+    </div>
+    
   </MainLayout>
   )
 }
@@ -27,16 +41,16 @@ export default function Catalog({ arts }) {
 
 
 export const getStaticProps = async () => {
-  const res = await fetch(API_HOST + '/arts/')
+  const res = await fetch(API_HOST + '/walls/')
   const json = await res.json()
-  const arts = json.sort((a,b)=> {
+  const walls = json
+  walls.forEach((wall)=>wall.arts = wall.arts.sort((a,b)=> {
     return a.published_at < b.published_at ? 1: -1;
-  })
-
+  }));
   return {
     props: {
-      arts,
+      walls,
     },
+    revalidate: 60,
   }
 }
-

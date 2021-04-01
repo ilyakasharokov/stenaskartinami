@@ -1,6 +1,13 @@
 import Link from 'next/link'
+import { useState } from 'react';
 
 export default function Menu(){
+
+  const [showMenu, setShowMenu] = useState(false)
+
+  function toggleMenu(){
+    setShowMenu(!showMenu)
+  }
 
   const menuItems = [
     {
@@ -26,15 +33,17 @@ export default function Menu(){
   ];
 
   return (
-     <div className="top-menu">
+    <div>
+      <div className="menu-btn" onClick={ () => toggleMenu() }></div>
+      <div className={`top-menu ${showMenu ? 'active':''}`}>
         {
           menuItems.map( (item, index) => 
-            <div key={item.link} className="top-menu__item">
-              <Link href={item.link}>{item.title}</Link>
+            <div key={item.link} className="top-menu__item" >
+              <Link href={item.link} onClick={ () => setShowMenu(false) }>{item.title}</Link>
             </div>
           )
         } 
       </div>
-    
+    </div>
   )
 }

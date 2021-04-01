@@ -1,0 +1,36 @@
+.product-list .catalog-item {
+    width: 22%;
+    display: inline-block;
+    margin: 0px 2%;
+    vertical-align: top;
+    text-align: left;
+}
+
+.product-list .catalog-item:first-child{
+    margin-left:0;
+}
+
+.product-list .catalog-item:nth-child(4){
+    margin-right: 0;
+}
+
+.product-list {
+    text-align: left;
+    margin-bottom: 20px;
+
+    &__link {
+        a {color: #777;}
+        text-align: center;
+    }
+
+}
+
+@media screen and (max-width: 994px) {
+    .product-list .catalog-item {
+        width: calc(50% - 10px);
+    }
+
+    .product-list .catalog-item:nth-child(2n) {
+        margin-right: 0;
+    }
+}
