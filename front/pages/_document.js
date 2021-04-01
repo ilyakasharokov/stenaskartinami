@@ -5,7 +5,11 @@ export default class MyDocument extends Document {
     return (
       <Html lang={this.props.lang || "en"}>
         <Head>
-          <script
+         
+          <link rel="shortcut icon" type="image/png" href="/favicon.png" />
+        </Head>
+        <body>
+          <div
             dangerouslySetInnerHTML={{
               __html: `<!-- Yandex.Metrika counter -->
               <script type="text/javascript" >
@@ -24,9 +28,6 @@ export default class MyDocument extends Document {
               <!-- /Yandex.Metrika counter -->`
             }}
           />
-          <link rel="shortcut icon" type="image/png" href="/favicon.png" />
-        </Head>
-        <body>
           <Main />
           <NextScript />
         </body>
