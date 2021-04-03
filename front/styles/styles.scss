@@ -36,21 +36,6 @@ main {
     flex: 1;
 }
 
-.content-page{
-    width: 1060px;
-    margin: 0 auto;
-}
-
-.content-page__wrapper {
-    display: flex;
-    margin-bottom: 30px;
-}
-
-.content-page__left {
-    width: 430px;
-    padding-right: 30px;
-}
-
 .align-right{
     text-align: right;
 }
@@ -199,10 +184,6 @@ main {
     .hide-big{
         display: block;
     }
-
-    .top-menu {
-        display: none;
-    }
     
     .top-navigation {
         padding: 15px;
@@ -231,10 +212,12 @@ main {
         bottom: 0;
         background: #fff;
         z-index: 1;
-        left: 0;
         padding: 15px;
+        right: 100%;
+        transition: right 0.5s;
         &.active{
             display:block;
+            right: 0;
         }
     }
    

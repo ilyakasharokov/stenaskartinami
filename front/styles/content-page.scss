@@ -1,0 +1,29 @@
+.content-page{
+    width: 1060px;
+    margin: 0 auto;
+}
+
+.content-page__wrapper {
+    display: flex;
+    margin-bottom: 30px;
+}
+
+.content-page__left {
+    width: 430px;
+    padding-right: 30px;
+}
+
+@media screen and (max-width: 994px) {
+    .content-page__wrapper {
+        display: block;
+    }
+
+    .content-page__left {
+        width: 100%;
+        padding: 0;
+    }
+
+    .content-page {
+        width: 100%;
+    }
+}
