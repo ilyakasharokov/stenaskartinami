@@ -37,11 +37,6 @@
       "required": true,
       "unique": true
     },
-    "Size": {
-      "type": "component",
-      "repeatable": false,
-      "component": "size.size"
-    },
     "Materials": {
       "type": "text"
     },
@@ -87,8 +82,8 @@
       "type": "boolean"
     },
     "mediums": {
-      "via": "arts",
-      "collection": "medium"
+      "collection": "medium",
+      "via": "arts"
     }
   }
 }

@@ -18,8 +18,8 @@
       "type": "richtext"
     },
     "arts": {
-      "collection": "art",
       "via": "mediums",
+      "collection": "art",
       "dominant": true
     },
     "slug": {
