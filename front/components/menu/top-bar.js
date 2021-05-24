@@ -7,7 +7,6 @@ export default function TopBar(){
 
     const [session, loading] = useSession()
 
-
     async function getUser(){
         const res = await fetch(API_HOST + '/users/me', {
             headers: {
@@ -20,44 +19,47 @@ export default function TopBar(){
     if(session){
         getUser()
     }
-
+    
     return (
         <div className="top-bar">
             <div className="top-bar__left"></div>
-            <div className="top-bar__right">
-                <div className="top-bar__login">
-                {
-                    !session &&
-                    <Link href="/api/auth/signin">
-                        <a className="top-bar__auth-link"
-                            onClick={(e) => {
-                            e.preventDefault();
-                            signIn('facebook');
-                            }}
-                        >
-                            Вход через Facebook
-                        </a>
-                    </Link>
-                }
-                {
-                    session &&
-                    <div className="top-bar__signed">
-                        <span className="top-bar__user-name">{ session.user.name }</span>
-                        | 
-                        <Link href="/api/auth/signout">
+            {
+                false &&
+                <div className="top-bar__right">
+                    <div className="top-bar__login">
+                    {
+                        !session &&
+                        <Link href="/api/auth/signin">
                             <a className="top-bar__auth-link"
                                 onClick={(e) => {
                                 e.preventDefault();
-                                signOut();
+                                signIn('facebook');
                                 }}
                             >
-                                Выйти
+                                Вход через Facebook
                             </a>
                         </Link>
+                    }
+                    {
+                        session &&
+                        <div className="top-bar__signed">
+                            <span className="top-bar__user-name">{ session.user.name }</span>
+                            | 
+                            <Link href="/api/auth/signout">
+                                <a className="top-bar__auth-link"
+                                    onClick={(e) => {
+                                    e.preventDefault();
+                                    signOut();
+                                    }}
+                                >
+                                    Выйти
+                                </a>
+                            </Link>
+                        </div>
+                    }
                     </div>
-                }
                 </div>
-            </div>
+            }
         </div>
     )
 }

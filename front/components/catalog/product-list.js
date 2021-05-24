@@ -42,11 +42,13 @@ export default function ProductList({artist, except}){
                 <Link href={ '/art/' + art.slug + '--' + art.id}>
                     <a>
                     <div>
-                      <div className="catalog-item__bg-img" style={{backgroundImage : `url(${(imageUrlBuilder(art.Pictures[0].formats.small ? art.Pictures[0].formats.small.url: ''))} )`, 
-                    backgroundSize: `cover`, backgroundPosition: `center` } }>
-                        <img className="catalog-item__invisible-img" src="/favicon.png"/>
-                      </div>
-                  
+                      {
+                        art.Pictures[0] && art.Pictures[0].formats &&
+                        <div className="catalog-item__bg-img" style={{backgroundImage : `url(${(imageUrlBuilder(art.Pictures[0].formats.small ? art.Pictures[0].formats.small.url: ''))} )`, 
+                      backgroundSize: `cover`, backgroundPosition: `center` } }>
+                          <img className="catalog-item__invisible-img" src="/favicon.png"/>
+                        </div>
+                      }
                       <div className="catalog-item__title">{art.Title}</div>
                     </div>
                   </a>

@@ -5,13 +5,16 @@ export default function CatalogItem({art, imageOnLoad}){
     return (
         <div className="catalog-item">
             <div className="catalog-item__wrapper">
-                <div className="catalog-item__img-wrap">
-                    <Link href={ '/art/' + art.slug + '--' + art.id}>
-                    <a title={art.Title}>
-                        <img className="catalog-item__img" src={ imageUrlBuilder(art.Pictures[0].formats.small ? art.Pictures[0].formats.small.url: art.Pictures[0].formats.thumbnail.url) } alt={art.Title} onLoad={()=> {imageOnLoad()}}/>
-                    </a>
-                    </Link>
-                </div>
+                {
+                    art.Pictures[0] && art.Pictures[0].formats && 
+                    <div className="catalog-item__img-wrap">
+                        <Link href={ '/art/' + art.slug + '--' + art.id}>
+                        <a title={art.Title}>
+                            <img className="catalog-item__img" src={ imageUrlBuilder(art.Pictures[0].formats.small ? art.Pictures[0].formats.small.url: art.Pictures[0].formats.thumbnail.url) } alt={art.Title} onLoad={()=> {imageOnLoad()}}/>
+                        </a>
+                        </Link>
+                    </div>
+                }
                 <Link href={ '/art/' + art.slug}>
                     <div className="catalog-item__title"><a title={art.Title}>{art.Title}</a></div>
                 </Link>
