@@ -36,7 +36,7 @@ export default function Catalog({ wall }) {
         <YMaps>
           <Map defaultState={wall.Coordinates} style={{width: '100%', height: '300px'}} >
             <ZoomControl/>
-            <Placemark geometry={wall.Coordinates.center} options={{ iconLayout: 'default#image', iconImageHref: '/images/Logo_stenaskartinami_black_sqr.svg', iconImageSize: [30, 30], iconImageOffset: [-15, -15]}} />
+            <Placemark geometry={wall.Coordinates.center} options={{ iconLayout: 'default#image', iconImageHref: '/images/logo-black.png', iconImageSize: [30, 30], iconImageOffset: [-15, -15]}} />
           </Map>
         </YMaps>
       }

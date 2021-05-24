@@ -1,4 +1,7 @@
 .product-list .catalog-item {
+    a{
+        text-decoration: none;
+    }
     width: 22%;
     display: inline-block;
     margin: 0px 2%;
@@ -34,7 +37,7 @@
         margin-right: 0;
     }
 
-    .product-list .catalog-item:nth-child(3n) {
+    .product-list .catalog-item:nth-child(2n + 1) {
         margin-left: 0;
     }
 }

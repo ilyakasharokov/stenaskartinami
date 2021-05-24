@@ -9,10 +9,14 @@ export default function MainLayout({children}){
       <header>
         <TopBar></TopBar>
         <nav className="top-navigation">
-          <div className="logo">
-            <img src="/images/Logo_stenaskartinami_black_sqr.svg"/> 
-            <div className="logo__text">Стена с картинами</div>
-          </div>
+          <Link href="/">
+            <a className="logo-link">
+            <div className="logo">
+              <img src="/images/Logo_stenaskartinami_black_sqr.svg"/> 
+              <div className="logo__text">Стена с картинами</div>
+            </div>
+            </a>
+          </Link>
           <Menu></Menu>
           { /* <SearchWidget></SearchWidget> */ }
         </nav>
@@ -24,10 +28,14 @@ export default function MainLayout({children}){
       </main>
       <footer>
         <nav className="bottom-navigation">
-          <div className="logo">
-            <img src="/images/Logo_stenaskartinami_black_sqr.svg"/> 
-            <div className="logo__text">Стена с картинами</div>
-          </div>
+          <Link href="/">
+            <a className="logo-link">
+            <div className="logo">
+              <img src="/images/Logo_stenaskartinami_black_sqr.svg"/> 
+              <div className="logo__text">Стена с картинами</div>
+            </div>
+            </a>
+          </Link>
           <div className="bottom-social">
             <a href="https://www.instagram.com/stena_s_kartinami/" target="_blank" title="Стена с картинами в Instagram"><img src="/images/instagram.svg"/></a>
             <a href="https://www.facebook.com/stenaskartinami/" target="_blank" title="Стена с картинами в Facebook"><img src="/images/facebook.svg"/></a>

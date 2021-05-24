@@ -58,6 +58,9 @@ main {
     align-items: center;
     -webkit-box-pack: justify;
     justify-content: space-between;
+    a.logo-link {
+        text-decoration: none;
+    }
     .logo {
         position: static;
         display: flex;
@@ -208,7 +211,8 @@ main {
     .top-menu {
         position: fixed;
         width: 100%;
-        top: 100px;
+        // top: 100px;
+        top: 62px;
         bottom: 0;
         background: #fff;
         z-index: 1;
@@ -261,6 +265,7 @@ main {
     outline: none;
     border:none;
     cursor: pointer;
+    text-decoration: none;
 }
 
 

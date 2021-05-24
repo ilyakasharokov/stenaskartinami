@@ -24,7 +24,7 @@ export default function TopBar(){
         <div className="top-bar">
             <div className="top-bar__left"></div>
             {
-                false &&
+                true &&
                 <div className="top-bar__right">
                     <div className="top-bar__login">
                     {

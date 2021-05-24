@@ -18,3 +18,9 @@ span.top-bar__user-name {
     margin-right: 10px;
     font-weight: bold;
 }
+
+@media screen and (max-width: 994px){
+    .top-bar{
+        padding: 0 15px;
+    }
+}
