@@ -117,13 +117,13 @@ export default function CatalogCmp({arts, hideFiltersForce, title, description, 
       }
       {
         state.showPreloader &&
-        <div class="overlay">
+        <div className="overlay">
           <Preloader></Preloader>
         </div>
       }
       {
         state.arts && state.arts.length > 0 && 
-        <div class="catalog-wrapper">
+        <div className="catalog-wrapper">
           <div className="catalog-grid">
             {
             state.arts.map((art) =>

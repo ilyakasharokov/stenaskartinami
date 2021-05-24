@@ -38,10 +38,10 @@ export default function BuyBlock({art}){
             {
                 !state.sent && 
                 <div>
-                <div class="form-input">
+                <div className="form-input">
                     <input type="text" name="name" placeholder="Имя" required/>
                 </div>
-                <div class="form-input">
+                <div className="form-input">
                     <input type="email" name="email" placeholder="E-mail" required/>
                 </div>
                 <input type="hidden" name="title" value="Купить картину"></input>

@@ -29,8 +29,8 @@ export default function AddArt({ Component, pageProps }) {
     </Head>
     <div className="form-page">
       <h1>Добавить стену</h1>
-      <div class="form-page__wrapper">
-        <div class="form-page__left">
+      <div className="form-page__wrapper">
+        <div className="form-page__left">
           <img className="form-page__image" src={ API_HOST + '/uploads/photo_2021_03_22_17_26_34_1769d88fce.jpeg?14694382.854999974'}></img>
         </div>
         <div className="form-page__right">
@@ -50,13 +50,13 @@ export default function AddArt({ Component, pageProps }) {
           {
             !state.sent && 
             <form onSubmit={ (event)=> submitForm(event)}>
-              <div class="form-input">
+              <div className="form-input">
                 <input type="text" name="name" placeholder="Имя" required/>
               </div>
-              <div class="form-input">
+              <div className="form-input">
                 <input type="email" name="email" placeholder="E-mail" required/>
               </div>
-              <div class="form-input">
+              <div className="form-input">
                 <textarea name="text" placeholder="Сообщение"></textarea>
               </div>
               <div className="align-right">

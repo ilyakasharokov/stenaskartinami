@@ -1,0 +1,113 @@
+.index-page {
+    width: 1440px;
+    margin: 0 auto;
+    &__last-arts {
+        margin-bottom: 60px;
+    }
+    &__last-arts h2 {
+        text-align: center;
+        margin-bottom: 45px;
+        font-size: 28px;
+    }
+    &__last-arts-link {
+        text-align: center;
+    }
+    &__map h2 {
+        text-align: center;
+        font-size: 27px;
+    }
+}
+
+.index-slider{
+    margin-bottom: 60px;
+
+    &__slide {
+        background-size: cover;
+        max-width: 1440px;
+        margin: 0 auto;
+        text-align: center;
+        height: 600px;
+        background-repeat: no-repeat;
+        background-position: center;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        position: relative;
+        overflow: hidden;
+        display:none;
+        &.active{
+            display: block;
+        }
+    }
+    &__overlay {
+        position: absolute;
+        left:0;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        background: rgba(0,0,0,0.5)
+    }
+    &__block {
+        position: absolute;
+        bottom: 90px;
+        left: 50%;
+        width: 800px;
+        transform: translate(-50%, 0);
+    }
+    &__title {
+        color: #fff;
+        font-size: 48px;
+        padding-top: 15%;
+        margin-bottom: 30px;
+    }
+    &__text {
+        color: #fff;
+        font-size: 24px;
+    }
+    &__background{
+        background-size: cover;
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        background-position: center;
+        animation: background-zoom 60s infinite;
+    }
+    &__slide-wrapper {
+        width: 1440px;
+        margin: 0 auto;
+        height: 600px;
+        position: relative;
+    }
+    .btn {
+        margin-top: 50px;
+    }
+    &__arrow {
+        position: absolute;
+        top: 50%;
+        width: 30px;
+        height: 60px;
+        cursor: pointer;
+        margin-top: -30px;
+    }
+    &__left{
+        left: 10px;
+    }
+    &__right{
+        right: 10px;
+    }
+}
+
+@keyframes background-zoom{
+    0%{
+        transform: translate(-50%, -50%) scale(1)
+    }
+    50% {
+        transform: translate(-50%, -50%) scale(1.4)
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(1)
+    }
+}
