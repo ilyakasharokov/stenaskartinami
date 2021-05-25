@@ -15,7 +15,7 @@ export default function CatalogItem({art, imageOnLoad}){
                         </Link>
                     </div>
                 }
-                <Link href={ '/art/' + art.slug}>
+                <Link href={ '/art/' + art.slug + '--' + art.id}>
                     <div className="catalog-item__title"><a title={art.Title}>{art.Title}</a></div>
                 </Link>
                 { 
