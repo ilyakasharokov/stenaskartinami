@@ -74,6 +74,17 @@ export default function Home({slides, walls, arts}) {
           </div>
         }
 
+        <div className="index-page__marquee">
+          <div className="marquee-new">
+            <div className="marquee__first-half">
+              Современное искусство - это работы, которые вы приобретаете здесь. &nbsp;&nbsp;&nbsp; 
+            </div>
+            <div className="marquee__second-half">
+              Современное искусство - это работы, которые вы приобретаете здесь. &nbsp;&nbsp;&nbsp; 
+            </div>
+          </div>
+        </div>   
+
         <div className="index-page__last-arts">
         {
           arts && 
@@ -81,11 +92,24 @@ export default function Home({slides, walls, arts}) {
             <h2>Последние добавленные работы</h2>
             <ProductListStatic arts={arts.slice(0, 8)}></ProductListStatic>
             <div className="index-page__last-arts-link">
-              <a href='/catalog' className="btn">Перейти в каталог</a>
+              <Link href="/catalog">
+                <a className="btn">Перейти в каталог</a>
+              </Link>
             </div>
           </div>
         }
         </div>
+
+        <div className="index-page__marquee">
+          <div className="marquee-new">
+            <div className="marquee__first-half">
+              Современное искусство - это работы, которые вы приобретаете здесь. &nbsp;&nbsp;&nbsp; 
+            </div>
+            <div className="marquee__second-half">
+              Современное искусство - это работы, которые вы приобретаете здесь. &nbsp;&nbsp;&nbsp; 
+            </div>
+          </div>
+        </div> 
 
         {
           walls &&
@@ -105,6 +129,9 @@ export default function Home({slides, walls, arts}) {
               }
               </Map>
             </YMaps>
+            <Link href="/add-wall">
+                <a href='/add-wall' className="btn">Добавить стену</a>
+              </Link>
           </div>
         }
         

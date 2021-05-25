@@ -1,0 +1,89 @@
+@-webkit-keyframes scroll {
+    0% {
+      -webkit-transform: translate(0, 0);
+      transform: translate(0, 0); }
+    100% {
+      -webkit-transform: translate(-100%, 0);
+      transform: translate(-100%, 0); } }
+  @-moz-keyframes scroll {
+    0% {
+      -moz-transform: translate(0, 0);
+      transform: translate(0, 0); }
+    100% {
+      -moz-transform: translate(-100%, 0);
+      transform: translate(-100%, 0); } }
+  @keyframes scroll {
+    0% {
+      transform: translate(0, 0); }
+    100% {
+      transform: translate(-100%, 0); } }
+  /* line 203, _header.scss */
+  .marquee-wrapper {
+    display: block;
+    width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    padding-top: 12px;
+    padding-bottom: 12px;
+    font-size: 20px;
+    color:#fff;
+    background: #000;
+ }
+  
+  /* line 215, _header.scss */
+  .marquee-content {
+    display: inline-block;
+    padding-left: 100%;
+    animation: scroll 20s infinite linear;
+    text-transform: uppercase; }
+
+    .marquee-new {
+        // overflow: hidden;
+        height: 50px;
+        position: relative;
+        color: #dc3a0f;
+        font-size: 20px;
+        text-transform: uppercase;
+      
+        div {
+          display: flex;
+          flex-direction: row;
+          justify-content: space-around;
+          align-items: center;
+          overflow: hidden;
+          width: 100%;
+          height: 50px;
+          transform: translate(100%, 0);
+        }
+      
+        $duration: 30s;
+      
+        .marquee__first-half, .marquee__second-half,  .marquee__third-half {
+          display: flex;
+          flex-direction: row;
+          justify-content: space-around;
+          align-items: center;
+          position: absolute;
+          top: 0;
+          right: 0;
+          animation: ticker $duration infinite linear forwards;
+        }
+      
+        .marquee__second-half {
+          animation: $duration ticker $duration/2 infinite linear forwards;
+        }
+      }
+      
+      @keyframes ticker {
+        0% {
+          transform: translate(100%, 0);
+        }
+      
+        50% {
+          transform: translate(0, 0);
+        }
+      
+        100% {
+          transform: translate(-100%, 0);
+        }
+      }

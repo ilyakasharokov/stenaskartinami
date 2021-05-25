@@ -109,6 +109,18 @@
     }
 }
 
+.index-page__map {
+    text-align: center;
+}
+
+.index-page__map .btn {
+    margin-top: 50px;
+}
+
+.index-page__marquee{
+    margin-bottom: 50px;
+}
+
 @media screen and (max-width: 994px){
     .index-slider__block {
         max-width: 100%;
