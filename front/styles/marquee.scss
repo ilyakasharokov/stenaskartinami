@@ -89,3 +89,27 @@
           transform: translate(-100%, 0);
         }
       }
+
+      @media screen and (max-width: 994px){
+        .marquee-new{
+            display: block;
+            width: 100%;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+        .marquee-new .marquee__first-half{
+            display: inline-block;
+            padding-left: 100%;
+            animation: scroll 20s infinite linear;
+            text-transform: uppercase; 
+            width: auto;
+            padding-top: 10px;
+            position: static;
+        
+        }
+        .marquee-new .marquee__second-half{
+            display:none;
+
+        }
+        
+      }
