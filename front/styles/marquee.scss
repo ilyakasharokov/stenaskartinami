@@ -38,12 +38,14 @@
     text-transform: uppercase; }
 
     .marquee-new {
-        // overflow: hidden;
         height: 50px;
         position: relative;
-        color: #dc3a0f;
+        color: #000;
         font-size: 20px;
         text-transform: uppercase;
+        border-bottom: 1px solid;
+        border-top: 1px solid;
+        overflow: hidden;
       
         div {
           display: flex;

@@ -116,7 +116,7 @@ export default function Home({slides, walls, arts}) {
           <div className="index-page__map">
             <h2>Стены на карте</h2>
             <YMaps>
-              <Map defaultState={{"center":[58.456994503197755,35.370069459975745],"zoom":6}} style={{width: '100%', height: '400px'}} >
+              <Map defaultState={{"center":[58.456994503197755,35.370069459975745],"zoom":5}} style={{width: '100%', height: '400px'}} >
               <ZoomControl/>
               {
                 walls.map( (wall, i) =>
