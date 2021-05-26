@@ -49,7 +49,7 @@ export default function ProductListStatic({arts}){
                     <div className="catalog-item__artist">
                       {
                         art.Artist.full_name && 
-                        <Link href={ '/artists/' + artist.slug + '--' + artist.id}><a title={art.Artist.full_name}>{art.Artist.full_name}</a></Link> 
+                        <Link href={ '/artists/' + art.Artist.slug + '--' + art.Artist.id}><a title={art.Artist.full_name}>{art.Artist.full_name}</a></Link> 
                       }
                       {
                         art.Artist.full_name && art.Year &&
