@@ -19,9 +19,10 @@ export default function Art({ art }) {
   console.log(art)
   return (<MainLayout>
     <Head>
-      <title>{art.Title}, картина художника {art.Artist?.full_name} | Стена с картинами, облачная галерея</title>
+      <title>{art?.Title}, картина художника {art?.Artist?.full_name} | Стена с картинами, облачная галерея</title>
     </Head>
-    
+    { 
+    art &&
     <div className="art-page">
       <h1>"{art.Title}"{ art.Artist && ', ' + art.Artist.full_name}</h1>
       <div className="art-page__grid">
@@ -77,6 +78,7 @@ export default function Art({ art }) {
         <ProductList artist={art.Artist} except={art.id}></ProductList>
       }
     </div>
+  }
   </MainLayout>
   )
 }
