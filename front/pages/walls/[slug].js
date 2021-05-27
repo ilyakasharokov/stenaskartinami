@@ -65,7 +65,7 @@ export async function getStaticPaths() {
     paths: json.map(item => { 
       return {params: { slug: item.slug + '--' + item.id }}
   }),
-    fallback: false
+    fallback: true
   }
 }
 
