@@ -12,8 +12,10 @@ export default function Catalog({ wall }) {
   console.log(wall)
   return (<MainLayout>
     <Head>
-      <title>{wall.Title} | Стена с картинами, облачная галерея</title>
+      <title>{wall?.Title} | Стена с картинами, облачная галерея</title>
     </Head>
+    {
+      wall &&
     <div className="content-page">
       <h1>{wall.Title}</h1>
       <div className="content-page__wrapper">
@@ -54,6 +56,7 @@ export default function Catalog({ wall }) {
         </div>
       } 
     </div>
+    }
   </MainLayout>
   )
 }

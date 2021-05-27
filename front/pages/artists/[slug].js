@@ -9,9 +9,12 @@ export default function  Artist({ artist }) {
   console.log(artist)
   return (<MainLayout>
     <Head>
-      <title>Художник {artist.full_name}, каталог картин  | Стена с картинами, облачная галерея</title>
+      <title>Художник {artist?.full_name}, каталог картин  | Стена с картинами, облачная галерея</title>
     </Head>
-    <CatalogCmp arts={arts} hideFiltersForce={true} hideSort={true} title={`${artist.full_name}, каталог картин.`} description={artist.description}></CatalogCmp>
+    {
+      artist && 
+      <CatalogCmp arts={arts} hideFiltersForce={true} hideSort={true} title={`${artist.full_name}, каталог картин.`} description={artist.description}></CatalogCmp>
+    }
   </MainLayout>
   )
 }
