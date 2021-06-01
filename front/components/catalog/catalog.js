@@ -101,7 +101,9 @@ export default function CatalogCmp({arts, hideFiltersForce, title, description, 
 
       {
         description &&
-        <div className="catalog__artist-description">{description}</div>
+        <div className="catalog__artist-description" dangerouslySetInnerHTML={{
+          __html: description
+        }}></div>
       }
 
       <div className={`catalog ${showFilters ? 'catalog--show-filters': ''}`}>

@@ -14,6 +14,10 @@ export default function Menu(){
       title: 'Главная',
       link: '/'
     },
+    /* {
+      title: 'О проекте',
+      link: '/about'
+    }, */
     {
       title: 'Каталог',
       link: '/catalog'
