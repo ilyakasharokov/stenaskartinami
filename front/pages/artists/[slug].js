@@ -9,11 +9,13 @@ export default function  Artist({ artist }) {
   console.log(artist)
   return (<MainLayout>
     <Head>
-      <title>Художник {artist?.full_name}, каталог картин  | Стена с картинами, облачная галерея</title>
+      <title>Художник {artist?.full_name}, { artist?.description ? 'краткая биография, ':''} каталог картин  | Стена с картинами, облачная галерея</title>
     </Head>
     {
       artist && 
-      <CatalogCmp arts={arts} hideFiltersForce={true} hideSort={true} title={`${artist.full_name}, каталог картин.`} description={artist.description}></CatalogCmp>
+      <div className="wide-page">
+        <CatalogCmp arts={arts} hideFiltersForce={true} hideSort={true} title={`${artist.full_name}, каталог картин.`} description={artist.description}></CatalogCmp>
+      </div>
     }
   </MainLayout>
   )

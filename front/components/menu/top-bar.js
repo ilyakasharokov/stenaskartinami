@@ -14,12 +14,13 @@ export default function TopBar(){
             }
         });
         const json = await res.json()
+        console.log(json)
     }
     
     if(session){
         getUser()
     }
-    
+
     return (
         <div className="top-bar">
             <div className="top-bar__left"></div>
