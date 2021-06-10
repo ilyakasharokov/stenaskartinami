@@ -152,7 +152,7 @@ export const getStaticProps = async () => {
   walls.forEach((wall)=>wall.arts = wall.arts.sort((a,b)=> {
     return a.published_at < b.published_at ? 1: -1;
   })); 
-  const query = {_start: 0, _limit: 8 };
+  const query = {_start: 0, _limit: 8, main: true };
   res = await fetch(API_HOST + '/arts/' + serialize(query))
   json = await res.json()
   const arts = json.sort((a,b)=> {

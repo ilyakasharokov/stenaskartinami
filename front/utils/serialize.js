@@ -27,6 +27,7 @@ function serialize(obj){
             case '_sort':
             case '_start':
             case '_limit':
+            case 'main':
               str += `&${key}=${value}&`
               break;
             default:
@@ -43,6 +44,7 @@ function serialize(obj){
           case '_sort':
           case '_start':
           case '_limit':
+          case 'main':
             str += `&${key}=${value}&`
             break;
           default:
