@@ -84,6 +84,9 @@
     "mediums": {
       "collection": "medium",
       "via": "arts"
+    },
+    "main": {
+      "type": "boolean"
     }
   }
 }
