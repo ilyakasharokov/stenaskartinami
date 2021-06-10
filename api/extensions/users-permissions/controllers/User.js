@@ -32,31 +32,39 @@ module.exports = {
       .get();
 
     const { id } = ctx.state.user;
-    console.log('id');
-    console.log(id);
+//    console.log('id');
+  //  console.log(id);
     const { artId } = ctx.request.body;
-    console.log('body');
-    console.log(artId);
+   // console.log('body');
+   // console.log(artId);
 
+console.log(ctx.request.body);
     const user = await strapi.plugins['users-permissions'].services.user.fetch({
       id,
     });
-    console.log('user');
-    console.log(user);
+   // console.log('user');
+   // console.log(user);
 
-    const art = await strapi.services.art.fetch({
-      artId,
+    const art = await strapi.services.art.find({_id:
+      artId
     });
-    console.log('art');
-    console.log(art);
 
-    console.log('userarts')
-    console.log(user.arts);
+	
+
+    // console.log('userarts')
+	let newArts = [];
+    if(user.arts.find((a)=> a._id == artId)){
+	console.log(1);
+	newArts = user.arts.filter((a)=>a._id != artId)
+	} else{
+	console.log(2);
+	newArts = user.arts.concat(art)
+	}
 
     let updateData = {
-      arts: [],
+      arts: newArts,
     };
-    
+    // console.log(newArts);
     const data = await strapi.plugins['users-permissions'].services.user.edit({ id }, updateData);
 
     ctx.send(sanitizeUser(data));
