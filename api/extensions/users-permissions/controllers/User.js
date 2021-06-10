@@ -20,4 +20,46 @@ module.exports = {
     const data = sanitizeUser(userWithMedia, { model: userQuery.model });
     ctx.send(data);
   },
+
+  async updateme(ctx) {
+    const advancedConfigs = await strapi
+      .store({
+        environment: '',
+        type: 'plugin',
+        name: 'users-permissions',
+        key: 'advanced',
+      })
+      .get();
+
+    const { id } = ctx.state.user;
+    console.log('id');
+    console.log(id);
+    const { artId } = ctx.request.body;
+    console.log('body');
+    console.log(artId);
+
+    const user = await strapi.plugins['users-permissions'].services.user.fetch({
+      id,
+    });
+    console.log('user');
+    console.log(user);
+
+    const art = await strapi.services.art.fetch({
+      artId,
+    });
+    console.log('art');
+    console.log(art);
+
+    console.log('userarts')
+    console.log(user.arts);
+
+    let updateData = {
+      arts: [],
+    };
+    
+    const data = await strapi.plugins['users-permissions'].services.user.edit({ id }, updateData);
+
+    ctx.send(sanitizeUser(data));
+  },
+
 };
