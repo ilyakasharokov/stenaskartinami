@@ -27,7 +27,7 @@ module.exports = {
       await strapi.plugins['email'].services.email.send({
         to: 'ilyakasharokov@mail.ru, dudkinet@gmail.com',
         from: 'no-reply@stenaskartinami.com',
-        subject: 'Заполнена форма на сайте',
+        subject: 'Стена с картинами, заявка YO',
         text: `
 	  Форма: ${entity.title}
 	  Имя: ${entity.name}
