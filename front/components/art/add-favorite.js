@@ -1,12 +1,20 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { API_HOST } from "../../constants/constants"
 import urlencodeFormData from "../../utils/urlencodeFormData"
 import { useSession, signIn, signOut } from "next-auth/client";
 
 export default function AddFavorite({artId}){
 
+    let userArts = [];
+
     const [session, loading] = useSession()
     let [ isActive, setActive] = useState(false);
+
+    useEffect( () => {
+        if(userArts && userArts.find((art) => art.id == artId)){
+            setActive(true)
+        }
+    }, [artId])
 
     async function getUser(){
         const res = await fetch(API_HOST + '/users/me', {
@@ -15,7 +23,8 @@ export default function AddFavorite({artId}){
             }
         });
         const json = await res.json()
-        if(json.arts && json.arts.find((art) => art.id == artId)){
+        userArts = [...json.arts]
+        if(userArts && userArts.find((art) => art.id == artId)){
             setActive(true)
         }
     }
