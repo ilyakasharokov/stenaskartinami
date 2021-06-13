@@ -30,6 +30,7 @@ export default function AddFavorite({artId}){
             data.append('artId', artId);
             fetch(API_HOST + '/users-permissions/users/me', {
                 method: 'PUT',
+		body: data,
                 headers: {
                     Authorization: `Bearer ${session.jwt}`,
                 }
