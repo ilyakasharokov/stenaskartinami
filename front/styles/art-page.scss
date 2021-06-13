@@ -7,6 +7,11 @@
         font-size: 24px;
         color: #FFF;
     }
+    &__header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
 }
 
 .art-page__grid {
@@ -16,7 +21,7 @@
     grid-template-areas:
         "gallery sidepanel";
     align-items: flex-start;
-    margin: 20px 0px 60px;
+    margin: 0 0px 60px;
 }
 
 .art-page__info {

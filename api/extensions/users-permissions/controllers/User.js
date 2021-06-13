@@ -54,9 +54,9 @@ module.exports = {
     console.log(user.arts);
 
     let updateData = {
-      arts: [],
+      arts: [...user.arts, art],
     };
-    
+
     const data = await strapi.plugins['users-permissions'].services.user.edit({ id }, updateData);
 
     ctx.send(sanitizeUser(data));

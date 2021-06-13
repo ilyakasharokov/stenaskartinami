@@ -11,6 +11,7 @@ import { YMaps, Map, Placemark, ZoomControl } from 'react-yandex-maps';
 import { isLocalURL } from 'next/dist/next-server/lib/router/router';
 import BuyBlock from '../../components/art/buy-block';
 import ImagesGallery from '../../components/art/image-gallery'
+import AddFavorite from '../../components/art/add-favorite';
 
 export default function Art({ art }) {
 
@@ -24,7 +25,10 @@ export default function Art({ art }) {
     { 
     art &&
     <div className="art-page">
-      <h1>"{art.Title}"{ art.Artist && ', ' + art.Artist.full_name}</h1>
+      <div className="art-page__header">
+        <h1>"{art.Title}"{ art.Artist && ', ' + art.Artist.full_name}</h1>
+        <AddFavorite artId={art.id}></AddFavorite>
+      </div>
       <div className="art-page__grid">
         <ImagesGallery images={art.Pictures}></ImagesGallery>
         <div className="art-page__right">
