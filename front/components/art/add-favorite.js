@@ -13,6 +13,8 @@ export default function AddFavorite({artId}){
     useEffect( () => {
         if(userArts && userArts.find((art) => art.id == artId)){
             setActive(true)
+        }else{
+            setActive(false)
         }
     }, [artId])
 
