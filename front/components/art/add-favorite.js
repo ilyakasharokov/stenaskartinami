@@ -1,39 +1,22 @@
 import { useState, useEffect } from "react"
 import { API_HOST } from "../../constants/constants"
 import urlencodeFormData from "../../utils/urlencodeFormData"
-import { useSession, signIn, signOut } from "next-auth/client";
+import { useSession } from "next-auth/client";
 
-export default function AddFavorite({artId}){
+export default function AddFavorite({art}){
 
     let userArts = [];
 
     const [session, loading] = useSession()
     let [ isActive, setActive] = useState(false);
 
-    useEffect( () => {
-        if(userArts && userArts.find((art) => art.id == artId)){
-            setActive(true)
+    if(session && session.info && session.info.arts){
+        if(session.info.arts.find((_art) => _art.id === art.id)){
+            setActive(true);
         }else{
-            setActive(false)
-        }
-    }, [artId])
-
-    async function getUser(){
-        const res = await fetch(API_HOST + '/users/me', {
-            headers: {
-              Authorization: `Bearer ${session.jwt}`,
-            }
-        });
-        const json = await res.json()
-        userArts = [...json.arts]
-        if(userArts && userArts.find((art) => art.id == artId)){
-            setActive(true)
+            setActive(false);
         }
     }
-    
-    if(session){
-        getUser()
-    } 
 
     function toggleFavorite(artId){
         if(session){
@@ -46,7 +29,9 @@ export default function AddFavorite({artId}){
                     Authorization: `Bearer ${session.jwt}`,
                 }
             }).then(res => res.json()).then((json)=> {
-                console.log(json);
+                if(json.arts){
+                    session.user = json;
+                }
                 setActive(!isActive);
             })
         }
@@ -54,6 +39,6 @@ export default function AddFavorite({artId}){
 
 
     return (
-        <div className={`favorite-btn ${ isActive ? 'active': ''}`} onClick={() => toggleFavorite(artId)}></div>
+        <div title="Избранное" className={`favorite-btn ${ isActive ? 'active': ''}`} onClick={() => toggleFavorite(art)}></div>
     )
   }

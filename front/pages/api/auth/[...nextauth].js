@@ -1,16 +1,17 @@
 import NextAuth from "next-auth";
 import Providers from "next-auth/providers";
+import { API_HOST  } from '../../../constants/constants'
 
 const options = {
   providers: [
     Providers.Facebook({
       clientId: process.env.FACEBOOK_CLIENT_ID,
       clientSecret: process.env.FACEBOOK_CLIENT_SECRET,
-    }), /*
-    Providers.Instagram({
-      clientId: process.env.INSTAGRAM_CLIENT_ID,
-      clientSecret: process.env.INSTAGRAM_CLIENT_SECRET,
-    }) */
+    }), 
+    Providers.VK({
+      clientId: process.env.VK_CLIENT_ID,
+      clientSecret: process.env.VK_CLIENT_SECRET,
+    }) 
   ],
   session: {
     jwt: true,
@@ -19,6 +20,13 @@ const options = {
     session: async (session, user) => {
       session.jwt = user.jwt;
       session.id = user.id;
+      const res = await fetch(API_HOST + '/users/me', {
+        headers: {
+          Authorization: `Bearer ${session.jwt}`,
+        }
+      });
+      const json = await res.json()
+      session.info = json;
       return Promise.resolve(session);
     },
     jwt: async (token, user, account) => {

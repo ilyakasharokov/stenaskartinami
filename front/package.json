@@ -12,7 +12,9 @@
     "next-auth": "^3.13.3",
     "react": "16.13.1",
     "react-dom": "16.13.1",
+    "react-redux": "^7.2.4",
     "react-yandex-maps": "^4.6.0",
+    "rxjs": "^7.1.0",
     "sass": "*",
     "slugify": "*"
   },

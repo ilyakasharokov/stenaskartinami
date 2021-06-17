@@ -12,12 +12,13 @@ import { isLocalURL } from 'next/dist/next-server/lib/router/router';
 import BuyBlock from '../../components/art/buy-block';
 import ImagesGallery from '../../components/art/image-gallery'
 import AddFavorite from '../../components/art/add-favorite';
+import Preloader from '../../components/preloader/preloader'
 
 export default function Art({ art }) {
 
   const sent = false;
 
-  console.log(art)
+  // console.log(art)
   return (<MainLayout>
     <Head>
       <title>{art?.Title}, картина художника {art?.Artist?.full_name} | Стена с картинами, облачная галерея</title>
@@ -27,7 +28,7 @@ export default function Art({ art }) {
     <div className="art-page">
       <div className="art-page__header">
         <h1>"{art.Title}"{ art.Artist && ', ' + art.Artist.full_name}</h1>
-        <AddFavorite artId={art.id}></AddFavorite>
+        <AddFavorite art={art}></AddFavorite>
       </div>
       <div className="art-page__grid">
         <ImagesGallery images={art.Pictures}></ImagesGallery>
@@ -82,7 +83,13 @@ export default function Art({ art }) {
         <ProductList artist={art.Artist} except={art.id}></ProductList>
       }
     </div>
-  }
+    }
+    {
+      !art && 
+      <div className="overlay">
+      <Preloader></Preloader>
+    </div>
+    }
   </MainLayout>
   )
 }

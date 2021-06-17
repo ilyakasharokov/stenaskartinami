@@ -7,20 +7,6 @@ export default function TopBar(){
 
     const [session, loading] = useSession()
 
-    async function getUser(){
-        const res = await fetch(API_HOST + '/users/me', {
-            headers: {
-              Authorization: `Bearer ${session.jwt}`,
-            }
-        });
-        const json = await res.json()
-        // console.log(json)
-    }
-    
-    if(session){
-        getUser()
-    } 
-
     return (
         <div className="top-bar">
             <div className="top-bar__left"></div>
@@ -44,6 +30,9 @@ export default function TopBar(){
                     {
                         session &&
                         <div className="top-bar__signed">
+                            <Link href="/account/favorite">
+                                <a title="Избранное" className={`favorite-btn ${ session.info.arts.length > 0 ? 'active': ''}`}></a>
+                            </Link>
                             <span className="top-bar__user-name">{ session.user.name }</span>
                             | 
                             <Link href="/api/auth/signout">
