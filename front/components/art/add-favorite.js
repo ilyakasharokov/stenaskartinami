@@ -10,13 +10,15 @@ export default function AddFavorite({art}){
     const [session, loading] = useSession()
     let [ isActive, setActive] = useState(false);
 
-    if(session && session.info && session.info.arts){
-        if(session.info.arts.find((_art) => _art.id === art.id)){
-            setActive(true);
-        }else{
-            setActive(false);
+    useEffect(()=>{
+        if(session && session.info && session.info.arts){
+            if(session.info.arts.find((_art) => _art.id === art.id)){
+                setActive(true);
+            }else{
+                setActive(false);
+            }
         }
-    }
+    }, [session])
 
     function toggleFavorite(artId){
         if(session){

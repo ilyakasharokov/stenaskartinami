@@ -1,7 +1,7 @@
 import MainLayout from "../../../components/layouts/MainLayout"
 import { useState, useEffect } from "react"
 import Head from 'next/head'
-import { useSession } from "next-auth/client";
+import { useSession, session } from "next-auth/client";
 import ProductListStatic from '../../../components/catalog/product-list-static'
 
 export default function Catalog() {
@@ -9,9 +9,12 @@ export default function Catalog() {
   const [ session, loading ] = useSession();
   const [ arts, setArts ] = useState([]);
 
-  if(session && session.info){
-    setArts(session.info.arts)
-  }
+  useEffect(()=>{
+      if(session && session.info){
+        setArts(session.info.arts)
+      }
+    
+  }, [session])
 
   return (<MainLayout>
     <Head>
