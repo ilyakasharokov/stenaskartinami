@@ -32,7 +32,7 @@ export default function AddFavorite({art}){
                 }
             }).then(res => res.json()).then((json)=> {
                 if(json.arts){
-                    session.user = json;
+                    session.user.info = json;
                 }
                 setActive(!isActive);
             })
