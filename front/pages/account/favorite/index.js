@@ -3,17 +3,18 @@ import { useState, useEffect } from "react"
 import Head from 'next/head'
 import { useSession, session } from "next-auth/client";
 import ProductListStatic from '../../../components/catalog/product-list-static'
+import CatalogCmp from "../../../components/catalog/catalog"
 
 export default function Catalog() {
 
   const [ session, loading ] = useSession();
   const [ arts, setArts ] = useState([]);
 
-  useEffect(()=>{
-      if(session && session.info){
-        setArts(session.info.arts)
-      }
-    
+  useEffect(()=> {
+	  if(session && session.info){
+		  setArts(session.info.arts)
+		console.log(arts)
+	  }
   }, [session])
 
   return (<MainLayout>
@@ -24,8 +25,8 @@ export default function Catalog() {
       {
         session && session.user.name &&
         <div className="content-user">
-          <h1>Избранное</h1>
-          <ProductListStatic arts={arts}></ProductListStatic>
+<CatalogCmp arts={arts} hideFiltersForce={true} hideSort={true}
+ title="Избранное"></CatalogCmp>         
         </div>
       }
       {

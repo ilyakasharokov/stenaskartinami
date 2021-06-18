@@ -18,12 +18,12 @@ export default function AddFavorite({art}){
                 setActive(false);
             }
         }
-    }, [session])
+    }, [session, art.id])
 
-    function toggleFavorite(artId){
+    function toggleFavorite(art){
         if(session){
             let data = new FormData();
-            data.append('artId', artId);
+            data.append('artId', art.id);
             fetch(API_HOST + '/users-permissions/users/me', {
                 method: 'PUT',
 		body: data,
