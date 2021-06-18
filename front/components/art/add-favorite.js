@@ -10,18 +10,20 @@ export default function AddFavorite({art}){
     const [session, loading] = useSession()
     let [ isActive, setActive] = useState(false);
 
-    if(session && session.info && session.info.arts){
-        if(session.info.arts.find((_art) => _art.id === art.id)){
-            setActive(true);
-        }else{
-            setActive(false);
+    useEffect(()=>{
+        if(session && session.info && session.info.arts){
+            if(session.info.arts.find((_art) => _art.id === art.id)){
+                setActive(true);
+            }else{
+                setActive(false);
+            }
         }
-    }
+    }, [session, art.id])
 
-    function toggleFavorite(artId){
+    function toggleFavorite(art){
         if(session){
             let data = new FormData();
-            data.append('artId', artId);
+            data.append('artId', art.id);
             fetch(API_HOST + '/users-permissions/users/me', {
                 method: 'PUT',
 		body: data,
