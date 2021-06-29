@@ -16,14 +16,10 @@ export default function TopBar(){
                     <div className="top-bar__login">
                     {
                         !session &&
-                        <Link href="/api/auth/signin">
+                        <Link href="/auth/signin">
                             <a className="top-bar__auth-link"
-                                onClick={(e) => {
-                                e.preventDefault();
-                                signIn('facebook');
-                                }}
                             >
-                                Вход через Facebook
+                                Войти
                             </a>
                         </Link>
                     }

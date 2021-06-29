@@ -38,7 +38,7 @@ export default function AddFavorite({art}){
                 setActive(!isActive);
             })
         }else{
-            Router.push('/api/auth/signin')
+            Router.push('/auth/signin')
         }
     }
 

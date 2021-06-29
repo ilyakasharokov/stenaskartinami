@@ -162,6 +162,12 @@
                 }
             }
         }
+        &__img-link {
+            display:block;
+            height: 100%;
+            z-index:2;
+            position:relative;
+        }
         &__price {
             margin-top: -4px;
             font-size: 16px;
