@@ -2,6 +2,7 @@ import { useState, useEffect } from "react"
 import { API_HOST } from "../../constants/constants"
 import urlencodeFormData from "../../utils/urlencodeFormData"
 import { useSession } from "next-auth/client";
+import Router from 'next/router';
 
 export default function AddFavorite({art}){
 
@@ -36,6 +37,8 @@ export default function AddFavorite({art}){
                 }
                 setActive(!isActive);
             })
+        }else{
+            Router.push('/api/auth/signin')
         }
     }
 

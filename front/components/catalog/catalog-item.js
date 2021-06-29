@@ -1,5 +1,6 @@
 import imageUrlBuilder from '../../utils/img-url-builder'
 import Link from 'next/link'
+import AddFavorite from '../art/add-favorite'
 
 export default function CatalogItem({art, imageOnLoad}){
     return (
@@ -8,6 +9,10 @@ export default function CatalogItem({art, imageOnLoad}){
                 {
                     art.Pictures[0] && art.Pictures[0].formats && 
                     <div className="catalog-item__img-wrap">
+                        <div className="catalog-item__btns">
+                            <AddFavorite art={art}></AddFavorite>    
+                        </div>
+                        <div className="overlay"></div>
                         <Link href={ '/art/' + art.slug + '--' + art.id}>
                         <a title={art.Title}>
                             <img className="catalog-item__img" src={ imageUrlBuilder(art.Pictures[0].formats.small ? art.Pictures[0].formats.small.url: art.Pictures[0].formats.thumbnail.url) } alt={art.Title} onLoad={()=> {imageOnLoad()}}/>
