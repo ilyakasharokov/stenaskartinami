@@ -46,7 +46,7 @@ export default function CatalogItem({art, imageOnLoad}){
                     </div>
                     }
                     <div className="catalog-item__price">
-                    { art.Price ? art.Price  + ' P' : ''} 
+                    { art.sold ? 'ПРОДАНО' : art.Price ? art.Price  + ' P' : ''} 
                     </div>
                 </div>
             </div>

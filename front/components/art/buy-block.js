@@ -36,7 +36,7 @@ export default function BuyBlock({art}){
                 </div>
             }
             {
-                !state.sent && 
+                !state.sent && !art.sold &&
                 <div>
                 <div className="form-input">
                     <input type="text" name="name" placeholder="Имя" required/>
@@ -58,14 +58,14 @@ export default function BuyBlock({art}){
             <div className={`art-page__buy-block-btns ${state.show ? 'closed': ''}`}>
             {
                 !state.sent &&
-                <div className="art-page__price">{art.Price} P</div>
+                <div className="art-page__price">{ art.sold ? 'ПРОДАНО' : art.Price ? art.Price  + ' P' : ''} </div>
             }
             {
                 state.show && !state.sent &&
                 <button className="btn buy-btn" type="submit">Отправить</button>
             }
             {
-                !state.show &&
+                !state.show && !art.sold &&
                 <div className="btn buy-btn" onClick={ (event) => buyClick(event)}>Купить</div>
             }
             </div>
