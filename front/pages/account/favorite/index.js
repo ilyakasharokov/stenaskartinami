@@ -15,7 +15,7 @@ export default function Catalog() {
 		  setArts(session.info.arts)
 		console.log(arts)
 	  }
-  }, [session, session.info.arts])
+  }, [session, session && session.info.arts])
 
   return (<MainLayout>
     <Head>
