@@ -234,7 +234,7 @@ main {
         position: fixed;
         top: 0;
         background: #fff;
-        z-index: 1;
+        z-index: 100;
         width: 100%;
     }
 
@@ -312,6 +312,7 @@ main {
 .wide-page {
     width: 1440px;
     margin: 0 auto;
+    max-width: 100%;
 }
 
 .favorite-btn {
