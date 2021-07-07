@@ -11,19 +11,22 @@ export default function ProductListItem({art}){
                 <div className="catalog-item__btns">
                   <AddFavorite art={art}></AddFavorite>    
                 </div>
-                <div className="overlay"></div>
+                
                   <Link href={ '/art/' + art.slug + '--' + art.id}>
+                    <div>
+                    <div className="overlay"></div>
                       <a>
-                      <div>
-                        {
-                          art.Pictures[0] && art.Pictures[0].formats && 
-                          <div className="catalog-item__bg-img" style={{backgroundImage : `url(${(imageUrlBuilder(art.Pictures[0].formats.small ? art.Pictures[0].formats.small.url: ''))} )`, 
-                        backgroundSize: `cover`, backgroundPosition: `center` } }>
-                            <img className="catalog-item__invisible-img" src="/favicon.png"/>
-                          </div>
-                        } 
-                      </div>
-                    </a>
+                        <div>
+                          {
+                            art.Pictures[0] && art.Pictures[0].formats && 
+                            <div className="catalog-item__bg-img" style={{backgroundImage : `url(${(imageUrlBuilder(art.Pictures[0].formats.small ? art.Pictures[0].formats.small.url: ''))} )`, 
+                          backgroundSize: `cover`, backgroundPosition: `center` } }>
+                              <img className="catalog-item__invisible-img" src="/favicon.png"/>
+                            </div>
+                          } 
+                        </div>
+                      </a>
+                    </div>
                   </Link>
                 </div>
                 <Link href={ '/art/' + art.slug + '--' + art.id}>
