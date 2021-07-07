@@ -1,5 +1,5 @@
-import MainLayout from "../components/layouts/MainLayout"
-import { API_HOST } from "../constants/constants"
+import MainLayout from "@/components/layouts/MainLayout"
+import { API_HOST } from "@/constants/constants"
 import Head from 'next/head'
 import urlencodeFormData from '../utils/urlencodeFormData'
 import { useState } from "react"

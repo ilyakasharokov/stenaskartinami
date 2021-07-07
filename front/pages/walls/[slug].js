@@ -1,11 +1,11 @@
-import MainLayout from "../../components/layouts/MainLayout"
+import MainLayout from "@/components/layouts/MainLayout"
 import { useState, useEffect } from "react"
-import { API_HOST } from '../../constants/constants'
-import CatalogCmp from "../../components/catalog/catalog"
+import { API_HOST } from '@/constants/constants'
+import CatalogCmp from "@/components/catalog/catalog"
 import Head from "next/head"
 import Link from "next/link"
-import ProductListStatic from "../../components/catalog/product-list-static"
-import ImageGallery from "../../components/art/image-gallery"
+import ProductListStatic from "@/components/catalog/product-list-static"
+import ImageGallery from "@/components/art/image-gallery"
 import { YMaps, Map, Placemark, ZoomControl } from 'react-yandex-maps';
 
 export default function Catalog({ wall }) {

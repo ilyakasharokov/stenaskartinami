@@ -1,7 +1,7 @@
 import MainLayout from "@/components/layouts/MainLayout"
 import { API_HOST } from "@/constants/constants"
 import Head from 'next/head'
-import urlencodeFormData from '../utils/urlencodeFormData'
+import urlencodeFormData from '@/utils/urlencodeFormData'
 import { useState } from "react"
 
 export default function AddArt({ Component, pageProps }) {
@@ -25,28 +25,19 @@ export default function AddArt({ Component, pageProps }) {
 
   return (<MainLayout>
     <Head>
-      <title>Аренда картин бесплатно? | Стена с картинами, облачная галерея</title>
+      <title>Где художнику выставить картину?| Стена с картинами, облачная галерея</title>
     </Head>
     <div className="form-page">
-      <h1>Добавить стену</h1>
+      <h1>Добавить картину</h1>
       <div className="form-page__wrapper">
         <div className="form-page__left">
-          <img className="form-page__image" src={ API_HOST + '/uploads/photo_2021_03_22_17_26_34_1769d88fce.jpeg?14694382.854999974'}></img>
+          <img className="form-page__image" src='/images/addart.jpeg'></img>
         </div>
         <div className="form-page__right">
-          <p>Облачная галерея "Стена с картинами" открыта к сотрудничеству.
-          Если вы или ваши знакомые,  являетесь владельцами, управляющими  площадок, т.к </p>
-          <ul>
-            <li>отели, </li>
-            <li>кофейни, </li>
-            <li>книжные магазины, </li>
-            <li>коворкинг, </li>
-            <li>офисы и др. </li>
-          </ul>
-          <p>
-          Хотите расширить аудиторию,взрастить культурную среду в однообразии пустых стен?
-          Мы готовы на идейной основе, предоставить индивидуальную подборку работ.</p>
-          <p>В нашем собрании более ста различных художников, несколько   постоянно функционирующих экспозиций.</p>
+          <p>Стена с картинами находится в постоянном поиске самобытных авторов.</p>
+          <p>Мы не ограничиваем художников жанрами, стилистикой, ценой. Не навязываем свои вкусовые предпочтения зрителю. </p>
+          <p>Мы готовы предоставить свою площадку: размещать ваши работы на безвозмездной основе как на онлайн-ресурсах, так и в офлайн точках. </p>
+          <p>Более полную информацию вы можете получить, заполнив форму обратной связи.</p>
           {
             !state.sent && 
             <form onSubmit={ (event)=> submitForm(event)}>
@@ -62,7 +53,7 @@ export default function AddArt({ Component, pageProps }) {
               <div className="align-right">
                 <button className="btn" type="submit">Отправить</button>
               </div>
-              <input type="hidden" name="title" value="Добавить стену"></input>
+              <input type="hidden" name="title" value="Добавить картину"></input>
             </form>
           }
           {

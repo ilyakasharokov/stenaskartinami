@@ -1,9 +1,9 @@
-import MainLayout from "../../components/layouts/MainLayout"
+import MainLayout from "@/components/layouts/MainLayout"
 import { useState, useEffect } from "react"
-import { API_HOST, CATALOG_ITEMS_PER_PAGE } from '../../constants/constants'
-import CatalogCmp from "../../components/catalog/catalog"
+import { API_HOST, CATALOG_ITEMS_PER_PAGE } from '@/constants/constants'
+import CatalogCmp from "@/components/catalog/catalog"
 import Head from 'next/head'
-import serialize from '../../utils/serialize'
+import serialize from '@/utils/serialize'
 
 export default function Catalog({ arts, filters, count }) {
 

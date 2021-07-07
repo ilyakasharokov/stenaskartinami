@@ -1,6 +1,6 @@
 import NextAuth from "next-auth";
 import Providers from "next-auth/providers";
-import { API_HOST  } from '../../../constants/constants'
+import { API_HOST  } from '@/constants/constants'
 
 const options = {
   providers: [

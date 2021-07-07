@@ -1,7 +1,5 @@
-import MainLayout from "../../components/layouts/MainLayout"
-import { useState, useEffect } from "react"
-import { API_HOST } from '../../constants/constants'
-import CatalogCmp from "../../components/catalog/catalog"
+import MainLayout from "@/components/layouts/MainLayout"
+import { API_HOST } from '@/constants/constants'
 import Head from 'next/head'
 import { YMaps, Map, Placemark, ZoomControl } from 'react-yandex-maps';
 

@@ -1,7 +1,7 @@
-import MainLayout from "../../components/layouts/MainLayout"
+import MainLayout from "@/components/layouts/MainLayout"
 import { useState, useEffect } from "react"
-import { API_HOST } from '../../constants/constants'
-import CatalogCmp from "../../components/catalog/catalog"
+import { API_HOST } from '@/constants/constants'
+import CatalogCmp from "@/components/catalog/catalog"
 import Head from 'next/head'
 
 export default function  Artists({ artists }) {

@@ -1,9 +1,9 @@
-import MainLayout from "../../components/layouts/MainLayout"
+import MainLayout from "@/components/layouts/MainLayout"
 import { useState, useEffect } from "react"
 
-import { API_HOST } from '../../constants/constants'
+import { API_HOST } from '@/constants/constants'
 
-import CatalogCmp from "../../components/catalog/catalog"
+import CatalogCmp from "@/components/catalog/catalog"
 
 export default function Catalog({ arts }) {
 

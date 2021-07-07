@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react'
-import { API_HOST, CATALOG_ITEMS_PER_PAGE } from '../../constants/constants'
+import { API_HOST, CATALOG_ITEMS_PER_PAGE } from '@/constants/constants'
 import { useRouter } from "next/router";
 import Router from 'next/router'
-import throttle from '../../utils/throttle'
-import { resizeAllGridItems } from '../../utils/grid-resizer'
+import throttle from '@/utils/throttle'
+import { resizeAllGridItems } from '@/utils/grid-resizer'
 import CatalogFilters from "./catalog-filters"
 import Preloader from '../preloader/preloader';
-import serialize from '../../utils/serialize'
+import serialize from '@/utils/serialize'
 import Pagination from './pagination'
 import CatalogItem from './catalog-item'
 

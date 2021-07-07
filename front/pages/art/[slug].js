@@ -1,20 +1,15 @@
 import Head from 'next/head'
 import Link from 'next/link'
-import MainLayout from "../../components/layouts/MainLayout"
-import { useRouter, Router } from "next/router";
-import { useState, useEffect } from "react"
-import { API_HOST, FREE_ID } from '../../constants/constants'
-import ProductList from '../../components/catalog/product-list'
-import Artist from '../artists/[slug]';
-import imageUrlBuilder from '../../utils/img-url-builder'
+import MainLayout from "@/components/layouts/MainLayout"
+import { API_HOST, FREE_ID } from '@/constants/constants';
 import { YMaps, Map, Placemark, ZoomControl } from 'react-yandex-maps';
-import { isLocalURL } from 'next/dist/next-server/lib/router/router';
-import BuyBlock from '../../components/art/buy-block';
-import ImagesGallery from '../../components/art/image-gallery'
-import AddFavorite from '../../components/art/add-favorite';
-import Preloader from '../../components/preloader/preloader'
+import BuyBlock from '@/components/art/buy-block';
+import ImagesGallery from '@/components/art/image-gallery'
+import AddFavorite from '@/components/art/add-favorite';
+import Preloader from '@/components/preloader/preloader'
+import ProductListStatic from '@/components/catalog/product-list-static';
 
-export default function Art({ art }) {
+export default function Art({ art, style, styleArts, artist }) {
 
   const sent = false;
 
@@ -79,8 +74,27 @@ export default function Art({ art }) {
         </div>
       </div>
       {
-        art.Artist && 
-        <ProductList artist={art.Artist} except={art.id}></ProductList>
+        artist && artist.Arts.length > 0 &&
+        <div>
+          <h2>Другие работы художника</h2>
+          <ProductListStatic arts={artist.Arts}></ProductListStatic>
+          {
+            artist.Arts.length === 4 &&
+          <div className="product-list__link">
+            <Link href={ '/artists/' + artist.slug + '--' + artist.id}><a title={artist.full_name}>Перейти в каталог работ художника</a></Link> 
+          </div>
+          } 
+        </div>
+      }
+      {
+        styleArts && style &&
+        <div>
+          <h2>Работы в стиле { style.Title.toLowerCase() }</h2>
+          <ProductListStatic arts={styleArts}></ProductListStatic>
+          <div className="product-list__link">
+      <Link href={ '/catalog/?styles=' + style.slug}><a title={`Перейти в каталог работ в стиле ${style.Title.toLowerCase()}`}>Перейти в каталог работ в стиле {style.Title.toLowerCase()}</a></Link> 
+          </div>
+        </div>
       }
     </div>
     }
@@ -121,8 +135,8 @@ export const getStaticProps = async ({params: {
 }}) => {
   let id = slug.split('--')[1]
   // console.log(id)
-  const res = await fetch(API_HOST + '/arts/' + id)
-  const json = await res.json()
+  let res = await fetch(API_HOST + '/arts/' + id);
+  let json = await res.json()
 
   if (!json) {
     return {
@@ -132,9 +146,33 @@ export const getStaticProps = async ({params: {
 
   const art = json;
 
+
+
+  let artist = null;
+  res = await fetch(API_HOST + '/artists/' + art.Artist.id)
+  json = await res.json()
+  artist = json;
+  artist.Arts = artist.Arts.sort((a,b)=> {
+    return a.published_at < b.published_at ? 1: -1;
+  }).filter((aa)=>aa.id !== art.id).slice(0, 4)
+
+  let style = art.styles && art.styles[0] ? art.styles[0] : null;
+  let styleArts = [];
+  if(style){
+    res = await fetch(API_HOST + '/arts?styles.id=' + style.id)
+    json = await res.json()
+    styleArts = json.sort((a,b)=> {
+      return a.published_at < b.published_at ? 1: -1;
+    }).filter((_art)=> _art.id !== art.id && !artist.Arts.find((aa) => aa.id === _art.id)).slice(0, 4); 
+  }
+
+
   return {
     props: {
       art,
+      style,
+      styleArts,
+      artist
     },
     revalidate: 60, // In seconds
   }

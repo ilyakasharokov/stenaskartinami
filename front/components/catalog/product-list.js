@@ -1,33 +1,17 @@
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
-import { API_HOST } from '../../constants/constants'
+import { API_HOST } from '@/constants/constants'
 import { useRouter } from "next/router";
 import Router from 'next/router'
-import throttle from '../../utils/throttle'
-import { resizeAllGridItems } from '../../utils/grid-resizer'
+import throttle from '@/utils/throttle'
+import { resizeAllGridItems } from '@/utils/grid-resizer'
 import CatalogFilters from "./catalog-filters"
-import imageUrlBuilder from "../../utils/img-url-builder"
+import imageUrlBuilder from "@/utils/img-url-builder"
 import ProductListItem from './product-list-item';
 
-export default function ProductList({artist, except}){
+export default function ProductList({artist}){
 
-  const [arts, setArts] = useState([])
-
-  useEffect(() => {
-
-    function loadArtistArts() {
-      fetch(API_HOST + '/artists/' + artist.id)
-      .then((response)=> response.json())
-      .then((artist)=>{
-        let arts = artist.Arts.sort((a,b)=> {
-          return a.published_at < b.published_at ? 1: -1;
-        }).filter((a) => a.id !== except).slice(0, 4);
-        setArts(arts);
-      })
-    }
-    loadArtistArts();
-
-  }, [except])
+  const arts = artist.Arts;
 
   return (
     <div>

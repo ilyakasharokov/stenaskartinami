@@ -1,4 +1,4 @@
-import MainLayout from "../components/layouts/MainLayout"
+import MainLayout from "@/components/layouts/MainLayout"
 import Head from 'next/head'
 
 export default function Page() {

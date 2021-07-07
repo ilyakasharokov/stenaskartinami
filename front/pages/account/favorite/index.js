@@ -1,9 +1,9 @@
-import MainLayout from "../../../components/layouts/MainLayout"
+import MainLayout from "@/components/layouts/MainLayout"
 import { useState, useEffect } from "react"
 import Head from 'next/head'
 import { useSession, session } from "next-auth/client";
-import ProductListStatic from '../../../components/catalog/product-list-static'
-import CatalogCmp from "../../../components/catalog/catalog"
+import ProductListStatic from '@/components/catalog/product-list-static'
+import CatalogCmp from "@/components/catalog/catalog"
 
 export default function Catalog() {
 

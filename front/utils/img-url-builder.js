@@ -1,4 +1,4 @@
-import { API_HOST } from '../constants/constants'
+import { API_HOST } from '@/constants/constants'
 
 export default function imageUrlBuilder(url){
     if( url[0] == '/')

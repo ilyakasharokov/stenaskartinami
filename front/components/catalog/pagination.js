@@ -1,5 +1,5 @@
 const { useState, useEffect } = require("react")
-import { CATALOG_ITEMS_PER_PAGE } from '../../constants/constants'
+import { CATALOG_ITEMS_PER_PAGE } from '@/constants/constants'
 
 export default function Pagination({currentPage, count, setPage}){
 

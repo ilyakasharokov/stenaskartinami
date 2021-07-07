@@ -1,6 +1,4 @@
-import Link from 'next/link'
 import { useState, useEffect } from 'react'
-import { API_HOST } from '../../constants/constants'
 import { useRouter } from "next/router";
 import Router from 'next/router'
 import Preloader from '../preloader/preloader';

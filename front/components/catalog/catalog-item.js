@@ -1,4 +1,4 @@
-import imageUrlBuilder from '../../utils/img-url-builder'
+import imageUrlBuilder from '@/utils/img-url-builder'
 import Link from 'next/link'
 import AddFavorite from '../art/add-favorite'
 

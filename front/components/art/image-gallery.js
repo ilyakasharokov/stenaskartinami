@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import imageUrlBuilder from '../../utils/img-url-builder'
+import imageUrlBuilder from '@/utils/img-url-builder'
 
 export default function ImageGallery({images}){
 

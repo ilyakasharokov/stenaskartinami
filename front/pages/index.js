@@ -1,10 +1,10 @@
 import Head from 'next/head'
 import Link from 'next/link'
-import MainLayout from '../components/layouts/MainLayout'
-import { API_HOST } from "../constants/constants"
+import MainLayout from '@/components/layouts/MainLayout'
+import { API_HOST } from "@/constants/constants"
 import { useState } from 'react'
-import serialize from '../utils/serialize'
-import ProductListStatic from '../components/catalog/product-list-static'
+import serialize from '@/utils/serialize'
+import ProductListStatic from '@/components/catalog/product-list-static'
 import { YMaps, Map, Placemark, ZoomControl } from 'react-yandex-maps';
 
 export default function Home({slides, walls, arts}) {
