@@ -7,19 +7,27 @@ export default function ProductListItem({art}){
         <div className={`catalog-item ${art.sold ? 'sold': ''}`} key={art.id}>
               
               <div className="catalog-item__wrapper">
+                <div className="catalog-item__img-wrap">
+                <div className="catalog-item__btns">
+                  <AddFavorite art={art}></AddFavorite>    
+                </div>
+                <div className="overlay"></div>
+                  <Link href={ '/art/' + art.slug + '--' + art.id}>
+                      <a>
+                      <div>
+                        {
+                          art.Pictures[0] && art.Pictures[0].formats && 
+                          <div className="catalog-item__bg-img" style={{backgroundImage : `url(${(imageUrlBuilder(art.Pictures[0].formats.small ? art.Pictures[0].formats.small.url: ''))} )`, 
+                        backgroundSize: `cover`, backgroundPosition: `center` } }>
+                            <img className="catalog-item__invisible-img" src="/favicon.png"/>
+                          </div>
+                        } 
+                      </div>
+                    </a>
+                  </Link>
+                </div>
                 <Link href={ '/art/' + art.slug + '--' + art.id}>
-                    <a>
-                    <div>
-                      {
-                        art.Pictures[0] && art.Pictures[0].formats && 
-                        <div className="catalog-item__bg-img" style={{backgroundImage : `url(${(imageUrlBuilder(art.Pictures[0].formats.small ? art.Pictures[0].formats.small.url: ''))} )`, 
-                      backgroundSize: `cover`, backgroundPosition: `center` } }>
-                          <img className="catalog-item__invisible-img" src="/favicon.png"/>
-                        </div>
-                      }
-                      <div className="catalog-item__title">{art.Title}</div>
-                    </div>
-                  </a>
+                    <div className="catalog-item__title"><a title={art.Title}>{art.Title}</a></div>
                 </Link>
                 <div className="catalog-item__size">
                 { 
