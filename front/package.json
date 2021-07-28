@@ -8,6 +8,8 @@
     "start": "next start"
   },
   "dependencies": {
+    "@ckeditor/ckeditor5-build-classic": "^29.0.0",
+    "@ckeditor/ckeditor5-react": "^3.0.2",
     "next": "^10.0.0",
     "next-auth": "^3.13.3",
     "react": "16.13.1",
