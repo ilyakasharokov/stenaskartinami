@@ -25,6 +25,16 @@
     },
     "name": {
       "type": "string"
+    },
+    "comment": {
+      "type": "richtext"
+    },
+    "processed": {
+      "type": "boolean",
+      "default": false
+    },
+    "phone": {
+      "type": "string"
     }
   }
 }
