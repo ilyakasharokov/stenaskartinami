@@ -11,6 +11,12 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
+        h1{
+            flex: 1 0;
+        }
+        .favorite-btn {
+            flex: 0 auto;
+        }
     }
 }
 

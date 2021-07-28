@@ -12,7 +12,7 @@ export default function Catalog() {
 
   useEffect(()=> {
 	  if(session && session.info){
-		  setArts(session.info.arts)
+		  setArts(session.info.arts.reverse())
 		console.log(arts)
 	  }
   }, [session, session && session.info.arts])

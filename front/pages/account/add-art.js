@@ -3,10 +3,18 @@ import { API_HOST } from "@/constants/constants"
 import Head from 'next/head'
 import urlencodeFormData from '@/utils/urlencodeFormData'
 import { useState } from "react"
+import ImageUploading from "react-images-uploading";
 
 export default function AddArt({ Component, pageProps }) {
 
   const [ state, setPageState ] = useState({sent: false})
+  const [ images, setImages ] = useState([]);
+
+  function onChange(imageList, addUpdateIndex){
+    // data for submit
+    console.log(imageList, addUpdateIndex);
+    setImages(imageList);
+  };
   
   async function submitForm(e){
     e.preventDefault();
@@ -30,25 +38,54 @@ export default function AddArt({ Component, pageProps }) {
     <div className="form-page">
       <h1>Добавить картину</h1>
       <div className="form-page__wrapper">
-        <div className="form-page__left">
-          <img className="form-page__image" src='/images/addart.jpeg'></img>
-        </div>
         <div className="form-page__right">
-          <p>Стена с картинами находится в постоянном поиске самобытных авторов.</p>
-          <p>Мы не ограничиваем художников жанрами, стилистикой, ценой. Не навязываем свои вкусовые предпочтения зрителю. </p>
-          <p>Мы готовы предоставить свою площадку: размещать ваши работы на безвозмездной основе как на онлайн-ресурсах, так и в офлайн точках. </p>
-          <p>Более полную информацию вы можете получить, заполнив форму обратной связи.</p>
           {
             !state.sent && 
             <form onSubmit={ (event)=> submitForm(event)}>
               <div className="form-input">
-                <input type="text" name="name" placeholder="Имя" required/>
+                <input type="text" name="title" placeholder="Название работы" required/>
               </div>
+              <ImageUploading
+                multiple
+                value={images}
+                onChange={onChange}
+                maxNumber={5}
+                dataURLKey="data_url"
+              >
+                {({
+                  imageList,
+                  onImageUpload,
+                  onImageRemoveAll,
+                  onImageUpdate,
+                  onImageRemove,
+                  isDragging,
+                  dragProps
+                }) => (
+                  // write your building UI
+                  <div className="upload__image-wrapper">
+                    <button
+                      style={isDragging ? { color: "red" } : null}
+                      onClick={onImageUpload}
+                      {...dragProps}
+                    >
+                      Click or Drop here
+                    </button>
+                    &nbsp;
+                    <button onClick={onImageRemoveAll}>Remove all images</button>
+                    {imageList.map((image, index) => (
+                      <div key={index} className="image-item">
+                        <img src={image.data_url} alt="" width="100" />
+                        <div className="image-item__btn-wrapper">
+                          <button onClick={() => onImageUpdate(index)}>Update</button>
+                          <button onClick={() => onImageRemove(index)}>Remove</button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </ImageUploading>
               <div className="form-input">
-                <input type="email" name="email" placeholder="E-mail" required/>
-              </div>
-              <div className="form-input">
-                <textarea name="text" placeholder="Сообщение"></textarea>
+                <textarea name="description" placeholder="Сообщение"></textarea>
               </div>
               <div className="align-right">
                 <button className="btn" type="submit">Отправить</button>
