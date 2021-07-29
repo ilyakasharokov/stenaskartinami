@@ -77,10 +77,10 @@ export default function Home({slides, walls, arts}) {
         <div className="index-page__marquee">
           <div className="marquee-new">
             <div className="marquee__first-half">
-              Современное искусство - это работы, которые вы приобретаете здесь. &nbsp;&nbsp;&nbsp; 
+              29 июля - 11 августа Открыта экспозиция в санкт - Петербурге в книжном  магазине «Во весь голос» ул. Маяковского 19 &nbsp;&nbsp;&nbsp; 
             </div>
             <div className="marquee__second-half">
-              Современное искусство - это работы, которые вы приобретаете здесь. &nbsp;&nbsp;&nbsp; 
+              29 июля - 11 августа Открыта экспозиция в санкт - Петербурге в книжном  магазине «Во весь голос» ул. Маяковского 19 &nbsp;&nbsp;&nbsp; 
             </div>
           </div>
         </div>   
@@ -103,10 +103,10 @@ export default function Home({slides, walls, arts}) {
         <div className="index-page__marquee">
           <div className="marquee-new">
             <div className="marquee__first-half">
-              Современное искусство - это работы, которые вы приобретаете здесь. &nbsp;&nbsp;&nbsp; 
+            29 июля - 11 августа Открыта экспозиция в санкт - Петербурге в книжном  магазине «Во весь голос» ул. Маяковского 19 &nbsp;&nbsp;&nbsp; 
             </div>
             <div className="marquee__second-half">
-              Современное искусство - это работы, которые вы приобретаете здесь. &nbsp;&nbsp;&nbsp; 
+            29 июля - 11 августа Открыта экспозиция в санкт - Петербурге в книжном  магазине «Во весь голос» ул. Маяковского 19 &nbsp;&nbsp;&nbsp; 
             </div>
           </div>
         </div> 
