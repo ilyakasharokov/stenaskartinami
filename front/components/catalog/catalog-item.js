@@ -15,7 +15,7 @@ export default function CatalogItem({art, imageOnLoad}){
                         <div className="overlay"></div>
                         <Link href={ '/art/' + art.slug + '--' + art.id}>
                         <a className="catalog-item__img-link" title={art.Title}>
-                            <img className="catalog-item__img" src={ imageUrlBuilder(art.Pictures[0].formats.small ? art.Pictures[0].formats.small.url: art.Pictures[0].formats.thumbnail.url) } alt={art.Title} onLoad={()=> {imageOnLoad()}}/>
+                            <img className="catalog-item__img" src={ imageUrlBuilder(art.Pictures[0].formats.medium ? art.Pictures[0].formats.medium.url: art.Pictures[0].formats.small ? art.Pictures[0].formats.small.url: art.Pictures[0].formats.thumbnail.url) } alt={art.Title} onLoad={()=> {imageOnLoad()}}/>
                         </a>
                         </Link>
                     </div>
