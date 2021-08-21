@@ -19,7 +19,7 @@
     "rxjs": "^7.1.0",
     "sass": "*",
     "slugify": "*",
-    "react-images-uploading": "3.1.2cd "
+    "react-images-uploading": "3.1.2"
   },
   "devDependencies": {
     "eslint": "^7.16.0",
