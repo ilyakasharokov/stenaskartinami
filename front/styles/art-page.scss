@@ -33,7 +33,6 @@
 .art-page__info {
     padding: 15px 15px 0 15px;
     background: #eee;
-    margin-bottom: 30px;
 }
 
 .art-page__wall-block-text {
@@ -72,8 +71,26 @@
     padding: 15px 15px 15px 15px;
     background: #333;
     margin-right: -15px;
-    margin-bottom: 15px;
+    margin-bottom: 0;
     margin-left: -15px;
+}
+
+.art-page__buy-poster {
+    padding: 15px;
+    margin-bottom: 30px;
+    .buy-btn {
+        background: #38d;
+    }
+    .art-page__buy-text {
+        color: #000;
+    }
+    input {
+        background: #fff;
+        border: 1px solid #ccc;
+    }
+    .art-page__price {
+        color: #555;
+    }
 }
 
 .art-page__buy-expand {

@@ -8,6 +8,7 @@ import ImagesGallery from '@/components/art/image-gallery'
 import AddFavorite from '@/components/art/add-favorite';
 import Preloader from '@/components/preloader/preloader'
 import ProductListStatic from '@/components/catalog/product-list-static';
+import BuyPoster from '@/components/art/buy-poster';
 
 export default function Art({ art, style, styleArts, artist }) {
 
@@ -46,14 +47,17 @@ export default function Art({ art, style, styleArts, artist }) {
               }
               { 
                 art.Description && art.Description.length > 5 &&
-                <div className="art-page__description">
-                  { art.Description }
+                <div className="art-page__description" dangerouslySetInnerHTML={{
+                  __html: art.Description
+                }}>
                 </div>
               }
             </div>
             <BuyBlock art={art}></BuyBlock>
-      
           </div>
+          {
+            <BuyPoster art={art}></BuyPoster>
+          }
           {
             art.wall && art.wall.id !== FREE_ID &&
             <div className="art-page__wall-block">

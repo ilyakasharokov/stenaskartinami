@@ -7,17 +7,19 @@
     "develop": "strapi develop",
     "start": "strapi start",
     "build": "strapi build",
-    "strapi": "strapi"
+    "strapi": "strapi",
+    "postinstall": "npx patch-package" 
   },
   "devDependencies": {},
   "dependencies": {
     "@ckeditor/ckeditor5-build-classic": "^29.0.0",
     "@ckeditor/ckeditor5-react": "^3.0.2",
     "knex": "<0.20.0",
+    "patch-package": "6.4.7",
     "slugify": "*",
     "sqlite3": "5.0.0",
-    "strapi": "3.6.3",
-    "strapi-admin": "3.6.3",
+    "strapi": "3.6.5",
+    "strapi-admin": "3.6.5",
     "strapi-connector-bookshelf": "^3.6.5",
     "strapi-connector-mongoose": "^3.6.5",
     "strapi-plugin-content-manager": "^3.6.5",
@@ -25,7 +27,7 @@
     "strapi-plugin-email": "^3.6.5",
     "strapi-plugin-graphql": "^3.6.5",
     "strapi-plugin-upload": "^3.6.5",
-    "strapi-plugin-users-permissions": "^3.6.3",
+    "strapi-plugin-users-permissions": "^3.6.5",
     "strapi-provider-email-mailgun": "^3.6.5",
     "strapi-utils": "^3.6.5"
   },

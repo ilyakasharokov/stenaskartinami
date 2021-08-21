@@ -19,7 +19,12 @@
     "rxjs": "^7.1.0",
     "sass": "*",
     "slugify": "*",
+<<<<<<< HEAD
     "react-images-uploading": "3.1.2"
+=======
+    "react-images-uploading": "3.1.2",
+    "react-input-mask": "*"
+>>>>>>> 29ea03b65ba0ada7e5e5fb759d14900e19beb4d1
   },
   "devDependencies": {
     "eslint": "^7.16.0",

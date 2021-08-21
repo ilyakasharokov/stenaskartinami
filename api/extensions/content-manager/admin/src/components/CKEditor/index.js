@@ -14,16 +14,33 @@ const Wrapper = styled.div`
 `;
 
 const Editor = ({ onChange, name, value }) => {
+  
+  let [_value, setValue] = React.useState(value)
+
+  React.useEffect(()=> setValue(value), [value])
+
   return (
     <Wrapper>
-      <CKEditor
+      {
+        !_value && <CKEditor
         editor={ClassicEditor}
-        data={value}
+        data={_value}
         onChange={(event, editor) => {
           const data = editor.getData();
           onChange({ target: { name, value: data } });
         }}
       />
+      }
+      {
+          _value && <CKEditor
+          editor={ClassicEditor}
+          data={_value}
+          onChange={(event, editor) => {
+            const data = editor.getData();
+            onChange({ target: { name, value: data } });
+          }}
+        />
+      }
     </Wrapper>
   );
 };

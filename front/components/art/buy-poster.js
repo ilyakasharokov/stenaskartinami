@@ -1,6 +1,7 @@
 import { useState } from "react"
 import { API_HOST } from "@/constants/constants"
 import urlencodeFormData from "@/utils/urlencodeFormData"
+import InputMask from 'react-input-mask';
 
 export default function BuyPoster({art}){
 
@@ -27,52 +28,59 @@ export default function BuyPoster({art}){
 
     return (
         <div className="art-page__buy-poster">
-        <form onSubmit={ (event)=> submitForm(event)}>
-            <div className={`art-page__buy-expand ${state.show ? 'active': ''}`}>
             {
-                !state.sent &&
-                <div className="art-page__buy-text">
+                false &&
+                <form onSubmit={ (event)=> submitForm(event)}>
+                    <div className={`art-page__buy-expand ${state.show ? 'active': ''}`}>
+                    {
+                        !state.sent &&
+                        <div className="art-page__buy-text">
 
-                </div>
-            }
-            {
-                !state.sent && 
-                <div>
-                <div className="form-input">
-                    <input type="text" name="name" placeholder="Имя" required/>
-                </div>
-                <div className="form-input">
-                    <input type="email" name="email" placeholder="E-mail" required/>
-                </div>
-                <div className="form-input">
-                    <input type="tel" name="phone" placeholder="Номер телефона" required/>
-                </div>
-                <input type="hidden" name="title" value="Заказать постер"></input>
-                <input type="hidden" name="text" value={art.Title + ', ' + art.Artist.full_name + ', id = ' + art.id }></input>
-                </div>
-            }
-            </div>
-            {
-            state.sent && 
-            <div className="art-page__sent">
-                Спасибо за интерес!
-            </div>
-            }
-            <div className={`art-page__buy-block-btns ${state.show ? 'closed': ''}`}>
-            {
-                !state.sent &&
-                <div className="art-page__price">{ art.sold ? 'ПРОДАНО' : art.Price ? art.Price  + ' P' : ''} </div>
-            }
-            {
-                state.show && !state.sent &&
-                <button className="btn buy-btn" type="submit">Отправить</button>
-            }
-            {
-                !state.show && !art.sold &&
-                <div className="btn buy-btn" onClick={ (event) => buyClick(event)}>Купить</div>
-            }
-            </div>
-        </form>
+                        </div>
+                    }
+                    {
+                        !state.sent && 
+                        <div>
+                        <div className="form-input">
+                            <input type="text" name="name" placeholder="Имя" required/>
+                        </div>
+                        <div className="form-input">
+                            <input type="email" name="email" placeholder="E-mail" required/>
+                        </div>
+                        <div className="form-input">
+                            <input type="tel" name="phone" placeholder="Номер телефона"
+                                pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}" required/>
+                            <InputMask {...this.props} mask="+9-999-999-99-99" maskChar=" " name="phone" type="tel" placeholder="Номер телефона"/>;
+                                
+                        </div>
+                        <input type="hidden" name="title" value="Заказать постер"></input>
+                        <input type="hidden" name="text" value={art.Title + ', ' + art.Artist.full_name + ', id = ' + art.id }></input>
+                        </div>
+                    }
+                    </div>
+                    {
+                    state.sent && 
+                    <div className="art-page__sent">
+                        Спасибо за интерес!
+                    </div>
+                    }
+                    <div className={`art-page__buy-block-btns ${state.show ? 'closed': ''}`}>
+                    {
+                        !state.sent &&
+                        <div className="art-page__price">1000 P</div>
+                    }
+                    {
+                        state.show && !state.sent &&
+                        <button className="btn buy-btn" type="submit">Заказать</button>
+                    }
+                    {
+                        !state.show && !art.sold &&
+                        <div className="btn buy-btn" onClick={ (event) => buyClick(event)}>Постер</div>
+                    }
+                    </div>
+                </form>
+            
+        }
       </div>
     )
   }
