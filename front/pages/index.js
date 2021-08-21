@@ -7,7 +7,7 @@ import serialize from '@/utils/serialize'
 import ProductListStatic from '@/components/catalog/product-list-static'
 import { YMaps, Map, Placemark, ZoomControl } from 'react-yandex-maps';
 
-export default function Home({slides, walls, arts}) {
+export default function Home({slides, walls, arts, marquee}) {
 
   const [ currentSlide, setSlide ] = useState(0); 
 
@@ -73,17 +73,19 @@ export default function Home({slides, walls, arts}) {
             </div>
           </div>
         }
-
-        <div className="index-page__marquee">
-          <div className="marquee-new">
-            <div className="marquee__first-half">
-              29 июля - 11 августа Открыта экспозиция в санкт - Петербурге в книжном  магазине «Во весь голос» ул. Маяковского 19 &nbsp;&nbsp;&nbsp; 
-            </div>
-            <div className="marquee__second-half">
-              29 июля - 11 августа Открыта экспозиция в санкт - Петербурге в книжном  магазине «Во весь голос» ул. Маяковского 19 &nbsp;&nbsp;&nbsp; 
+        {
+          marquee.text &&
+          <div className="index-page__marquee">
+            <div className="marquee-new">
+              <div className="marquee__first-half">
+                {marquee.text}
+              </div>
+              <div className="marquee__second-half">
+              {marquee.text}
+              </div>
             </div>
           </div>
-        </div>   
+        }   
 
         <div className="index-page__last-arts">
         {
@@ -100,16 +102,19 @@ export default function Home({slides, walls, arts}) {
         }
         </div>
 
-        <div className="index-page__marquee">
-          <div className="marquee-new">
-            <div className="marquee__first-half">
-            29 июля - 11 августа Открыта экспозиция в санкт - Петербурге в книжном  магазине «Во весь голос» ул. Маяковского 19 &nbsp;&nbsp;&nbsp; 
-            </div>
-            <div className="marquee__second-half">
-            29 июля - 11 августа Открыта экспозиция в санкт - Петербурге в книжном  магазине «Во весь голос» ул. Маяковского 19 &nbsp;&nbsp;&nbsp; 
+        {
+          marquee.text &&
+          <div className="index-page__marquee">
+            <div className="marquee-new">
+              <div className="marquee__first-half">
+                {marquee.text}
+              </div>
+              <div className="marquee__second-half">
+              {marquee.text}
+              </div>
             </div>
           </div>
-        </div> 
+        }   
 
         {
           walls &&
@@ -158,11 +163,15 @@ export const getStaticProps = async () => {
   const arts = json.sort((a,b)=> {
     return a.published_at < b.published_at ? 1: -1;
   })
+  res = await fetch(API_HOST + '/marquee/' )
+  json = await res.json()
+  const marquee = json;
   return {
     props: {
       slides,
       walls,
-      arts
+      arts,
+      marquee
     },
     revalidate: 60,
   }

@@ -27,7 +27,7 @@ const WysiwygWithErrors = ({
     <div
       className="col-12"
       style={{
-        marginBottom: '1.6rem',
+        marginBottom: '1.7rem',
         fontSize: '1.3rem',
         fontFamily: 'Lato',
       }}

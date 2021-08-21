@@ -12,5 +12,8 @@ module.exports = ({ env }) => ({
       defaultReplyTo: 'admin@stenaskartinami.com',
     },
   },
+  /* upload: {
+    provider: 'ssk'
+  }, */
   // ...
 });
