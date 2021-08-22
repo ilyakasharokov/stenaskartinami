@@ -1,6 +1,6 @@
 module.exports = ({ env }) => ({
   defaultConnection: 'default',
-   /* connections: {
+    connections: {
     default: {
       connector: 'mongoose',
       settings: {
@@ -16,8 +16,8 @@ module.exports = ({ env }) => ({
         ssl: env('DATABASE_SSL'),
       },
     },
-  }, */
-  connections: {
+  }, 
+  /* connections: {
     default: {
       connector: 'bookshelf',
       settings: {
@@ -28,5 +28,5 @@ module.exports = ({ env }) => ({
         useNullAsDefault: true,
       },
     },
-  }
+  }*/
 });
