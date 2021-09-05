@@ -29,13 +29,20 @@ export default function BuyPoster({art}){
     return (
         <div className="art-page__buy-poster">
             {
-                false &&
                 <form onSubmit={ (event)=> submitForm(event)}>
                     <div className={`art-page__buy-expand ${state.show ? 'active': ''}`}>
                     {
                         !state.sent &&
                         <div className="art-page__buy-text">
+                            <p>Постер создается в натуральную величину оригинала.
+                            Высококачественная цифровая печать, на холсте или плотной бумаге.</p>
 
+                            <p>Индивидуальное оформление под ваш интерьер, подпись художника.</p>
+
+                            <p>Действует доставка по всему миру.
+                            Помните, заказывая постер, вы на прямую поддерживаете автора.</p>
+
+                            <p>Для заказа заполните форму обратной связи.</p>
                         </div>
                     }
                     {
@@ -48,10 +55,7 @@ export default function BuyPoster({art}){
                             <input type="email" name="email" placeholder="E-mail" required/>
                         </div>
                         <div className="form-input">
-                            <input type="tel" name="phone" placeholder="Номер телефона"
-                                pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}" required/>
-                            <InputMask {...this.props} mask="+9-999-999-99-99" maskChar=" " name="phone" type="tel" placeholder="Номер телефона"/>;
-                                
+                            <InputMask mask="+9-999-999-99-99" maskChar={null} maskPlaceholder="+7-123-456-89-90" name="phone" type="tel" placeholder="Номер телефона" required/>
                         </div>
                         <input type="hidden" name="title" value="Заказать постер"></input>
                         <input type="hidden" name="text" value={art.Title + ', ' + art.Artist.full_name + ', id = ' + art.id }></input>
@@ -61,13 +65,13 @@ export default function BuyPoster({art}){
                     {
                     state.sent && 
                     <div className="art-page__sent">
-                        Спасибо за интерес!
+                        Сообщение отправлено! Мы свяжемся с Вами с ближайшее время.
                     </div>
                     }
                     <div className={`art-page__buy-block-btns ${state.show ? 'closed': ''}`}>
                     {
                         !state.sent &&
-                        <div className="art-page__price">1000 P</div>
+                        <div className="art-page__price"></div>
                     }
                     {
                         state.show && !state.sent &&

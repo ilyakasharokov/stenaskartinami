@@ -78,6 +78,7 @@
 .art-page__buy-poster {
     padding: 15px;
     margin-bottom: 30px;
+    background: aliceblue;
     .buy-btn {
         background: #38d;
     }
@@ -90,6 +91,12 @@
     }
     .art-page__price {
         color: #555;
+    }
+    .art-page__buy-expand.active {
+        max-height: 490px;
+    }
+    .art-page__sent {
+        color: #000;
     }
 }
 
