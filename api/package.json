@@ -22,6 +22,7 @@
     "strapi-admin": "3.6.5",
     "strapi-connector-bookshelf": "^3.6.5",
     "strapi-connector-mongoose": "^3.6.5",
+    "strapi-middleware-cache": "^1.5.0",
     "strapi-plugin-content-manager": "^3.6.5",
     "strapi-plugin-content-type-builder": "^3.6.5",
     "strapi-plugin-email": "^3.6.5",
