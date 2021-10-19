@@ -24,11 +24,14 @@ export default function TopBar(){
                         </Link>
                     }
                     {
-                        session &&
+                        session && 
                         <div className="top-bar__signed">
-                            <Link href="/account/favorite">
-                                <a title="Избранное" className={`favorite-btn ${ session.info.arts.length > 0 ? 'active': ''}`}></a>
-                            </Link>
+                            {
+                                session.info && session.info.arts &&
+                                <Link href="/account/favorite">
+                                    <a title="Избранное" className={`favorite-btn ${ session.info.arts.length > 0 ? 'active': ''}`}></a>
+                                </Link>
+                            }
                             <span className="top-bar__user-name">{ session.user.name }</span>
                             | 
                             <Link href="/api/auth/signout">
