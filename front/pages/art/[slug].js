@@ -149,7 +149,15 @@ export const getStaticProps = async ({params: {
     }
   }
 
+  if(!json || json && !json.id){
+    return {
+      notFound: true,
+    }
+  }
+
   const art = json;
+
+
 
   let artist = null;
   res = await fetch(API_HOST + '/artists/' + art.Artist.id)
