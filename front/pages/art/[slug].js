@@ -12,8 +12,6 @@ import BuyPoster from '@/components/art/buy-poster';
 
 export default function Art({ art, style, styleArts, artist }) {
 
-  const sent = false;
-
   // console.log(art)
   return (<MainLayout>
     <Head>
@@ -137,20 +135,21 @@ export async function getStaticPaths() {
 export const getStaticProps = async ({params: {
   slug
 }}) => {
+  
   let id = slug.split('--')[1]
   // console.log(id)
   let res = await fetch(API_HOST + '/arts/' + id);
-  let json = await res.json()
-
-  if (!json) {
+  let json;
+  try {
+    json = await res.json()
+  }catch(e){
+    console.error(e);
     return {
       notFound: true,
     }
   }
 
   const art = json;
-
-
 
   let artist = null;
   res = await fetch(API_HOST + '/artists/' + art.Artist.id)
