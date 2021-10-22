@@ -7,6 +7,8 @@ export default class MyDocument extends Document {
         <Head>
          
           <link rel="shortcut icon" type="image/png" href="/favicon.png" />
+          <script src="//code-ya.jivosite.com/widget/BmVVnzRhlD" async></script>
+
         </Head>
         <body>
           <div
