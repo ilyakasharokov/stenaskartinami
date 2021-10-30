@@ -18,7 +18,7 @@ export default function MainLayout({children}){
             </a>
           </Link>
           <Menu></Menu>
-          { /* <SearchWidget></SearchWidget> */ }
+          { <SearchWidget></SearchWidget> }
         </nav>
       </header>
       <main>
