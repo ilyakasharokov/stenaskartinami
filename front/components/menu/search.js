@@ -3,7 +3,6 @@ import { InstantSearch, SearchBox, Hits, Highlight, Configure, connectStateResul
 import { instantMeiliSearch } from '@meilisearch/instant-meilisearch';
 import imageUrlBuilder from '@/utils/img-url-builder'
 import Link from 'next/link'
-import $ from 'jquery';
 
 const searchClient = instantMeiliSearch(
   "https://meili.stenaskartinami.com/",
