@@ -68,8 +68,10 @@ input[type="search"]::-webkit-search-results-decoration {
         display:none;
     }
     .top-bar__left .top-search-widget {
+        width: auto;
         display: block;
         margin-top: 5px;
+    
     }
     .top-bar__left .top-search-widget input {
         padding: 5px;
