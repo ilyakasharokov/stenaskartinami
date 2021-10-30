@@ -1,11 +1,64 @@
+import React, { useState } from 'react';
+import { InstantSearch, SearchBox, Hits, Highlight, Configure, connectStateResults } from 'react-instantsearch-dom';
+import { instantMeiliSearch } from '@meilisearch/instant-meilisearch';
+import imageUrlBuilder from '@/utils/img-url-builder'
+import Link from 'next/link'
+import $ from 'jquery';
+
+const searchClient = instantMeiliSearch(
+  "https://meili.stenaskartinami.com/",
+  ""
+);
+
+function Hit(props) {
+  return <div className="search-item">
+    <Link href={ '/art/' + props.hit.slug + '--' + props.hit.id} onClick={ () => {}}>
+      <a>
+        <div className="search-item__image" style={{ backgroundImage: 'url(' + imageUrlBuilder(props.hit.img) + ')'}}></div>
+        <div className="search-item__text">
+          <div className="search-item__title">{props.hit.Title}</div>
+          <div className="search-item__artist">{props.hit.Artist_full_name}</div>
+        </div>
+      </a>
+    </Link>
+  </div>;
+}
+
+
 export default function SearchWidget(){
 
-  return (
-    <form className="top-search-widget">
-      <input type="text" placeholder="Найти..."/>  
-      <button type="submit">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 23 21"><g fill="none"><rect width="8.903" height="1.25" x="14.747" y="17.027" fill="#333" rx=".625" transform="rotate(45 19.198 17.652)"></rect><ellipse cx="9.274" cy="9.073" stroke="#333" rx="8.774" ry="8.573"></ellipse></g></svg>
-      </button>
-    </form>
+  const [filled, setFilled] = useState(false)
+
+  const Results = connectStateResults(({ searchState, searchResults }) => 
+    searchState && searchState.query ? (
+      searchResults && searchResults.hits && searchResults.hits.length ? 
+      <div className="search__results">
+        <Hits hitComponent={Hit} />
+      </div> : 
+      <div className="search__results">
+        <div className="search__nothing-found">Ничего не найдено</div>
+      </div>
+      
+    ) : ""
+  );
+
+  return (<div className="top-search-desktop">
+    <div className={`top-search-widget ${filled ? 'filled': ''}`}>
+      <InstantSearch
+      indexName="art"
+      searchClient={searchClient}
+      onSearchStateChange={searchState => {
+        setFilled(searchState.query.length > 0)
+      }}>  
+      <Configure
+        hitsPerPage={10}/>
+        <button type="submit"></button>
+        <SearchBox translations={{
+            placeholder: 'Найти...'
+            }}/>
+          <Results></Results>
+        </InstantSearch>
+    </div>
+    </div>
   )
 }
