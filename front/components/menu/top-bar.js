@@ -1,7 +1,7 @@
 import { useSession, signIn, signOut } from "next-auth/client";
 import Link from "next/link";
 import React from "react";
-import { API_HOST } from "@/constants/constants";
+import SearchWidget from '../menu/search';
 
 export default function TopBar(){
 
@@ -9,7 +9,9 @@ export default function TopBar(){
 
     return (
         <div className="top-bar">
-            <div className="top-bar__left"></div>
+            <div className="top-bar__left">
+                <SearchWidget></SearchWidget>
+            </div>
             {
                 true &&
                 <div className="top-bar__right">
