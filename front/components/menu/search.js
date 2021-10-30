@@ -9,9 +9,13 @@ const searchClient = instantMeiliSearch(
   ""
 );
 
-function Hit(props) {
-  return <div className="search-item">
-    <Link href={ '/art/' + props.hit.slug + '--' + props.hit.id} onClick={ () => {}}>
+function Item(props) {
+  return <div className="search-item" onClick={() => {
+        props.setSearchState({
+          ...props.searchState,
+          query: '',
+        })}}>
+    <Link href={ '/art/' + props.hit.slug + '--' + props.hit.id} >
       <a>
         <div className="search-item__image" style={{ backgroundImage: 'url(' + imageUrlBuilder(props.hit.img) + ')'}}></div>
         <div className="search-item__text">
@@ -26,13 +30,24 @@ function Hit(props) {
 
 export default function SearchWidget(){
 
-  const [filled, setFilled] = useState(false)
+  //const [filled, setFilled] = useState(false)
+  const [searchState, setSearchState] = useState({});
+
+  const Hit = React.useRef(props => (
+    <Item
+      {...props}
+      searchState={searchState}
+      setSearchState={setSearchState}
+    />
+  ));
 
   const Results = connectStateResults(({ searchState, searchResults }) => 
     searchState && searchState.query ? (
       searchResults && searchResults.hits && searchResults.hits.length ? 
       <div className="search__results">
-        <Hits hitComponent={Hit} />
+        <Hits hitComponent={Hit.current}  
+          searchState={searchState}
+          setSearchState={setSearchState}/>
       </div> : 
       <div className="search__results">
         <div className="search__nothing-found">Ничего не найдено</div>
@@ -41,13 +56,15 @@ export default function SearchWidget(){
     ) : ""
   );
 
-  return (<div className="top-search-desktop">
-    <div className={`top-search-widget ${filled ? 'filled': ''}`}>
+  return (
+    <div className={`top-search-widget ${true ? 'filled': ''}`}>
       <InstantSearch
       indexName="art"
       searchClient={searchClient}
+      searchState={searchState}
       onSearchStateChange={searchState => {
-        setFilled(searchState.query.length > 0)
+        //setFilled(searchState.query.length > 0)
+        setSearchState(searchState)
       }}>  
       <Configure
         hitsPerPage={10}/>
@@ -57,7 +74,6 @@ export default function SearchWidget(){
             }}/>
           <Results></Results>
         </InstantSearch>
-    </div>
     </div>
   )
 }

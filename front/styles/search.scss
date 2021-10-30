@@ -59,8 +59,35 @@ input[type="search"]::-webkit-search-results-decoration {
     display: none;
 }
 
+.top-bar__left .top-search-widget {
+    display: none;
+}
+
 @media screen and (max-width: 994px) {
     .top-search-desktop{
         display:none;
+    }
+    .top-bar__left .top-search-widget {
+        display: block;
+        margin-top: 5px;
+    }
+    .top-bar__left .top-search-widget input {
+        padding: 5px;
+    }
+    
+    .search__results {
+        position: fixed;
+        left: 0;
+        right: 0;
+        width: auto;
+        height: calc(100% - 50px);
+        max-height: calc(100% - 50px);
+        padding-bottom: 50px;
+        top: 85px;
+        z-index: 1;
+    }
+    .search__nothing-found {
+        margin-top: 50%;
+        text-align: center;
     }
 }
