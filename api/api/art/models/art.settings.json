@@ -26,11 +26,12 @@
         "videos"
       ],
       "plugin": "upload",
-      "required": false
+      "required": false,
+      "pluginOptions": {}
     },
     "Artist": {
-      "model": "artist",
-      "via": "Arts"
+      "via": "Arts",
+      "model": "artist"
     },
     "Articul": {
       "type": "string",
@@ -101,7 +102,13 @@
         "videos"
       ],
       "plugin": "upload",
-      "required": false
+      "required": false,
+      "pluginOptions": {}
+    },
+    "views": {
+      "type": "integer",
+      "default": 0,
+      "min": 0
     }
   }
 }

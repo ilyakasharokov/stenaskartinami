@@ -4,7 +4,7 @@ module.exports = ({ env }) => ({
         enabled: true,
         type: 'redis',
         models: ['arts', 'artists', 'mediums', 'slides', 'styles', 'subjects', 'walls'],
-        maxAge: 900000,
+        maxAge: 1800000,
       }
     }
   });

@@ -1,0 +1,3 @@
+[submodule "api/plugins/elastic"]
+	path = api/plugins/elastic
+	url = https://github.com/marefati110/strapi-plugin-elasticsearch.git
