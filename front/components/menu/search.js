@@ -57,7 +57,7 @@ export default function SearchWidget(){
   );
 
   return (
-    <div className={`top-search-widget ${true ? 'filled': ''}`}>
+    <div className={`top-search-widget ${searchState?.query?.length ? 'filled': ''}`}>
       <InstantSearch
       indexName="art"
       searchClient={searchClient}
