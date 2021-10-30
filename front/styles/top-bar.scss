@@ -11,6 +11,7 @@
         margin-top: -5px;
         margin-bottom: -3px;
         margin-right: 10px;
+        margin-left: 10px;
     }
 }
 
@@ -31,6 +32,6 @@ span.top-bar__user-name {
 
 @media screen and (max-width: 994px){
     .top-bar{
-        padding: 0 15px;
+        padding: 0 10px;
     }
 }
