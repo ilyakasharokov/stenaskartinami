@@ -19,7 +19,7 @@ export default function AddArt() {
   const [ date, setDate] = useState(new Date());
   const [ errors, setErrors ] = useState({imageUploadError:false});
   const [ uploading, setUploading ] = useState(false);
-  const [ loaded, setUploading ] = useState(false);
+  const [ loaded, setLoaded ] = useState(false);
 
 
   function onChange(imageList, addUpdateIndex){
