@@ -18,6 +18,10 @@ img {
     width: 100%;
 }
 
+label {
+    font-weight: bold;
+}
+
 .container {
     margin:0 auto;
     width: 100%;
@@ -74,6 +78,24 @@ main {
             text-transform: uppercase;
             font-size: 18px;
             font-weight: bold;
+        }
+    }
+}
+
+@media screen and (min-width:994px){
+    .top-navigation, .bottom-navigation {
+        a.logo-link {
+            flex: 1;
+        }
+        .menu{
+            flex:1;
+            text-align: center;
+        }
+        .top-search-desktop{
+            flex:1;
+        }
+        .top-search-widget{
+            float:right;
         }
     }
 }

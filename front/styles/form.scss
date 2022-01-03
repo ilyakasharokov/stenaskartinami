@@ -1,7 +1,7 @@
 .form-page {
     max-width: 1060px;
     margin: 0 auto;
-    overflow: hidden;
+    position: relative;
 }
 
 img.form-page__image {
@@ -22,7 +22,7 @@ img.form-page__image {
     font-size: 24px;
 }
 
-input[type="text"], input[type="email"], input[type="tel"], textarea {
+input[type="text"], input[type="email"], input[type="tel"], input[type="number"],textarea {
     // font-size: 16px;
     width: 100%;
     padding: 15px;
@@ -40,8 +40,48 @@ input[type="text"]:focus, input[type="email"]:focus, textarea:focus {
     border: 1px solid #333;
 }
 
+::placeholder {
+    color: #aaa;
+}
+
 textarea{
     min-height: 150px;
+}
+
+.form-group-input{
+    display:flex;
+    gap: 30px;
+}
+
+.form-input {
+    position: relative;
+    flex: 1;
+    &__options {
+        border: 1px solid #999;
+        position: absolute;
+        top: 47px;
+        width: 100%;
+        background: #fff;
+        z-index: 1;
+    }
+    &__option {
+        padding: 11px 15px;
+        border-bottom: 1px solid #ddd;
+        box-sizing: border-box;
+        width: 100%;
+        cursor: pointer;
+    }
+    &__options-wrapper{
+        position:relative;
+    }
+    &__group {
+        display: flex;
+        gap: 15px;
+        align-items: center;
+    }
+    &__spacer {
+        height: 34px;
+    }
 }
 
 @media screen and (max-width: 994px) {
@@ -55,3 +95,4 @@ textarea{
         margin-bottom: 15px;
     }
 }
+

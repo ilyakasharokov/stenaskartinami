@@ -1,0 +1,81 @@
+.upload__image-btn {
+    padding: 50px;
+    appearance: none;
+    border: 3px dashed #999;
+    background: #eee;
+    font-size: 18px;
+    color: #aaa;
+    margin-bottom: 30px;
+    text-align: center;
+    img.upload__logo {
+        width: 10%;
+        display: block;
+        margin: 0 auto 30px;
+        opacity: 0.2;
+    }
+    span {
+        display: block;
+        font-size: 14px;
+    }
+    
+    strong {
+        display: block;
+        margin-bottom: 10px;
+    }
+}
+
+
+.upload__image-wrapper {
+    margin-bottom: 50px;
+    display: block;
+    &.error .upload__image-btn {
+        animation: error 1s;
+        animation-iteration-count: 1;
+        animation-fill-mode: forwards;
+    }
+}
+
+.image-item {
+    position: relative;
+    margin-right: 30px;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.upload__images-list {
+    padding-top: 50px;
+    position: relative;
+    text-align: left;
+}
+
+.image-item img {width: 250px;}
+
+.image-item__btn-wrapper {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    button {
+        background: #dc3a0f;
+        appearance: none;
+        border: none;
+        line-height: 30px;
+        width: 35px;
+        color: #fff;
+        font-size: 18px;
+        border-radius: 30px;
+        height: 35px;
+        cursor: pointer;
+        text-align: center;
+    }
+}
+
+@keyframes error {
+    0% {
+        border-color: inherit;
+        box-shadow: none;
+    }
+    100% {
+        border-color: #dc3a0f;
+        box-shadow: #dc3a0f 0px 0px 35px -10px;
+    }
+}
