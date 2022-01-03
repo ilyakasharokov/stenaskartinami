@@ -33,7 +33,7 @@ export default function Menu(){
   ];
 
   return (
-    <div>
+    <div className="menu">
       <div className="menu-btn" onClick={ () => toggleMenu() }></div>
       <div className={`top-menu ${showMenu ? 'active':''}`}>
         {

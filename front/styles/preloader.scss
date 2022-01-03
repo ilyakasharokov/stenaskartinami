@@ -86,6 +86,7 @@
     transform: translateZ(1px);
   }
   .lds-circle2 > div {
+    vertical-align: top;
     display: inline-block;
     width: 44px;
     height: 44px;
@@ -94,6 +95,13 @@
     background: #000;
     animation: lds-circle2 2.4s cubic-bezier(0, 0.2, 0.8, 1) infinite;
   }
+  .lds-circle2.preloader span {
+    margin-left: 10px;
+    margin-top: 13px;
+    display: inline-block;
+    padding-bottom: 14px;
+    font-size: 24px;
+}
   @keyframes lds-circle2 {
     0%, 100% {
       animation-timing-function: cubic-bezier(0.5, 0, 1, 0.5);
