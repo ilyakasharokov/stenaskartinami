@@ -1,7 +1,7 @@
 import MainLayout from "@/components/layouts/MainLayout"
 import { API_HOST } from "@/constants/constants"
 import Head from 'next/head'
-import { useState } from "react"
+import { useState, useRef } from "react"
 import ImageUploading from "react-images-uploading";
 import urlencodeFormData from '../../utils/urlencodeFormData'
 import ArtistInput from "@/components/input/artist-input";
@@ -13,22 +13,45 @@ import Preloader from "@/components/preloader/preloader"
 export default function AddArt() {
 
   const [session, loading] = useSession();
-  const [ state, setPageState ] = useState({sent: false});
   const [ images, setImages ] = useState([]);
   const [ artist, setArtist] = useState({ id: null, name: ''});
   const [ date, setDate] = useState(new Date());
   const [ errors, setErrors ] = useState({imageUploadError:false});
   const [ uploading, setUploading ] = useState(false);
-  const [ loaded, setLoaded ] = useState(false);
+  const [ loaded, setLoaded ] = useState(null);
+  const form = null;
 
 
-  function onChange(imageList, addUpdateIndex){
+  function onImagesChange(imageList, addUpdateIndex){
     setImages(imageList);
     setErrors({imageUploadError:false})
   };
+
+  async function postArtist(e, artist){
+    let data = new FormData(e.target);
+    let response = await fetch( API_HOST + '/artists', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
+      },
+      body: urlencodeFromObject({full_name: artist.full_name, description: data.get("Artist_description"), })
+    })
+    return response.json()
+  }
   
   async function submitForm(e){
     e.preventDefault();
+
+    setUploading(true);
+
+    if(!artist.id){
+      let uploadedArtist = await postArtist(e, artist);
+      if(uploadedArtist && uploadedArtist.id){
+        artist.id = uploadedArtist.id;
+        setArtist({id:uploadedArtist.id, full_name: uploadedArtist.full_name})
+      }
+    }
+
     let data = new FormData();
     images.forEach(file => {
       data.append(
@@ -38,8 +61,7 @@ export default function AddArt() {
         method: 'POST',
         body: data
     })
-    console.log(session)
-    setUploading(true);
+    
     let imagesUploaded = await response.json()
     if(imagesUploaded[0] && imagesUploaded[0].id){
       data = new FormData(e.target);
@@ -52,9 +74,11 @@ export default function AddArt() {
         Materials: data.get("Materials"),
         Owners_price: data.get("Owners_price"),
         width: data.get("width"),
-        height: data.get("height"),
-        user_uploader: session.info.id
+        height: data.get("height")
       };
+      if(session && session.info){
+        art.user_uploader = session.info.id;
+      }
       art['Pictures[]'] = imagesUploaded.map((p)=>p._id);
       let urlEncodedData = urlencodeFromObject(art);
       response = await fetch( API_HOST + '/artsd', {
@@ -66,8 +90,10 @@ export default function AddArt() {
       });
       let json = await response.json();
       setUploading(false);
+      setLoaded(
+        json
+      );
       console.log(json);
-
     }else{
       setUploading(false);
       setErrors({imageUploadError:true})
@@ -82,19 +108,27 @@ export default function AddArt() {
     setDate(newDate);
   }
 
+  function resetForm(){
+    setLoaded(null);
+    setImages([])
+  }
+
   return (<MainLayout>
     <Head>
       <title>Где художнику выставить картину?| Стена с картинами, облачная галерея</title>
     </Head>
     <div className="form-page">
-      <div className="overlay">
-        <Preloader text={'Загружаем картину . . . '}></Preloader>
-      </div>
+      {
+        uploading &&
+        <div className="overlay">
+          <Preloader text={'Загружаем картину . . . '}></Preloader>
+        </div>
+      }
       <h1>Добавить картину</h1>
       <div className="form-page__wrapper">
       {
-        !state.sent && 
-        <form onSubmit={ (event)=> submitForm(event)}>
+        !loaded && 
+        <form onSubmit={ (event)=> submitForm(event)} >
           <div className="form-group-input">
             <div className="form-input">
               <label>Название работы</label>
@@ -113,6 +147,13 @@ export default function AddArt() {
               </div>
             </div>
           </div>
+          {
+            artist && artist.full_name && artist.id === null &&
+            <div className="form-input">
+              <label>Об авторе</label>
+              <textarea name="Artist_description" placeholder="Краткая биография, творческий путь, участие в выставках . . ." required></textarea>
+            </div>
+          }
           <h3>Загрузите изображения</h3>
           {
             false && <div>
@@ -129,10 +170,11 @@ export default function AddArt() {
           <ImageUploading
             multiple
             value={images}
-            onChange={onChange}
+            onChange={onImagesChange}
             maxNumber={5}
             dataURLKey="data_url"
-            
+            imgExtension={['.jpg', '.png']}
+            maxFileSize={5242880}
           >
             {({
               imageList,
@@ -192,9 +234,10 @@ export default function AddArt() {
         </form>
       }
       {
-        state.sent && 
+        loaded && loaded.Title &&
         <div className="form-page__sent">
-          Спасибо, ваше сообщение отправлено, мы скоро с вами свяжемся! 
+          Спасибо! Работа "{ loaded.Title }" художника { loaded.Artist.full_name } добавлена в очередь на модерацию, скоро она появится на сайте! 
+          <button type="button" onClick={()=>resetForm()}>Добавить еще одну</button>
         </div>
       }
       </div>

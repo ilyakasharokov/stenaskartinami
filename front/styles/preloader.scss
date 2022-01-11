@@ -102,6 +102,15 @@
     padding-bottom: 14px;
     font-size: 24px;
 }
+
+.loading-icon{
+  animation: lds-circle2 2.4s cubic-bezier(0, 0.2, 0.8, 1) infinite;
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  background: #000;
+  opacity: 0.5;
+}
   @keyframes lds-circle2 {
     0%, 100% {
       animation-timing-function: cubic-bezier(0.5, 0, 1, 0.5);
