@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react"
 import { API_HOST } from "@/constants/constants"
 import Preloader from "../preloader/preloader";
-const cache = {};
+// const cache = {};
 
 export default function ArtistInput({onArtistChange}){
 
@@ -29,14 +29,14 @@ export default function ArtistInput({onArtistChange}){
                 let opts = json.map((j) => {
                     return {full_name: j.full_name, id: j.id }
                 })
-                cache[newVal] = opts.slice(0, 7);
+                // cache[newVal] = opts.slice(0, 7);
                 if(focus) {
                     setOptions(opts.slice(0, 7));
                 }else{
                     setOptions([])
                 }
             }else{
-                cache[newVal] = [];
+                // cache[newVal] = [];
                 setOptions([]);
             }
             setLoading(false);
@@ -60,12 +60,12 @@ export default function ArtistInput({onArtistChange}){
         setNewArtist(artist);
         onArtistChange(artist);
         if(newVal.length > 1){
-            if(!cache.hasOwnProperty(newVal)){
+            //if(!cache.hasOwnProperty(newVal)){
                 setLoading(true);
                 debounceFunction(()=>loadArtists(newVal), 500)
-            }else{
-                setOptions(cache[newVal]);
-            }
+            //}else{
+            //    setOptions(cache[newVal]);
+            // }
         }else{
             setOptions([]);
         }

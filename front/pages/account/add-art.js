@@ -18,7 +18,7 @@ export default function AddArt() {
   const [ date, setDate] = useState(new Date());
   const [ errors, setErrors ] = useState({imageUploadError:false});
   const [ uploading, setUploading ] = useState(false);
-  const [ loaded, setLoaded ] = useState(null);
+  const [ loaded, setLoaded ] = useState(false);
   const form = null;
 
 
@@ -117,17 +117,18 @@ export default function AddArt() {
     <Head>
       <title>Где художнику выставить картину?| Стена с картинами, облачная галерея</title>
     </Head>
-    <div className="form-page">
+    <div className="form-page add-art-page">
       {
         uploading &&
         <div className="overlay">
           <Preloader text={'Загружаем картину . . . '}></Preloader>
         </div>
       }
-      <h1>Добавить картину</h1>
-      <div className="form-page__wrapper">
       {
         !loaded && 
+        <div>
+        <h1>Добавить картину</h1>
+        <div className="form-page__wrapper">
         <form onSubmit={ (event)=> submitForm(event)} >
           <div className="form-group-input">
             <div className="form-input">
@@ -232,16 +233,32 @@ export default function AddArt() {
             <button className="btn" type="submit">Отправить на модерацию</button>
           </div>
         </form>
+        </div>
+        </div>
       }
+      
       {
         loaded && loaded.Title &&
         <div className="form-page__sent">
           Спасибо! Работа "{ loaded.Title }" художника { loaded.Artist.full_name } добавлена в очередь на модерацию, скоро она появится на сайте! 
-          <button type="button" onClick={()=>resetForm()}>Добавить еще одну</button>
+          <button className="btn" type="button" onClick={()=>resetForm()}>Добавить еще одну</button>
+        </div>
+      }
+      {
+        loaded && loaded.statusCode !== 401 &&
+        <div className="form-page__sent">
+          Упс, произошла непредвиденная ошибка :(
+          <button className="btn" type="button" onClick={()=>resetForm()}>Попробовать заново</button>
+        </div>
+      }
+            {
+        loaded && loaded.statusCode == 401 &&
+        <div className="form-page__sent">
+          Вы не авторизованы! :( <br></br>Войдите с помощью соц сетей и повторите попытку.
+          <button className="btn" type="button" onClick={()=>resetForm()}>Попробовать заново</button>
         </div>
       }
       </div>
-    </div>
   </MainLayout>
   )
 }
