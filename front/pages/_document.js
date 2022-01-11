@@ -5,7 +5,6 @@ export default class MyDocument extends Document {
     return (
       <Html lang={this.props.lang || "en"}>
         <Head>
-         
           <link rel="shortcut icon" type="image/png" href="/favicon.png" />
           <script src="//code-ya.jivosite.com/widget/BmVVnzRhlD" async></script>
 
