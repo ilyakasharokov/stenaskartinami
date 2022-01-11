@@ -79,7 +79,8 @@ export default function AddArt() {
         Materials: data.get("Materials"),
         Owners_price: data.get("Owners_price"),
         width: data.get("width"),
-        height: data.get("height")
+        height: data.get("height"),
+        user_uploader: session.info.id
       };
 
       art['Pictures[]'] = imagesUploaded.map((p)=>p._id);
