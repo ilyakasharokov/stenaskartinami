@@ -250,7 +250,7 @@ export default function AddArt() {
         </div>
       }
       {
-        loaded && loaded.statusCode !== 401 &&
+        loaded && !loaded.title && loaded.statusCode !== 401 &&
         <div className="form-page__sent">
           Упс, произошла непредвиденная ошибка :(
           <button className="btn" type="button" onClick={()=>resetForm()}>Попробовать заново</button>
