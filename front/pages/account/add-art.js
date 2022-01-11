@@ -42,6 +42,11 @@ export default function AddArt() {
   async function submitForm(e){
     e.preventDefault();
 
+    if(!session || session && !session.jwt){
+      setUploading(false)
+      return setLoaded({statusCode: 401})
+    }
+
     setUploading(true);
 
     if(!artist.id){
@@ -76,14 +81,13 @@ export default function AddArt() {
         width: data.get("width"),
         height: data.get("height")
       };
-      if(session && session.info){
-        art.user_uploader = session.info.id;
-      }
+
       art['Pictures[]'] = imagesUploaded.map((p)=>p._id);
       let urlEncodedData = urlencodeFromObject(art);
       response = await fetch( API_HOST + '/artsd', {
         method: 'POST',
         headers: {
+          Authorization: `Bearer ${session.jwt}`,
           'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
         },
         body: urlEncodedData
@@ -127,7 +131,8 @@ export default function AddArt() {
       {
         !loaded && 
         <div>
-        <h1>Добавить картину</h1>
+        <h1>Добавить картину </h1>
+        {`${session ? '': '(доступно только авторизованым пользователям!)'}`}<br></br><br></br>
         <div className="form-page__wrapper">
         <form onSubmit={ (event)=> submitForm(event)} >
           <div className="form-group-input">
