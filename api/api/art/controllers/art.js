@@ -36,7 +36,25 @@ module.exports = {
     } else {
       entity = await strapi.services.art.create({...ctx.request.body, published_at: null});
     }
-	entity.published_at = null;
-    return sanitizeEntity(entity, { model: strapi.models.art });
+	  entity.published_at = null;
+    entity = sanitizeEntity(entity, { model: strapi.models.art });
+
+    // send an email by using the email plugin
+    try{
+      await strapi.plugins['email'].services.email.send({
+        to: 'ilyakasharokov@mail.ru, dudkinet@gmail.com',
+        from: 'no-reply@stenaskartinami.com',
+        subject: 'Стена с картинами, новая картина на модерации',
+        text: `
+          Форма: "Новая картина",
+          Имя: ${entity.Title}
+          Художник: ${entity.Artist.full_name}
+        `,
+      });
+    }catch(e){
+      console.log(e);
+    }
+
+    return entity;
   },
 };

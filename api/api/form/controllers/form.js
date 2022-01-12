@@ -29,10 +29,10 @@ module.exports = {
         from: 'no-reply@stenaskartinami.com',
         subject: 'Стена с картинами, заявка YO',
         text: `
-	  Форма: ${entity.title}
-	  Имя: ${entity.name}
-	  Почта: ${entity.email}
-	  Сообщение: ${entity.text}
+          Форма: ${entity.title}
+          Имя: ${entity.name}
+          Почта: ${entity.email}
+          Сообщение: ${entity.text}
         `,
       });
     
