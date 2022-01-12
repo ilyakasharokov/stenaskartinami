@@ -35,8 +35,8 @@
     },
     "Articul": {
       "type": "string",
-      "required": true,
-      "unique": true
+      "required": false,
+      "unique": false
     },
     "Materials": {
       "type": "text"
@@ -109,6 +109,11 @@
       "type": "integer",
       "default": 0,
       "min": 0
+    },
+    "user_uploader": {
+      "plugin": "users-permissions",
+      "model": "user",
+      "via": "created_arts"
     }
   }
 }

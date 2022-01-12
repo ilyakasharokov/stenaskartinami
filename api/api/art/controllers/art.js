@@ -27,4 +27,16 @@ module.exports = {
         }
         return entities.map(entity => sanitizeEntity(entity, { model: strapi.models.art })); */
       },
+
+	async createD(ctx) {
+    let entity;
+    if (ctx.is('multipart')) {
+      const { data, files } = parseMultipartData(ctx);
+      entity = await strapi.services.art.create(data, { files });
+    } else {
+      entity = await strapi.services.art.create({...ctx.request.body, published_at: null});
+    }
+	entity.published_at = null;
+    return sanitizeEntity(entity, { model: strapi.models.art });
+  },
 };

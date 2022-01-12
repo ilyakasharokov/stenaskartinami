@@ -61,6 +61,10 @@
     },
     "arts": {
       "collection": "art"
+    },
+    "created_arts": {
+      "via": "user_uploader",
+      "collection": "art"
     }
   }
 }

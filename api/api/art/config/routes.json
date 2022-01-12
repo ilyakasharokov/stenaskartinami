@@ -40,6 +40,11 @@
         "policies": []
       }
     },
+	{
+	"method":"POST",
+	"path": "/artsd",
+	"handler": "art.createD",
+	"config": {"policies":[]}},
     {
       "method": "PUT",
       "path": "/arts/:id",
