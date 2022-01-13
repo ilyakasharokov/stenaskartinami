@@ -180,7 +180,7 @@ export default function AddArt() {
             onChange={onImagesChange}
             maxNumber={5}
             dataURLKey="data_url"
-            imgExtension={['.jpg', '.png']}
+            imgExtension={['.jpg', '.png', '.jpeg']}
             maxFileSize={5242880}
           >
             {({
