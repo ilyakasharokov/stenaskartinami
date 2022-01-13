@@ -85,7 +85,7 @@
     display: inline-block;
     transform: translateZ(1px);
   }
-  .lds-circle2 > div {
+  .lds-circle2 > div.preloader__circle {
     vertical-align: top;
     display: inline-block;
     width: 44px;

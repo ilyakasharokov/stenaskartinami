@@ -10,6 +10,8 @@ import YearInput from "@/components/input/year-input";
 import { useSession, signIn, signOut } from "next-auth/client";
 import Preloader from "@/components/preloader/preloader"
 
+const USE_SESSION = true;
+
 export default function AddArt() {
 
   const [session, loading] = useSession();
@@ -19,7 +21,7 @@ export default function AddArt() {
   const [ errors, setErrors ] = useState({imageUploadError:false});
   const [ uploading, setUploading ] = useState(false);
   const [ loaded, setLoaded ] = useState(false);
-  const form = null;
+  const [ imageLoadingProcess, setImageLoadingProcess ] = useState(null)
 
 
   function onImagesChange(imageList, addUpdateIndex){
@@ -38,14 +40,32 @@ export default function AddArt() {
     })
     return response.json()
   }
+
+  async function uploadImages(images){
+    let imagesUploaded = [];
+    for(let i =0; i < images.length; i++){
+      let data = new FormData();
+      data.append(
+        'files', images[0].file, images[0].file.name)
+      setImageLoadingProcess({ index: i, length: images.length})
+      let response = await fetch( API_HOST + '/upload', {
+        method: 'POST',
+        body: data
+      })
+      let image = await response.json()
+      imagesUploaded.push(image[0])
+    }
+    setImageLoadingProcess({ index: images.length, length: images.length})
+    return imagesUploaded;
+  }
   
   async function submitForm(e){
     e.preventDefault();
 
-    if(!session || session && !session.jwt){
+    if(USE_SESSION && (!session || session && !session.jwt)){
       setUploading(false)
       return setLoaded({statusCode: 401})
-    }
+    } 
 
     setUploading(true);
 
@@ -57,19 +77,10 @@ export default function AddArt() {
       }
     }
 
-    let data = new FormData();
-    images.forEach(file => {
-      data.append(
-        'files', file.file, file.file.name)
-    })
-    let response = await fetch( API_HOST + '/upload', {
-        method: 'POST',
-        body: data
-    })
-    
-    let imagesUploaded = await response.json()
+    let imagesUploaded = await uploadImages(images);
+
     if(imagesUploaded[0] && imagesUploaded[0].id){
-      data = new FormData(e.target);
+      let data = new FormData(e.target);
       let art = {
         Title: data.get("Title"),
         Description: data.get("Description"),
@@ -80,15 +91,21 @@ export default function AddArt() {
         Owners_price: data.get("Owners_price"),
         width: data.get("width"),
         height: data.get("height"),
-        user_uploader: session.info.id
       };
+      let headers = {
+        'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
+      }
+
+      if(USE_SESSION){
+        art.user_uploader = session.info.id;
+        headers.Authorization =`Bearer ${session.jwt}`;
+      }
 
       art['Pictures[]'] = imagesUploaded.map((p)=>p._id);
       let urlEncodedData = urlencodeFromObject(art);
-      response = await fetch( API_HOST + '/artsd', {
+      let response = await fetch( API_HOST + '/artsd', {
         method: 'POST',
         headers: {
-          Authorization: `Bearer ${session.jwt}`,
           'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
         },
         body: urlEncodedData
@@ -124,9 +141,18 @@ export default function AddArt() {
     </Head>
     <div className="form-page add-art-page">
       {
-        uploading &&
+        uploading  &&
         <div className="overlay">
-          <Preloader text={'Загружаем картину . . . '}></Preloader>
+          <Preloader>
+            <div className="preloader__text">Загружаем картину . . .</div>
+            { 
+              imageLoadingProcess && 
+              <div>
+                (загружаем изображения: { imageLoadingProcess.index === imageLoadingProcess.length ? imageLoadingProcess.index: imageLoadingProcess.index + 1 } из { imageLoadingProcess.length } )
+              </div>
+            }
+          </Preloader>
+
         </div>
       }
       {
@@ -180,7 +206,7 @@ export default function AddArt() {
             onChange={onImagesChange}
             maxNumber={5}
             dataURLKey="data_url"
-            imgExtension={['.jpg', '.png', '.jpeg']}
+            imgExtension={['.jpg', '.png']}
             maxFileSize={5242880}
           >
             {({
