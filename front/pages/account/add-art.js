@@ -105,9 +105,7 @@ export default function AddArt() {
       let urlEncodedData = urlencodeFromObject(art);
       let response = await fetch( API_HOST + '/artsd', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
-        },
+        headers,
         body: urlEncodedData
       });
       let json = await response.json();
