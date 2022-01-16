@@ -31,6 +31,10 @@ export default function ArtistInput({onArtistChange}){
                 })
                 // cache[newVal] = opts.slice(0, 7);
                 if(focus) {
+                    let found = options.find((opt)=> opt.full_name.toLowerCase() === newVal.toLowerCase());
+                    if(found){
+                        setNewArtist(found);
+                    }
                     setOptions(opts.slice(0, 7));
                 }else{
                     setOptions([])
