@@ -28,6 +28,11 @@ module.exports = {
         return entities.map(entity => sanitizeEntity(entity, { model: strapi.models.art })); */
       },
 
+      async allArts(ctx) {
+        let entities = strapi.query('art').find({_limit: -1});
+        return entities.map(entity => sanitizeEntity(entity, { model: strapi.models.art })); 
+      },
+
 	async createD(ctx) {
     let entity;
     if (ctx.is('multipart')) {

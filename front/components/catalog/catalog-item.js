@@ -9,9 +9,12 @@ export default function CatalogItem({art, imageOnLoad}){
                 {
                     art.Pictures[0] && art.Pictures[0].formats && 
                     <div className="catalog-item__img-wrap">
-                        <div className="catalog-item__btns">
-                            <AddFavorite art={art}></AddFavorite>    
-                        </div>
+                        {
+                            art.published_at &&
+                            <div className="catalog-item__btns">
+                                <AddFavorite art={art}></AddFavorite>    
+                            </div>
+                        }
                         <div className="overlay"></div>
                         <Link href={ '/art/' + art.slug + '--' + art.id}>
                         <a className="catalog-item__img-link" title={art.Title}>
