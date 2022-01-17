@@ -23,10 +23,10 @@ export default function MyArts() {
     </Head>
     <div className="account-page favorite-page">
       {
-        session && session.user.name &&
+        session && session.user.name && session.user.info && 
         <div className="content-user">
-<CatalogCmp arts={arts} hideFiltersForce={true} hideSort={true}
- title="Избранное"></CatalogCmp>         
+<CatalogCmp arts={session.user.info.created_arts} hideFiltersForce={true} hideSort={true}
+ title="Загруженные картины"></CatalogCmp>         
         </div>
       }
       {
