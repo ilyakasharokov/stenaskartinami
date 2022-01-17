@@ -13,9 +13,9 @@ export default function MyArts() {
   useEffect(()=> {
 	  if(session && session.info){
 		  setArts(session.info.created_arts.reverse())
-		console.log(arts)
+		console.log(session.info.created_arts)
 	  }
-  }, [session, session && session.info.arts])
+  }, [session, session && session.info.created_arts])
 
   return (<MainLayout>
     <Head>
@@ -23,7 +23,7 @@ export default function MyArts() {
     </Head>
     <div className="account-page favorite-page">
       {
-        session && session.user.name && session.user.info && 
+        session && session.user.name &&  
         <div className="content-user">
 <CatalogCmp arts={arts} hideFiltersForce={true} hideSort={true}
  title="Загруженные картины"></CatalogCmp>         
