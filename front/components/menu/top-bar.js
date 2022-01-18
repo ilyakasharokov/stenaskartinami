@@ -34,7 +34,16 @@ export default function TopBar(){
                                     <a title="Избранное" className={`favorite-btn ${ session.info.arts.length > 0 ? 'active': ''}`}></a>
                                 </Link>
                             }
-                            <span className="top-bar__user-name">{ session.user.name }</span>
+                            {
+                                session.info && session.info.created_arts &&  session.info.created_arts.length > 0 &&
+                                <Link href="/account/my-arts">
+                                    <a className="top-bar__user-name">{ session.user.name }</a>
+                                </Link>
+                            }
+                            {
+                                session.info && ( session.info.created_arts &&  session.info.created_arts.length ===  0 || !session.info.created_arts) &&
+                                <span className="top-bar__user-name">{ session.user.name }</span>
+                            }
                             | 
                             <Link href="/api/auth/signout">
                                 <a className="top-bar__auth-link"

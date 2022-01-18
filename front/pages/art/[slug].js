@@ -22,7 +22,10 @@ export default function Art({ art, style, styleArts, artist }) {
     <div className="art-page">
       <div className="art-page__header">
         <h1>"{art.Title}"{ art.Artist && ', ' + art.Artist.full_name}</h1>
-        <AddFavorite art={art}></AddFavorite>
+        {
+          art.published_at &&
+          <AddFavorite art={art}></AddFavorite>
+        }
       </div>
       <div className="art-page__grid">
         <ImagesGallery images={art.Pictures}></ImagesGallery>
@@ -51,9 +54,13 @@ export default function Art({ art, style, styleArts, artist }) {
                 </div>
               }
             </div>
-            <BuyBlock art={art}></BuyBlock>
+            {
+              art.published_at &&
+              <BuyBlock art={art}></BuyBlock>
+            }   
           </div>
           {
+            art.published_at &&
             <BuyPoster art={art}></BuyPoster>
           }
           {

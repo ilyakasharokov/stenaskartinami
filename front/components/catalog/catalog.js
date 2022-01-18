@@ -11,7 +11,7 @@ import Pagination from './pagination'
 import CatalogItem from './catalog-item'
 
 
-export default function CatalogCmp({arts, hideFiltersForce, title, description, filters, count, useURLParams, hideSort}){
+export default function CatalogCmp({arts, hideFiltersForce, title, description, filters, count, useURLParams, hideSort, emptyText}){
 
   //console.log(arts)
   const router = useRouter()
@@ -142,7 +142,7 @@ export default function CatalogCmp({arts, hideFiltersForce, title, description, 
       {
         !state.arts?.length &&
         <div className="catalog__no-results">
-          Извините, по данным критериям ничего нет :(
+          { emptyText ? emptyText : "Извините, по данным критериям ничего нет :(" }
         </div>
       }
     </div>
