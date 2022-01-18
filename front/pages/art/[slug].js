@@ -26,6 +26,10 @@ export default function Art({ art, style, styleArts, artist }) {
           art.published_at &&
           <AddFavorite art={art}></AddFavorite>
         }
+        {
+           !art.published_at &&
+           <div>(на модерации)</div>
+        }
       </div>
       <div className="art-page__grid">
         <ImagesGallery images={art.Pictures}></ImagesGallery>
