@@ -36,8 +36,8 @@ module.exports = {
 
       async findOneAll(ctx) {
         // some logic here
-        console.log(ctx)
-        const response = await super.findOne(ctx);
+        console.log(ctx.params)
+        const response = await strapi.query('art').findOne({id:ctx.params.id});
         // some more logic
       
         return response;

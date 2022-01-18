@@ -122,7 +122,7 @@ Art.getInitialProps = async ({query}) => {
 */
 
 export async function getStaticPaths() {
-  const res = await fetch(API_HOST + '/arts/')
+  const res = await fetch(API_HOST + '/arts')
   const json = await res.json()
   return {
     paths: json.map(item => { 
@@ -138,7 +138,7 @@ export const getStaticProps = async ({params: {
   
   let id = slug.split('--')[1]
   // console.log(id)
-  let res = await fetch(API_HOST + '/arts/' + id);
+  let res = await fetch(API_HOST + '/arts/all/' + id);
   let json;
   try {
     json = await res.json()

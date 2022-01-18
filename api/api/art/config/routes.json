@@ -40,6 +40,14 @@
         "policies": []
       }
     },
+	    {
+      "method": "GET",
+      "path": "/arts/all/:id",
+      "handler": "art.findOneAll",
+      "config": {
+        "policies": []
+      }
+    },
     {
       "method": "POST",
       "path": "/arts",
