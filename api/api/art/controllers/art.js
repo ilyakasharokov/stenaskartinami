@@ -34,6 +34,15 @@ module.exports = {
         return entities.map(entity => sanitizeEntity(entity, { model: strapi.models.art })); 
       },
 
+      async findOneAll(ctx) {
+        // some logic here
+        console.log(ctx)
+        const response = await super.findOne(ctx);
+        // some more logic
+      
+        return response;
+      },
+
 	async createD(ctx) {
     let entity;
     if (ctx.is('multipart')) {
