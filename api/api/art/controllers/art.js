@@ -29,7 +29,8 @@ module.exports = {
       },
 
       async allArts(ctx) {
-        let entities = strapi.query('art').find({_limit: -1});
+        let entities = await  strapi.query('art').find({_limit: -1});
+	// console.log(entities)
         return entities.map(entity => sanitizeEntity(entity, { model: strapi.models.art })); 
       },
 
