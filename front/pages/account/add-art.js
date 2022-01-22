@@ -53,7 +53,7 @@ export default function AddArt() {
         body: data
       })
       let image = await response.json()
-      imagesUploaded.push(image[i])
+      imagesUploaded.push(image[0])
     }
     setImageLoadingProcess({ index: images.length, length: images.length})
     return imagesUploaded;
