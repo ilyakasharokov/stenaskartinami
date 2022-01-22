@@ -46,14 +46,14 @@ export default function AddArt() {
     for(let i =0; i < images.length; i++){
       let data = new FormData();
       data.append(
-        'files', images[0].file, images[0].file.name)
+        'files', images[i].file, images[i].file.name)
       setImageLoadingProcess({ index: i, length: images.length})
       let response = await fetch( API_HOST + '/upload', {
         method: 'POST',
         body: data
       })
       let image = await response.json()
-      imagesUploaded.push(image[0])
+      imagesUploaded.push(image[i])
     }
     setImageLoadingProcess({ index: images.length, length: images.length})
     return imagesUploaded;
