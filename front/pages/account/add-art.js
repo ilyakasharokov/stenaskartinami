@@ -81,6 +81,10 @@ export default function AddArt() {
 
     if(imagesUploaded[0] && imagesUploaded[0].id){
       let data = new FormData(e.target);
+      let ownersPrice = parseInt(data.get("Owners_price"));
+      if( isNaN(ownersPrice) ){
+        ownersPrice = 0;
+      }
       let art = {
         Title: data.get("Title"),
         Description: data.get("Description"),
@@ -88,7 +92,7 @@ export default function AddArt() {
         Artist: artist.id,
         Year: date.getFullYear() + '-' + ("0" + (date.getMonth() + 1)).slice(-2) + '-' + ("0" + (date.getDate())).slice(-2),
         Materials: data.get("Materials"),
-        Owners_price: data.get("Owners_price"),
+        Owners_price: ownersPrice,
         width: data.get("width"),
         height: data.get("height"),
       };
