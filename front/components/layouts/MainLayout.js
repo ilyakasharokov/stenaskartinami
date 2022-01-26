@@ -12,7 +12,7 @@ export default function MainLayout({children}){
           <Link href="/">
             <a className="logo-link">
             <div className="logo">
-              <img src="/images/newlogo.svg"/> 
+              <img src="/images/newlogo2.svg"/> 
               <div className="logo__text">Стена с картинами</div>
             </div>
             </a>
@@ -33,7 +33,7 @@ export default function MainLayout({children}){
           <Link href="/">
             <a className="logo-link">
             <div className="logo">
-              <img src="/images/Logo_stenaskartinami_black_sqr.svg"/> 
+              <img src="/images/newlogo2.svg"/> 
               <div className="logo__text">Стена с картинами</div>
             </div>
             </a>
