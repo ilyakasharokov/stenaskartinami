@@ -78,7 +78,7 @@ export default function Art({ art, style, styleArts, artist }) {
                 <YMaps>
                   <Map defaultState={art.wall.Coordinates} style={{width: '100%', height: '200px'}} >
                     <ZoomControl/>
-                    <Placemark geometry={art.wall.Coordinates.center} options={{ iconLayout: 'default#image', iconImageHref: '/images/Logo_stenaskartinami_black_sqr.svg', iconImageSize: [30, 30], iconImageOffset: [-15, -15]}} />
+                    <Placemark geometry={art.wall.Coordinates.center} options={{ iconLayout: 'default#image', iconImageHref: '/images/mapicon.png', iconImageSize: [40, 40], iconImageOffset: [-20, -20]}} />
                   </Map>
                 </YMaps>
               }

@@ -19,7 +19,7 @@ export default function SignIn({ providers }) {
             <div className="login-page__wrapper">
                 <div className="login-page">
                     <div className="login-page__logo">
-                        <img src="/images/Logo_stenaskartinami_black.svg"/> 
+                        <img src="/images/newlogo2.svg"/> 
                         <div className="login-page__text">Стена с картинами</div>
                     </div>
                     {Object.values(providers).map(provider => (

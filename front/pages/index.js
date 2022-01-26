@@ -126,10 +126,10 @@ export default function Home({slides, walls, arts, marquee}) {
               {
                 walls.map( (wall, i) =>
                   wall.Coordinates &&
-                  <Placemark key={i} geometry={wall.Coordinates.center} options={{ iconLayout: 'default#image', iconImageHref: '/images/logo-black.png', iconImageSize: [30, 30], iconImageOffset: [-15, -15]}}
-                    properties={{ balloonContentHeader: wall.Title,
+                  <Placemark key={i} geometry={wall.Coordinates.center} options={{ iconLayout: 'default#image', iconImageSize: [40, 40], iconImageOffset: [-20, -20], iconImageHref: '/images/mapicon.png' }}
+                    properties={{ iconContent: 1, balloonContentHeader: wall.Title, iconContent: "<div>test</div>",
                     balloonContentBody: wall.Address,
-                    balloonContentFooter: `<a href="${'/walls/' + wall.slug + '--' + wall.id }">Перейти</a>`}} modules={['geoObject.addon.balloon', 'geoObject.addon.hint']}/>
+                    balloonContentFooter: `<a href="${'/walls/' + wall.slug + '--' + wall.id }">Перейти</a>`}} modules={['geoObject.addon.balloon', 'geoObject.addon.hint', 'layout.ImageWithContent']}/>
                 )
               }
               </Map>
