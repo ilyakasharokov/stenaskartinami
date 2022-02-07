@@ -26,7 +26,12 @@ export default function MyArts() {
         session && session.user.name &&  
         <div className="content-user">
           <CatalogCmp arts={arts} hideFiltersForce={true} hideSort={true} emptyText={"Вы пока не добавили ни одной картины :("}
-          title="Мои картины"></CatalogCmp>         
+          title="Мои картины"></CatalogCmp>       
+                    <p>
+            <Link href="/remove-data">
+              <a><h3>Запрос на удаление данных</h3></a>
+            </Link>
+          </p>
         </div>
       }
       {

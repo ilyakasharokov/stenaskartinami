@@ -104,6 +104,12 @@ main {
     }
 }
 
+.footer__links a {
+    display: block;
+    font-size: 12px;
+    text-align: right;
+}
+
 .bottom-navigation {
     padding: 30px;
     background: #eee;

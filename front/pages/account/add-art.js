@@ -67,6 +67,8 @@ export default function AddArt() {
       return setLoaded({statusCode: 401})
     } 
 
+    if(images.length)
+
     setUploading(true);
 
     if(!artist.id){
@@ -191,7 +193,7 @@ export default function AddArt() {
           }
           <h3>Загрузите изображения</h3>
           {
-            false && <div>
+            <div>
             <p>Качественные фотографии при хорошем естественном дневном освещении <br></br>
             <i>(Фото с четким пониманием границ работы, чем качественнее фото, тем выше вероятность публикации на сайте).</i></p>
             <ul>
@@ -199,7 +201,6 @@ export default function AddArt() {
               <li> фото деталей ( текстура. подпись )</li>
               <li> фото работы в проекции ( для понимания толщины и качества холста )</li>
             </ul>
-            <p>Фотографии должны быть высокого качества не меньше (1200 или 1600 пикселей)</p>
             </div>
           }
           <ImageUploading

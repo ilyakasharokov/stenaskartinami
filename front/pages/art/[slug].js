@@ -40,6 +40,10 @@ export default function Art({ art, style, styleArts, artist }) {
               <Link href={ '/artists/' + art.Artist.slug + '--' + art.Artist.id}>
                 <a title={art.Artist.full_name}>{art.Artist.full_name}</a>
               </Link> 
+              {
+                art.Year && 
+                <span>, {new Date(art.Year).getFullYear()}</span>
+              }
             </div>
             <div className="art-page__info-blocks">
               { 
@@ -55,6 +59,16 @@ export default function Art({ art, style, styleArts, artist }) {
                 <div className="art-page__description" dangerouslySetInnerHTML={{
                   __html: art.Description
                 }}>
+                </div>
+              }
+              {
+                art.published_at && 
+                <div className="art-page__published-at">
+                    Дата публикации: { new Date(art.published_at).toLocaleDateString('en-GB', {
+                    day: 'numeric',
+                    month: 'numeric',
+                    year: 'numeric',
+                    })} 
                 </div>
               }
             </div>

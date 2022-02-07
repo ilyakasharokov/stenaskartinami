@@ -15,8 +15,10 @@ export default function CatalogCmp({arts, hideFiltersForce, title, description, 
 
   //console.log(arts)
   const router = useRouter()
-  const [state, setState] = useState({showPreloader: false, selectedSortValue: "", arts:arts, count: count})
-  const [showFilters, setShowFilters] = useState(false)
+  const [ state, setState ] = useState({showPreloader: false, selectedSortValue: "", arts:arts, count: count})
+  const [ showFilters, setShowFilters ] = useState(false)
+  const [ currentPage, setCurrentPage ] = useState(1)
+  const [ loadingMore, setLoadingMore ] = useState(true)
 
   const resizeThrottled = throttle(resizeAllGridItems.bind(this, 'catalog-item',  'catalog-grid', '.catalog-item__wrapper'), 100)
 
@@ -42,17 +44,23 @@ export default function CatalogCmp({arts, hideFiltersForce, title, description, 
       }else{
         setState({arts, showPreloader:false, selectedSortValue, page: parseInt(Router.query && Router.query.page, 10) || 1, count: count})
       }
-
+      
       window.scrollTo(0, 0)
     }
 
     loadArts()
+    window.addEventListener('scroll', onScroll)
 
     return _ => {
       window.removeEventListener('resize', resizeThrottled)
       window.removeEventListener('load', resizeThrottled)
+      window.removeEventListener('scroll', onScroll)
     }
   }, [arts, router.query])
+
+  function onScroll(e){
+
+  }
 
   function changeSort(event){
     let queryObj = Router.query || {};
@@ -133,6 +141,12 @@ export default function CatalogCmp({arts, hideFiltersForce, title, description, 
           )
           }
           </div>
+          {
+            loadingMore &&
+            <div className="catalog__loading-more">
+                <Preloader></Preloader>
+            </div>
+          }
           {
             state.count && state.count > CATALOG_ITEMS_PER_PAGE &&
             <Pagination currentPage={state.page} count={state.count} setPage={(num)=> setPage(num)}></Pagination>

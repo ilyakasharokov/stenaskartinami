@@ -35,14 +35,10 @@ export default function TopBar(){
                                 </Link>
                             }
                             {
-                                session.info && session.info.created_arts &&  session.info.created_arts.length > 0 &&
+                                session.info && 
                                 <Link href="/account/my-arts">
                                     <a className="top-bar__user-name">{ session.user.name }</a>
                                 </Link>
-                            }
-                            {
-                                session.info && ( session.info.created_arts &&  session.info.created_arts.length ===  0 || !session.info.created_arts) &&
-                                <span className="top-bar__user-name">{ session.user.name }</span>
                             }
                             | 
                             <Link href="/api/auth/signout">

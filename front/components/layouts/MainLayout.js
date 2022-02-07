@@ -38,10 +38,19 @@ export default function MainLayout({children}){
             </div>
             </a>
           </Link>
+          <div className="footer__links">
+            <Link href="/privacy-policy">
+              <a>Политика конфиденциальности</a>
+            </Link>
+            <Link href="/remove-data">
+              <a>Запрос на удаление данных</a>
+            </Link>
+          </div>
           <div className="bottom-social">
             <a href="https://www.instagram.com/stena_s_kartinami/" target="_blank" title="Стена с картинами в Instagram"><img src="/images/instagram.svg"/></a>
             <a href="https://www.facebook.com/stenaskartinami/" target="_blank" title="Стена с картинами в Facebook"><img src="/images/facebook.svg"/></a>
           </div>
+
         </nav>
       </footer>
     </>
