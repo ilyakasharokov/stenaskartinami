@@ -126,7 +126,7 @@ export default function CatalogCmp({arts, hideFiltersForce, title, description, 
         </div>
       }
       {
-        state.showPreloader &&
+        false && state.showPreloader &&
         <div className="overlay">
           <Preloader></Preloader>
         </div>
