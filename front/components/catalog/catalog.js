@@ -18,7 +18,7 @@ export default function CatalogCmp({arts, hideFiltersForce, title, description, 
   const [ state, setState ] = useState({showPreloader: false, selectedSortValue: "", arts:arts, count: count})
   const [ showFilters, setShowFilters ] = useState(false)
   const [ currentPage, setCurrentPage ] = useState(1)
-  const [ loadingMore, setLoadingMore ] = useState(true)
+  const [ loadingMore, setLoadingMore ] = useState(false)
 
   const resizeThrottled = throttle(resizeAllGridItems.bind(this, 'catalog-item',  'catalog-grid', '.catalog-item__wrapper'), 100)
 
@@ -126,7 +126,7 @@ export default function CatalogCmp({arts, hideFiltersForce, title, description, 
         </div>
       }
       {
-        false && state.showPreloader &&
+        state.showPreloader &&
         <div className="overlay">
           <Preloader></Preloader>
         </div>
