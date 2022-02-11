@@ -10,7 +10,7 @@ import YearInput from "@/components/input/year-input";
 import { useSession, signIn, signOut } from "next-auth/client";
 import Preloader from "@/components/preloader/preloader"
 
-const USE_SESSION = false;
+const USE_SESSION = true;
 
 export default function AddArt() {
 
