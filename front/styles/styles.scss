@@ -365,3 +365,13 @@ main {
     background-repeat: no-repeat;
     cursor: pointer;
 }
+
+@media screen and (max-width: 994px) {
+    .bottom-navigation {
+        padding: 15px 10px;
+    }
+
+    .footer__links{
+        display:none;
+    }
+}
