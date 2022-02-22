@@ -109,6 +109,30 @@ textarea{
         color: #777;
         font-style: italic;
     }
+    &__suggestion {
+        padding: 5px 10px;
+        border: 1px solid;
+        color: #999;
+        border-radius: 15px;
+        display: inline-block;
+        margin-right: 10px;
+        margin-bottom: 10px;
+        cursor: pointer;
+    }
+    
+    &__hints {
+        padding-top: 10px;
+    }
+    
+    &__suggestion:hover {
+        color: #333;
+    }
+    
+    &__suggestion.active {
+        color: #fff;
+        background: #38d;
+        border-color: #38d;
+    }
 }
 
 @media screen and (max-width: 994px) {

@@ -9,14 +9,16 @@ import urlencodeFromObject from "@/utils/urlencodeFromObject";
 import YearInput from "@/components/input/year-input";
 import { useSession, signIn, signOut } from "next-auth/client";
 import Preloader from "@/components/preloader/preloader"
+import StylesInput from "@/components/input/styles-input";
 
-const USE_SESSION = true;
+const USE_SESSION = false;
 
 export default function AddArt() {
 
   const [session, loading] = useSession();
   const [ images, setImages ] = useState([]);
   const [ artist, setArtist] = useState({ id: null, name: ''});
+  const [ styles, setStyles] = useState([]);
   const [ date, setDate] = useState(new Date());
   const [ errors, setErrors ] = useState({imageUploadError:false});
   const [ uploading, setUploading ] = useState(false);
@@ -97,6 +99,7 @@ export default function AddArt() {
         Owners_price: ownersPrice,
         width: data.get("width"),
         height: data.get("height"),
+        styles: styles
       };
       let headers = {
         'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
@@ -128,6 +131,10 @@ export default function AddArt() {
 
   function onArtistChange(newArtist){
     setArtist(newArtist);
+  }
+
+  function onStylesChange(newStyles){
+    setStyles(newStyles);
   }
 
   function onDateChange(newDate){
@@ -262,6 +269,13 @@ export default function AddArt() {
             <div className="form-input">
               <label>Желаемая цена</label>
               <input type="text" name="Owners_price" placeholder="10000 р" required/>
+            </div>
+          </div>
+          <div className="form-group-input">
+            <StylesInput onStylesChange={onStylesChange}></StylesInput>
+            <div className="form-input">
+              <label>Материалы</label>
+              <input type="text" name="Materials" placeholder="Холст, масло" required/>
             </div>
           </div>
           <div className="align-right">
