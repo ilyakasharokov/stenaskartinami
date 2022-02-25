@@ -11,7 +11,7 @@ import { useSession, signIn, signOut } from "next-auth/client";
 import Preloader from "@/components/preloader/preloader"
 import StylesInput from "@/components/input/styles-input";
 
-const USE_SESSION = false;
+const USE_SESSION = true;
 
 export default function AddArt() {
 
