@@ -47,8 +47,10 @@ module.exports = {
     let entity;
     if (ctx.is('multipart')) {
       const { data, files } = parseMultipartData(ctx);
+      console.log(JSON.stringify(data));
       entity = await strapi.services.art.create(data, { files });
     } else {
+      console.log(JSON.stringify(ctx.request.body));
       entity = await strapi.services.art.create({...ctx.request.body, published_at: null});
     }
 	  entity.published_at = null;

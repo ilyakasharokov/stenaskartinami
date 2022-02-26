@@ -273,10 +273,6 @@ export default function AddArt() {
           </div>
           <div className="form-group-input">
             <StylesInput onStylesChange={onStylesChange}></StylesInput>
-            <div className="form-input">
-              <label>Материалы</label>
-              <input type="text" name="Materials" placeholder="Холст, масло" required/>
-            </div>
           </div>
           <div className="align-right">
             <button className="btn" type="submit">Отправить на модерацию</button>

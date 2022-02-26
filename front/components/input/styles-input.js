@@ -11,7 +11,7 @@ export default function StylesInput({onStylesChange}){
     useEffect(()=>{
         fetch(API_HOST + `/styles`).then(response=>response.json())
         .then(json => {
-            setOptions(json)
+            setOptions(json.sort((a,b) => a.Title < b.Title ? -1: 1 ))
         })
     }, [])
 
