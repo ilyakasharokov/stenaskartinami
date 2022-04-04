@@ -1,0 +1,28 @@
+{
+  "routes": [
+    {
+      "method": "GET",
+      "path": "/marquee",
+      "handler": "marquee.find",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "PUT",
+      "path": "/marquee",
+      "handler": "marquee.update",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "DELETE",
+      "path": "/marquee",
+      "handler": "marquee.delete",
+      "config": {
+        "policies": []
+      }
+    }
+  ]
+}

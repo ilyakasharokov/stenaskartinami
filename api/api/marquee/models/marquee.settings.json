@@ -1,0 +1,17 @@
+{
+  "kind": "singleType",
+  "collectionName": "marquees",
+  "info": {
+    "name": "marquee"
+  },
+  "options": {
+    "increments": true,
+    "timestamps": true,
+    "draftAndPublish": true
+  },
+  "attributes": {
+    "text": {
+      "type": "string"
+    }
+  }
+}
