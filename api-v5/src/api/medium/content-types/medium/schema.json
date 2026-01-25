@@ -1,0 +1,30 @@
+{
+  "kind": "collectionType",
+  "collectionName": "mediums",
+  "info": {
+    "singularName": "medium",
+    "pluralName": "mediums",
+    "displayName": "Medium",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "attributes": {
+    "title": {
+      "type": "string"
+    },
+    "description": {
+      "type": "richtext"
+    },
+    "arts": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::art.art",
+      "mappedBy": "mediums"
+    },
+    "slug": {
+      "type": "string"
+    }
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "kind": "collectionType",
+  "collectionName": "artists",
+  "info": {
+    "singularName": "artist",
+    "pluralName": "artists",
+    "displayName": "Artist",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "attributes": {
+    "full_name": {
+      "type": "string",
+      "required": true
+    },
+    "description": {
+      "type": "richtext"
+    },
+    "email": {
+      "type": "email"
+    },
+    "Arts": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::art.art",
+      "mappedBy": "Artist"
+    },
+    "Phone": {
+      "type": "string"
+    },
+    "slug": {
+      "type": "string"
+    },
+    "photos": {
+      "type": "media",
+      "multiple": true,
+      "required": false,
+      "allowedTypes": ["images", "files", "videos"]
+    }
+  }
+}

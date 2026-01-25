@@ -1,0 +1,33 @@
+{
+  "kind": "collectionType",
+  "collectionName": "styles",
+  "info": {
+    "singularName": "style",
+    "pluralName": "styles",
+    "displayName": "Style",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "attributes": {
+    "Title": {
+      "type": "string"
+    },
+    "arts": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::art.art",
+      "mappedBy": "styles"
+    },
+    "slug": {
+      "type": "string"
+    },
+    "seotitle": {
+      "type": "string"
+    },
+    "description": {
+      "type": "richtext"
+    }
+  }
+}

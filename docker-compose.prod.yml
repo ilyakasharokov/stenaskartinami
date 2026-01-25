@@ -1,0 +1,31 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: stenaskartinami-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: stenaskartinami
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  api-v5:
+    build:
+      context: ./api-v5
+      dockerfile: dockerfile
+    container_name: stenaskartinami-api-v5
+    restart: unless-stopped
+    env_file:
+      - ./api-v5/.env
+    ports:
+      - "1337:1337"
+    depends_on:
+      - postgres
+    volumes:
+      - /home/stenaskartinami/api/public/uploads:/usr/src/app/public/uploads
+
+volumes:
+  postgres_data:

@@ -1,0 +1,40 @@
+{
+  "kind": "collectionType",
+  "collectionName": "forms",
+  "info": {
+    "singularName": "form",
+    "pluralName": "forms",
+    "displayName": "Form",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "attributes": {
+    "title": {
+      "type": "string"
+    },
+    "email": {
+      "type": "email"
+    },
+    "text": {
+      "type": "richtext"
+    },
+    "json": {
+      "type": "json"
+    },
+    "name": {
+      "type": "string"
+    },
+    "comment": {
+      "type": "richtext"
+    },
+    "processed": {
+      "type": "boolean",
+      "default": false
+    },
+    "phone": {
+      "type": "string"
+    }
+  }
+}

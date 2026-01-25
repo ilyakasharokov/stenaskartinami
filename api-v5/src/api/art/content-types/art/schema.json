@@ -1,0 +1,112 @@
+{
+  "kind": "collectionType",
+  "collectionName": "arts",
+  "info": {
+    "singularName": "art",
+    "pluralName": "arts",
+    "displayName": "Art",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "attributes": {
+    "Title": {
+      "type": "string"
+    },
+    "Description": {
+      "type": "richtext"
+    },
+    "Pictures": {
+      "type": "media",
+      "multiple": true,
+      "required": false,
+      "allowedTypes": ["images", "files", "videos"]
+    },
+    "Artist": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::artist.artist",
+      "inversedBy": "Arts"
+    },
+    "Articul": {
+      "type": "string"
+    },
+    "Materials": {
+      "type": "text"
+    },
+    "Year": {
+      "type": "date"
+    },
+    "Owners_price": {
+      "type": "integer",
+      "private": true
+    },
+    "wall": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::wall.wall",
+      "inversedBy": "arts"
+    },
+    "slug": {
+      "type": "string"
+    },
+    "styles": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::style.style",
+      "inversedBy": "arts"
+    },
+    "Price": {
+      "type": "integer"
+    },
+    "subjects": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::subject.subject",
+      "inversedBy": "arts"
+    },
+    "width": {
+      "type": "decimal"
+    },
+    "height": {
+      "type": "decimal"
+    },
+    "square": {
+      "type": "decimal"
+    },
+    "isSquare": {
+      "type": "boolean"
+    },
+    "mediums": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::medium.medium",
+      "inversedBy": "arts"
+    },
+    "main": {
+      "type": "boolean"
+    },
+    "sold": {
+      "type": "boolean",
+      "default": false
+    },
+    "video": {
+      "type": "media",
+      "multiple": true,
+      "required": false,
+      "allowedTypes": ["images", "files", "videos"]
+    },
+    "views": {
+      "type": "integer",
+      "default": 0,
+      "min": 0
+    },
+    "user_uploader": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "plugin::users-permissions.user",
+      "inversedBy": "created_arts"
+    }
+  }
+}

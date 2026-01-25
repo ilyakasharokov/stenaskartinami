@@ -1,0 +1,64 @@
+module.exports = {
+  routes: [
+    {
+      method: 'GET',
+      path: '/arts',
+      handler: 'art.find',
+      config: { policies: [] },
+    },
+    {
+      method: 'GET',
+      path: '/arts/all',
+      handler: 'art.allArts',
+      config: { policies: [] },
+    },
+    {
+      method: 'GET',
+      path: '/arts/filter',
+      handler: 'art.filter',
+      config: { policies: [] },
+    },
+    {
+      method: 'GET',
+      path: '/arts/count',
+      handler: 'art.count',
+      config: { policies: [] },
+    },
+    {
+      method: 'GET',
+      path: '/arts/:id',
+      handler: 'art.findOne',
+      config: { policies: [] },
+    },
+    {
+      method: 'GET',
+      path: '/arts/all/:id',
+      handler: 'art.findOneAll',
+      config: { policies: [] },
+    },
+    {
+      method: 'POST',
+      path: '/arts',
+      handler: 'art.create',
+      config: { policies: [] },
+    },
+    {
+      method: 'POST',
+      path: '/artsd',
+      handler: 'art.createD',
+      config: { policies: [] },
+    },
+    {
+      method: 'PUT',
+      path: '/arts/:id',
+      handler: 'art.update',
+      config: { policies: [] },
+    },
+    {
+      method: 'DELETE',
+      path: '/arts/:id',
+      handler: 'art.delete',
+      config: { policies: [] },
+    },
+  ],
+};

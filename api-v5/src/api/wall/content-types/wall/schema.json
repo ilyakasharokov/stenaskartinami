@@ -1,0 +1,57 @@
+{
+  "kind": "collectionType",
+  "collectionName": "walls",
+  "info": {
+    "singularName": "wall",
+    "pluralName": "walls",
+    "displayName": "Wall",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "attributes": {
+    "Title": {
+      "type": "string"
+    },
+    "Description": {
+      "type": "richtext"
+    },
+    "slug": {
+      "type": "string"
+    },
+    "Address": {
+      "type": "string"
+    },
+    "Coordinates": {
+      "type": "json"
+    },
+    "Website": {
+      "type": "string"
+    },
+    "Schedule": {
+      "type": "richtext"
+    },
+    "Phone": {
+      "type": "string"
+    },
+    "Images": {
+      "type": "media",
+      "multiple": true,
+      "required": false,
+      "allowedTypes": ["images", "files", "videos"]
+    },
+    "city": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::city.city",
+      "inversedBy": "walls"
+    },
+    "arts": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::art.art",
+      "mappedBy": "wall"
+    }
+  }
+}

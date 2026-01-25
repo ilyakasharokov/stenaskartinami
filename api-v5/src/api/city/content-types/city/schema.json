@@ -1,0 +1,27 @@
+{
+  "kind": "collectionType",
+  "collectionName": "cities",
+  "info": {
+    "singularName": "city",
+    "pluralName": "cities",
+    "displayName": "City",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "attributes": {
+    "Title": {
+      "type": "string"
+    },
+    "walls": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::wall.wall",
+      "mappedBy": "city"
+    },
+    "slug": {
+      "type": "string"
+    }
+  }
+}

@@ -1,0 +1,46 @@
+module.exports = {
+  routes: [
+    {
+      method: 'GET',
+      path: '/styles',
+      handler: 'style.find',
+      config: { policies: [] },
+    },
+    {
+      method: 'GET',
+      path: '/styles/filters',
+      handler: 'style.filters',
+      config: { policies: [] },
+    },
+    {
+      method: 'GET',
+      path: '/styles/count',
+      handler: 'style.count',
+      config: { policies: [] },
+    },
+    {
+      method: 'GET',
+      path: '/styles/:id',
+      handler: 'style.findOne',
+      config: { policies: [] },
+    },
+    {
+      method: 'POST',
+      path: '/styles',
+      handler: 'style.create',
+      config: { policies: [] },
+    },
+    {
+      method: 'PUT',
+      path: '/styles/:id',
+      handler: 'style.update',
+      config: { policies: [] },
+    },
+    {
+      method: 'DELETE',
+      path: '/styles/:id',
+      handler: 'style.delete',
+      config: { policies: [] },
+    },
+  ],
+};

@@ -1,0 +1,15 @@
+{
+  "attributes": {
+    "arts": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::art.art"
+    },
+    "created_arts": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::art.art",
+      "mappedBy": "user_uploader"
+    }
+  }
+}
