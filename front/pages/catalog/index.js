@@ -4,6 +4,7 @@ import { API_HOST, CATALOG_ITEMS_PER_PAGE } from '@/constants/constants'
 import CatalogCmp from "@/components/catalog/catalog"
 import Head from 'next/head'
 import serialize from '@/utils/serialize'
+import { fetchStrapi } from '@/utils/strapi'
 
 export default function Catalog({ arts, filters, count }) {
 
@@ -30,14 +31,20 @@ export default function Catalog({ arts, filters, count }) {
 
 
 export const getStaticProps = async () => {
-  const query = {_start: 0, _limit: CATALOG_ITEMS_PER_PAGE };
-  let res = await fetch(API_HOST + '/arts/' + serialize(query))
-  let json = await res.json()
-  const arts = json.sort((a,b)=> {
-    return a.published_at < b.published_at ? 1: -1;
+  const query = {
+    _start: 0,
+    _limit: CATALOG_ITEMS_PER_PAGE,
+    populate: ['Pictures', 'Artist', 'styles', 'subjects', 'mediums', 'wall'],
+  };
+  let json = await fetchStrapi(API_HOST + '/arts' + serialize(query))
+  const list = Array.isArray(json) ? json : []
+  const arts = list.sort((a, b) => {
+    const aPublished = a.publishedAt || a.published_at;
+    const bPublished = b.publishedAt || b.published_at;
+    return aPublished < bPublished ? 1 : -1;
   })
-  res = await fetch(API_HOST + '/arts/count' + serialize(query ) )
-  const count = await res.json()
+  const countResponse = await fetchStrapi(API_HOST + '/arts/count' + serialize(query))
+  const count = countResponse?.count ?? countResponse?.meta?.pagination?.total ?? 0
   const filters = {
     styles: [],
     mediums: [],
@@ -45,12 +52,11 @@ export const getStaticProps = async () => {
     walls: []
   }
   for( let key in filters){
-    res = await fetch(API_HOST + '/' + key + '/')
-    json = await res.json()
+    json = await fetchStrapi(API_HOST + '/' + key + '/')
     if(key === 'walls'){
       key = 'wall'
     }
-    filters[key] = json
+    filters[key] = Array.isArray(json) ? json : []
   }
   return {
     props: {

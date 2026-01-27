@@ -1,14 +1,14 @@
-'use strict';
-
-const { sanitize } = require('@strapi/utils');
-const { createCoreController } = require('@strapi/strapi').factories;
+import { sanitize } from '@strapi/utils';
+import { factories } from '@strapi/strapi';
 
 const uid = 'api::style.style';
 
-const sanitizeOutput = (data, ctx) =>
-  sanitize.contentAPI.output(data, strapi.getModel(uid), { auth: ctx.state.auth });
+const sanitizeOutput = (data: any, ctx: any) => {
+  const sanitizer = (sanitize as any).contentAPI?.output;
+  return sanitizer ? sanitizer(data, strapi.getModel(uid), { auth: ctx.state.auth }) : data;
+};
 
-module.exports = createCoreController(uid, ({ strapi }) => ({
+export default factories.createCoreController(uid, () => ({
   async filters(ctx) {
     const filters = {
       styles: [],
@@ -16,16 +16,16 @@ module.exports = createCoreController(uid, ({ strapi }) => ({
       mediums: [],
     };
 
-    const sources = [
+    const sources: Array<{ key: string; uid: string }> = [
       { key: 'styles', uid: 'api::style.style' },
       { key: 'subjects', uid: 'api::subject.subject' },
       { key: 'mediums', uid: 'api::medium.medium' },
     ];
 
     for (const source of sources) {
-      filters[source.key] = await strapi.entityService.findMany(source.uid, {
+      filters[source.key] = await strapi.entityService.findMany(source.uid as any, {
         pagination: { pageSize: 10000 },
-      });
+      } as any);
     }
 
     return filters;

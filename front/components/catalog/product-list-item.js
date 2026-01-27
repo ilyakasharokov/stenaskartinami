@@ -2,8 +2,23 @@ import imageUrlBuilder from '@/utils/img-url-builder'
 import Link from 'next/link'
 import AddFavorite from '../art/add-favorite'
 
+const getPictureUrl = (art) => {
+  if (!Array.isArray(art?.Pictures) || !art.Pictures[0]) return null;
+  const picture = art.Pictures[0];
+  if (picture.formats) {
+    return (
+      picture.formats.small?.url ||
+      picture.formats.thumbnail?.url ||
+      picture.formats.medium?.url ||
+      null
+    );
+  }
+  return picture.url || null;
+};
+
 export default function ProductListItem({art}){
     return (
+      <>
         <div className={`catalog-item ${art.sold ? 'sold': ''}`} key={art.id}>
               
               <div className="catalog-item__wrapper">
@@ -18,9 +33,15 @@ export default function ProductListItem({art}){
                       <a>
                         <div>
                           {
-                            art.Pictures[0] && art.Pictures[0].formats && 
-                            <div className="catalog-item__bg-img" style={{backgroundImage : `url(${(imageUrlBuilder(art.Pictures[0].formats.small ? art.Pictures[0].formats.small.url: ''))} )`, 
-                          backgroundSize: `cover`, backgroundPosition: `center` } }>
+                            getPictureUrl(art) &&
+                            <div
+                              className="catalog-item__bg-img"
+                              style={{
+                                backgroundImage: `url(${imageUrlBuilder(getPictureUrl(art))})`,
+                                backgroundSize: 'cover',
+                                backgroundPosition: 'center',
+                              }}
+                            >
                               <img className="catalog-item__invisible-img" src="/favicon.png"/>
                             </div>
                           } 
@@ -64,5 +85,6 @@ export default function ProductListItem({art}){
                 </div>
               </div>
             </div>
+      </>
     )
 }

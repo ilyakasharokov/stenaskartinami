@@ -22,14 +22,13 @@ export default function AddFavorite({art}){
 
     function toggleFavorite(art){
         if(session){
-            let data = new FormData();
-            data.append('artId', art.id);
-            fetch(API_HOST + '/users-permissions/users/me', {
+            fetch(API_HOST + '/users/me', {
                 method: 'PUT',
-		body: data,
                 headers: {
                     Authorization: `Bearer ${session.jwt}`,
-                }
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ artId: art.id }),
             }).then(res => res.json()).then((json)=> {
                 if(json.arts){
                     session.info = json;

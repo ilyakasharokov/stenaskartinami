@@ -105,8 +105,7 @@
     "user_uploader": {
       "type": "relation",
       "relation": "manyToOne",
-      "target": "plugin::users-permissions.user",
-      "inversedBy": "created_arts"
+      "target": "plugin::users-permissions.user"
     }
   }
 }

@@ -2,15 +2,29 @@ import imageUrlBuilder from '@/utils/img-url-builder'
 import Link from 'next/link'
 import AddFavorite from '../art/add-favorite'
 
+const getPictureUrl = (art) => {
+  if (!Array.isArray(art?.Pictures) || !art.Pictures[0]) return null;
+  const picture = art.Pictures[0];
+  if (picture.formats) {
+    return (
+      picture.formats.medium?.url ||
+      picture.formats.small?.url ||
+      picture.formats.thumbnail?.url ||
+      null
+    );
+  }
+  return picture.url || null;
+};
+
 export default function CatalogItem({art, imageOnLoad}){
     return (
         <div className="catalog-item">
             <div className="catalog-item__wrapper">
                 {
-                    art.Pictures[0] && art.Pictures[0].formats && 
+                    getPictureUrl(art) &&
                     <div className="catalog-item__img-wrap">
                         {
-                            art.published_at &&
+                            (art.publishedAt || art.published_at) &&
                             <div className="catalog-item__btns">
                                 <AddFavorite art={art}></AddFavorite>    
                             </div>
@@ -18,7 +32,12 @@ export default function CatalogItem({art, imageOnLoad}){
                         <div className="overlay"></div>
                         <Link href={ '/art/' + art.slug + '--' + art.id}>
                         <a className="catalog-item__img-link" title={art.Title}>
-                            <img className="catalog-item__img" src={ imageUrlBuilder(art.Pictures[0].formats.medium ? art.Pictures[0].formats.medium.url: art.Pictures[0].formats.small ? art.Pictures[0].formats.small.url: art.Pictures[0].formats.thumbnail.url) } alt={art.Title} onLoad={()=> {imageOnLoad()}}/>
+                            <img
+                              className="catalog-item__img"
+                              src={imageUrlBuilder(getPictureUrl(art))}
+                              alt={art.Title}
+                              onLoad={()=> {imageOnLoad()}}
+                            />
                         </a>
                         </Link>
                     </div>

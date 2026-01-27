@@ -1,6 +1,7 @@
 import MainLayout from "@/components/layouts/MainLayout"
 import { useState, useEffect } from "react"
 import { API_HOST } from '@/constants/constants'
+import { fetchStrapi } from '@/utils/strapi'
 import CatalogCmp from "@/components/catalog/catalog"
 import Head from 'next/head'
 
@@ -47,9 +48,7 @@ export default function  Artists({ artists }) {
 }
 
 export const getStaticProps = async () => {
-  const res = await fetch(API_HOST + '/artists/')
-  const json = await res.json()
-  let artists = json
+  let artists = await fetchStrapi(API_HOST + '/artists/')
   artists = artists.sort((a,b) => {
       return a.full_name < b.full_name ? -1: 1;
   })

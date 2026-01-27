@@ -2,6 +2,8 @@ import Head from 'next/head'
 import Link from 'next/link'
 import MainLayout from "@/components/layouts/MainLayout"
 import { API_HOST, FREE_ID } from '@/constants/constants';
+import { fetchStrapi } from '@/utils/strapi';
+import serialize from '@/utils/serialize';
 import { YMaps, Map, Placemark, ZoomControl } from 'react-yandex-maps';
 import BuyBlock from '@/components/art/buy-block';
 import ImagesGallery from '@/components/art/image-gallery'
@@ -23,11 +25,11 @@ export default function Art({ art, style, styleArts, artist }) {
       <div className="art-page__header">
         <h1>"{art.Title}"{ art.Artist && ', ' + art.Artist.full_name}</h1>
         {
-          art.published_at &&
+          (art.publishedAt || art.published_at) &&
           <AddFavorite art={art}></AddFavorite>
         }
         {
-           !art.published_at &&
+           !(art.publishedAt || art.published_at) &&
            <div>(на модерации)</div>
         }
       </div>
@@ -36,15 +38,17 @@ export default function Art({ art, style, styleArts, artist }) {
         <div className="art-page__right">
           <div className="art-page__info">
             <div className="art-page__info-title">{art.Title}</div>
-            <div className="art-page__info-author">
-              <Link href={ '/artists/' + art.Artist.slug + '--' + art.Artist.id}>
-                <a title={art.Artist.full_name}>{art.Artist.full_name}</a>
-              </Link> 
-              {
-                art.Year && 
-                <span>, {new Date(art.Year).getFullYear()}</span>
-              }
-            </div>
+            {art.Artist && (
+              <div className="art-page__info-author">
+                <Link href={ '/artists/' + art.Artist.slug + '--' + art.Artist.id}>
+                  <a title={art.Artist.full_name}>{art.Artist.full_name}</a>
+                </Link>
+                {
+                  art.Year && 
+                  <span>, {new Date(art.Year).getFullYear()}</span>
+                }
+              </div>
+            )}
             <div className="art-page__info-blocks">
               { 
                 art.width && art.height &&
@@ -61,26 +65,26 @@ export default function Art({ art, style, styleArts, artist }) {
                 }}>
                 </div>
               }
-              {
-                art.published_at && 
-                <div className="art-page__published-at">
-                    Дата публикации: { new Date(art.published_at).toLocaleDateString('en-GB', {
-                    day: 'numeric',
-                    month: 'numeric',
-                    year: 'numeric',
-                    })} 
-                </div>
-              }
+              {(() => {
+                const publishedAt = art.publishedAt || art.published_at;
+                if (!publishedAt) return null;
+                return (
+                  <div className="art-page__published-at">
+                    Дата публикации: { new Date(publishedAt).toLocaleDateString('en-GB', {
+                      day: 'numeric',
+                      month: 'numeric',
+                      year: 'numeric',
+                    })}
+                  </div>
+                );
+              })()}
             </div>
             {
-              art.published_at &&
+            (art.publishedAt || art.published_at) &&
               <BuyBlock art={art}></BuyBlock>
             }   
           </div>
-          {
-            art.published_at &&
-            <BuyPoster art={art}></BuyPoster>
-          }
+          { (art.publishedAt || art.published_at) && <BuyPoster art={art}></BuyPoster> }
           {
             art.wall && art.wall.id !== FREE_ID &&
             <div className="art-page__wall-block">
@@ -147,10 +151,12 @@ Art.getInitialProps = async ({query}) => {
 */
 
 export async function getStaticPaths() {
-  const res = await fetch(API_HOST + '/arts')
-  const json = await res.json()
+  const json = await fetchStrapi(
+    API_HOST + '/arts' + serialize({ populate: ['Pictures', 'Artist'] })
+  )
+  const arts = Array.isArray(json) ? json : []
   return {
-    paths: json.map(item => { 
+    paths: arts.map(item => { 
       return {params: { slug: item.slug + '--' + item.id }}
   }),
     fallback: true
@@ -163,10 +169,11 @@ export const getStaticProps = async ({params: {
   
   let id = slug.split('--')[1]
   // console.log(id)
-  let res = await fetch(API_HOST + '/arts/all/' + id);
   let json;
   try {
-    json = await res.json()
+    json = await fetchStrapi(
+      API_HOST + '/arts/all/' + id + serialize({ populate: 'deep,2' })
+    );
   }catch(e){
     console.error(e);
     return {
@@ -185,21 +192,33 @@ export const getStaticProps = async ({params: {
 
 
   let artist = null;
-  res = await fetch(API_HOST + '/artists/' + art.Artist.id)
-  json = await res.json()
-  artist = json;
-  artist.Arts = artist.Arts.sort((a,b)=> {
-    return a.published_at < b.published_at ? 1: -1;
-  }).filter((aa)=>aa.id !== art.id).slice(0, 4)
+  if (art?.Artist?.id) {
+    artist = await fetchStrapi(API_HOST + '/artists/' + art.Artist.id + '?populate=deep,2');
+    if (artist && Array.isArray(artist.Arts)) {
+      artist.Arts = artist.Arts.sort((a, b) => {
+        const aPublished = a.publishedAt || a.published_at;
+        const bPublished = b.publishedAt || b.published_at;
+        return aPublished < bPublished ? 1 : -1;
+      }).filter((aa) => aa.id !== art.id).slice(0, 4);
+    } else if (artist) {
+      artist.Arts = [];
+    }
+  }
 
   let style = art.styles && art.styles[0] ? art.styles[0] : null;
   let styleArts = [];
   if(style){
-    res = await fetch(API_HOST + '/arts?styles.id=' + style.id)
-    json = await res.json()
-    styleArts = json.sort((a,b)=> {
-      return a.published_at < b.published_at ? 1: -1;
-    }).filter((_art)=> _art.id !== art.id && !artist.Arts.find((aa) => aa.id === _art.id)).slice(0, 4); 
+    json = await fetchStrapi(
+      API_HOST +
+        `/arts?filters[styles][id][$eq]=${style.id}&populate[0]=Pictures&populate[1]=Artist`
+    )
+    const styleList = Array.isArray(json) ? json : [];
+    const artistArts = artist?.Arts || [];
+    styleArts = styleList.sort((a, b) => {
+      const aPublished = a.publishedAt || a.published_at;
+      const bPublished = b.publishedAt || b.published_at;
+      return aPublished < bPublished ? 1 : -1;
+    }).filter((_art) => _art.id !== art.id && !artistArts.find((aa) => aa.id === _art.id)).slice(0, 4);
   }
 
 

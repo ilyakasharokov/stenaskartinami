@@ -3,13 +3,12 @@ import { API_HOST } from "@/constants/constants"
 import Head from 'next/head'
 import { useState, useRef } from "react"
 import ImageUploading from "react-images-uploading";
-import urlencodeFormData from '../../utils/urlencodeFormData'
 import ArtistInput from "@/components/input/artist-input";
-import urlencodeFromObject from "@/utils/urlencodeFromObject";
 import YearInput from "@/components/input/year-input";
 import { useSession, signIn, signOut } from "next-auth/client";
 import Preloader from "@/components/preloader/preloader"
 import StylesInput from "@/components/input/styles-input";
+import { normalizeStrapiResponse } from "@/utils/strapi";
 
 const USE_SESSION = true;
 
@@ -36,11 +35,17 @@ export default function AddArt() {
     let response = await fetch( API_HOST + '/artists', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
+        'Content-Type': 'application/json'
       },
-      body: urlencodeFromObject({full_name: artist.full_name, description: data.get("Artist_description"), })
+      body: JSON.stringify({
+        data: {
+          full_name: artist.full_name,
+          description: data.get("Artist_description"),
+        },
+      })
     })
-    return response.json()
+    const json = await response.json()
+    return normalizeStrapiResponse(json)
   }
 
   async function uploadImages(images){
@@ -55,7 +60,11 @@ export default function AddArt() {
         body: data
       })
       let image = await response.json()
-      imagesUploaded.push(image[0])
+      image = normalizeStrapiResponse(image)
+      const first = Array.isArray(image) ? image[0] : image
+      if (first) {
+        imagesUploaded.push(first)
+      }
     }
     setImageLoadingProcess({ index: images.length, length: images.length})
     return imagesUploaded;
@@ -102,7 +111,7 @@ export default function AddArt() {
         styles: styles
       };
       let headers = {
-        'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
+        'Content-Type': 'application/json'
       }
 
       if(USE_SESSION){
@@ -110,14 +119,14 @@ export default function AddArt() {
         headers.Authorization =`Bearer ${session.jwt}`;
       }
 
-      art['Pictures[]'] = imagesUploaded.map((p)=>p._id);
-      let urlEncodedData = urlencodeFromObject(art);
+      art.Pictures = imagesUploaded.map((p)=>p.id);
       let response = await fetch( API_HOST + '/artsd', {
         method: 'POST',
         headers,
-        body: urlEncodedData
+        body: JSON.stringify(art)
       });
       let json = await response.json();
+      json = normalizeStrapiResponse(json)
       setUploading(false);
       setLoaded(
         json

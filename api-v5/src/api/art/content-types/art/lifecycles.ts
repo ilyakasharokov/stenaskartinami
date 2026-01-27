@@ -2,8 +2,8 @@
 
 const slugOptions = { lower: true, remove: /[*+~.()'"!:@ь«»\/#,]/g };
 
-const slugifyValue = (value) => {
-  if (!value) return value;
+const slugifyValue = (value: unknown) => {
+  if (!value) return value as string;
   const lower = slugOptions.lower ? value.toString().toLowerCase() : value.toString();
   return lower
     .replace(slugOptions.remove, '')
@@ -12,15 +12,15 @@ const slugifyValue = (value) => {
     .replace(/-+/g, '-');
 };
 
-const updateDimensions = (data) => {
+const updateDimensions = (data: any) => {
   if (typeof data.width !== 'undefined' && typeof data.height !== 'undefined') {
     data.square = data.width * data.height;
     data.isSquare = data.width === data.height;
   }
 };
 
-module.exports = {
-  async beforeCreate(event) {
+export default {
+  async beforeCreate(event: any) {
     const { data } = event.params;
 
     if (data.Title) {
@@ -30,7 +30,7 @@ module.exports = {
     updateDimensions(data);
   },
 
-  async beforeUpdate(event) {
+  async beforeUpdate(event: any) {
     const { data } = event.params;
 
     if (data.Title) {

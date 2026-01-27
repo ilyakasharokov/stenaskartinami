@@ -7,6 +7,7 @@ import { resizeAllGridItems } from '@/utils/grid-resizer'
 import CatalogFilters from "./catalog-filters"
 import Preloader from '../preloader/preloader';
 import serialize from '@/utils/serialize'
+import { fetchStrapi } from '@/utils/strapi'
 import Pagination from './pagination'
 import CatalogItem from './catalog-item'
 
@@ -33,13 +34,16 @@ export default function CatalogCmp({arts, hideFiltersForce, title, description, 
       if(useURLParams && Router && Router.query && Object.entries(Router.query).length){
         const query = Router.query;
         const _start = query.page ? ( query.page - 1)  * CATALOG_ITEMS_PER_PAGE: 0;
-        const newQuery = Object.assign({_start, _limit: CATALOG_ITEMS_PER_PAGE }, query) ;
+        const newQuery = Object.assign({
+          _start,
+          _limit: CATALOG_ITEMS_PER_PAGE,
+          populate: ['Pictures', 'Artist', 'styles', 'subjects', 'mediums', 'wall'],
+        }, query);
         delete newQuery.page;
-        let res = await fetch(API_HOST + '/arts' + serialize(newQuery) )
-        const json = await res.json()
-        const arts = json || []
-        res = await fetch(API_HOST + '/arts/count' + serialize(newQuery ) )
-        const newCount = await res.json()
+        let json = await fetchStrapi(API_HOST + '/arts' + serialize(newQuery))
+        const arts = Array.isArray(json) ? json : []
+        const countResponse = await fetchStrapi(API_HOST + '/arts/count' + serialize(newQuery))
+        const newCount = countResponse?.count ?? countResponse?.meta?.pagination?.total ?? 0
         setState({arts, showPreloader:false, selectedSortValue, page: parseInt(Router.query && Router.query.page, 10) || 1, count: newCount})
       }else{
         setState({arts, showPreloader:false, selectedSortValue, page: parseInt(Router.query && Router.query.page, 10) || 1, count: count})

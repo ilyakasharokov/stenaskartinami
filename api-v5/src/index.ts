@@ -21,5 +21,61 @@ export default {
       const { default: importV3Dump } = await import('./utils/import-v3-dump');
       await importV3Dump(strapi);
     }
+
+    const ensurePublicUploadPermissions = async () => {
+      const role = await strapi.db
+        .query('plugin::users-permissions.role')
+        .findOne({ where: { type: 'public' } });
+      if (!role) return;
+
+      const actions = [
+        'plugin::upload.content-api.find',
+        'plugin::upload.content-api.findOne',
+      ];
+
+      const existing = await strapi.db
+        .query('plugin::users-permissions.permission')
+        .findMany({
+          where: {
+            role: role.id,
+            action: { $in: actions },
+          },
+          select: ['action'],
+        });
+
+      const existingActions = new Set((existing || []).map((item) => item.action));
+      const missing = actions.filter((action) => !existingActions.has(action));
+
+      await Promise.all(
+        missing.map((action) =>
+          strapi.db.query('plugin::users-permissions.permission').create({
+            data: {
+              action,
+              role: role.id,
+            },
+          })
+        )
+      );
+    };
+
+    await ensurePublicUploadPermissions();
+
+    const ensureUploadFilesPublished = async () => {
+      const now = new Date().toISOString();
+      await strapi.db.query('plugin::upload.file').updateMany({
+        where: { publishedAt: null },
+        data: { publishedAt: now },
+      });
+    };
+
+    await ensureUploadFilesPublished();
+
+    if (process.env.REGENERATE_UPLOAD_FORMATS === 'true') {
+      const { default: regenerateUploadFormats } = await import(
+        './utils/regenerate-upload-formats'
+      );
+      await regenerateUploadFormats(strapi);
+    }
+
   },
 };

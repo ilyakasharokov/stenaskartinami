@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react"
 import { API_HOST } from "@/constants/constants"
+import { fetchStrapi } from "@/utils/strapi"
 import Preloader from "../preloader/preloader";
 // const cache = {};
 
@@ -9,8 +10,7 @@ export default function StylesInput({onStylesChange}){
     let [ newStyle, setNewStyle ] = useState({id:null, full_name: ""});
 
     useEffect(()=>{
-        fetch(API_HOST + `/styles`).then(response=>response.json())
-        .then(json => {
+        fetchStrapi(API_HOST + `/styles`).then(json => {
             setOptions(json.sort((a,b) => a.Title < b.Title ? -1: 1 ))
         })
     }, [])

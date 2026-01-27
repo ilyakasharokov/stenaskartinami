@@ -1,6 +1,8 @@
 import MainLayout from "@/components/layouts/MainLayout"
 import { useState, useEffect } from "react"
 import { API_HOST } from '@/constants/constants'
+import { fetchStrapi } from '@/utils/strapi'
+import serialize from '@/utils/serialize'
 import CatalogCmp from "@/components/catalog/catalog"
 import Head from 'next/head'
 
@@ -22,10 +24,10 @@ export default function  Artist({ artist }) {
 }
 
 export async function getStaticPaths() {
-  const res = await fetch(API_HOST + '/artists/')
-  const json = await res.json()
+  const json = await fetchStrapi(API_HOST + '/artists/')
+  const artists = Array.isArray(json) ? json : []
   return {
-    paths: json.map(item => { 
+    paths: artists.map(item => { 
       return {params: { slug: item.slug + '--' + item.id }}
   }),
     fallback: true
@@ -36,9 +38,19 @@ export const getStaticProps = async ({params: {
   slug
 }}) => {
   let id = slug.split('--')[1]
-  const res = await fetch(API_HOST + '/artists/' + id)
-  const json = await res.json()
-  const artist = json
+  const artist = await fetchStrapi(
+    API_HOST +
+      '/artists/' +
+      id +
+      serialize({
+        populate: {
+          Arts: {
+            populate: ['Pictures', 'Artist', 'styles', 'subjects', 'mediums', 'wall'],
+          },
+        },
+        populateDefaults: [],
+      })
+  )
   
   return {
     props: {

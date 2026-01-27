@@ -1,6 +1,8 @@
 import MainLayout from "@/components/layouts/MainLayout"
 import { useState, useEffect } from "react"
 import { API_HOST } from '@/constants/constants'
+import { fetchStrapi } from '@/utils/strapi'
+import serialize from '@/utils/serialize'
 import CatalogCmp from "@/components/catalog/catalog"
 import Head from "next/head"
 import Link from "next/link"
@@ -21,7 +23,7 @@ export default function Catalog({ wall }) {
       <div className="content-page__wrapper">
         <div className="content-page__left">
         {
-          wall.Images.length && 
+          Array.isArray(wall.Images) && wall.Images.length > 0 &&
           <ImageGallery images={wall.Images}></ImageGallery>
         }
         </div>
@@ -62,10 +64,10 @@ export default function Catalog({ wall }) {
 }
 
 export async function getStaticPaths() {
-  const res = await fetch(API_HOST + '/walls/')
-  const json = await res.json()
+  const json = await fetchStrapi(API_HOST + '/walls')
+  const walls = Array.isArray(json) ? json : []
   return {
-    paths: json.map(item => { 
+    paths: walls.map(item => { 
       return {params: { slug: item.slug + '--' + item.id }}
   }),
     fallback: true
@@ -76,11 +78,28 @@ export const getStaticProps = async ({params: {
   slug
 }}) => {
   let id = slug.split('--')[1]
-  const res = await fetch(API_HOST + '/walls/' + id)
-  const json = await res.json()
-  const wall = json
-  wall.arts = wall.arts.sort((a,b)=> {
-    return a.published_at < b.published_at ? 1: -1;
+  const wall = await fetchStrapi(
+    API_HOST +
+      '/walls/' +
+      id +
+      serialize({
+        populate: {
+          Images: true,
+          arts: {
+            populate: ['Pictures', 'Artist', 'styles', 'subjects', 'mediums', 'wall'],
+          },
+        },
+        populateDefaults: [],
+      })
+  )
+  if (!wall || !wall.id) {
+    return { notFound: true };
+  }
+  const wallArts = Array.isArray(wall.arts) ? wall.arts : [];
+  wall.arts = wallArts.sort((a, b) => {
+    const aPublished = a.publishedAt || a.published_at;
+    const bPublished = b.publishedAt || b.published_at;
+    return aPublished < bPublished ? 1 : -1;
   });
   return {
     props: {

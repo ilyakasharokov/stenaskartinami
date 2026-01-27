@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react"
 import { API_HOST } from "@/constants/constants"
+import { fetchStrapi } from "@/utils/strapi"
 import Preloader from "../preloader/preloader";
 // const cache = {};
 
@@ -21,8 +22,7 @@ export default function ArtistInput({onArtistChange}){
     }
 
     function loadArtists(newVal){
-        fetch(API_HOST + `/artists?full_name_contains=${newVal}`)
-        .then(response=>response.json())
+        fetchStrapi(API_HOST + `/artists?filters[full_name][$contains]=${encodeURIComponent(newVal)}`)
         .then(json => {
             // console.log(json)
             if(json && json.length){

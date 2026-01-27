@@ -2,8 +2,10 @@ import Head from 'next/head'
 import Link from 'next/link'
 import MainLayout from '@/components/layouts/MainLayout'
 import { API_HOST } from "@/constants/constants"
+import imageUrlBuilder from '@/utils/img-url-builder'
 import { useState } from 'react'
 import serialize from '@/utils/serialize'
+import { fetchStrapi } from '@/utils/strapi'
 import ProductListStatic from '@/components/catalog/product-list-static'
 import { YMaps, Map, Placemark, ZoomControl } from 'react-yandex-maps';
 
@@ -43,7 +45,7 @@ export default function Home({slides, walls, arts, marquee}) {
                 slides.map((slide, i) => 
                     <div className={`index-slider__slide ${i === currentSlide ? 'active':''}`} key={i}>
                       <div className="index-slider__background">
-                        <img src={API_HOST + slide.image.url}/>
+                        {slide?.image?.url && <img src={imageUrlBuilder(slide.image.url)}/>}
                       </div>
                       <div className="index-slider__overlay">
                         <div className="index-slider__block">
@@ -146,25 +148,50 @@ export default function Home({slides, walls, arts, marquee}) {
 }
 
 export const getStaticProps = async () => {
-  let res = await fetch(API_HOST + '/slides/')
-  let json = await res.json()
+  let json = await fetchStrapi(
+    API_HOST +
+      '/slides' +
+      serialize({ populate: ['image'], populateDefaults: [] })
+  )
   const slides = json && json.sort && json.sort((a,b)=> {
     return a.updatedAt < b.updatedAt ? 1: -1;
   }) || [];
-  res = await fetch(API_HOST + '/walls/')
-  json = await res.json()
-  const walls = json
-  walls.forEach((wall)=>wall.arts = wall.arts.sort((a,b)=> {
-    return a.published_at < b.published_at ? 1: -1;
-  })); 
-  const query = {_start: 0, _limit: 8, main: true };
-  res = await fetch(API_HOST + '/arts/' + serialize(query))
-  json = await res.json()
-  const arts = json.sort((a,b)=> {
-    return a.published_at < b.published_at ? 1: -1;
+  json = await fetchStrapi(
+    API_HOST +
+      '/walls' +
+      serialize({
+        populate: {
+          Images: true,
+          arts: {
+            populate: ['Pictures', 'Artist', 'styles', 'subjects', 'mediums', 'wall'],
+          },
+        },
+        populateDefaults: [],
+      })
+  )
+  const walls = Array.isArray(json) ? json : []
+  walls.forEach((wall) => {
+    const wallArts = Array.isArray(wall.arts) ? wall.arts : []
+    wall.arts = wallArts.sort((a, b) => {
+      const aPublished = a.publishedAt || a.published_at;
+      const bPublished = b.publishedAt || b.published_at;
+      return aPublished < bPublished ? 1 : -1;
+    });
+  });
+  const query = {
+    _start: 0,
+    _limit: 8,
+    main: true,
+    populate: ['Pictures', 'Artist', 'styles', 'subjects', 'mediums', 'wall'],
+  };
+  json = await fetchStrapi(API_HOST + '/arts' + serialize(query))
+  const list = Array.isArray(json) ? json : []
+  const arts = list.sort((a,b)=> {
+    const aPublished = a.publishedAt || a.published_at;
+    const bPublished = b.publishedAt || b.published_at;
+    return aPublished < bPublished ? 1: -1;
   })
-  res = await fetch(API_HOST + '/marquee/' )
-  json = await res.json()
+  json = await fetchStrapi(API_HOST + '/marquee')
   const marquee = json;
   return {
     props: {
