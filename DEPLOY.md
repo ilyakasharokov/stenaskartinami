@@ -194,6 +194,105 @@ You should see:
 
 ---
 
+## 10a. Troubleshooting: Port conflicts and nginx
+
+If you previously ran the apps manually with Node.js or have nginx configured, you may need to:
+
+### Check what's using ports 1337 and 3000:
+
+```bash
+sudo lsof -i :1337
+sudo lsof -i :3000
+# OR
+sudo netstat -tlnp | grep -E ':(1337|3000)'
+```
+
+### Stop old Node.js processes:
+
+```bash
+# Find and kill old node processes
+ps aux | grep node
+sudo pkill -f "node.*1337"  # Kill API process
+sudo pkill -f "node.*3000"  # Kill frontend process
+# OR if using PM2
+pm2 stop all
+pm2 delete all
+```
+
+### Check nginx status and configs:
+
+```bash
+sudo systemctl status nginx
+sudo nginx -t  # Test config
+ls -la /etc/nginx/sites-enabled/
+```
+
+### Option A: Disable nginx (if you want direct Docker access):
+
+```bash
+sudo systemctl stop nginx
+sudo systemctl disable nginx
+```
+
+### Option B: Update nginx to proxy to Docker containers:
+
+If you want to keep nginx, update your nginx configs to proxy to `localhost:1337` and `localhost:3000` (Docker containers expose these ports).
+
+Example nginx config (`/etc/nginx/sites-available/stenaskartinami`):
+
+```nginx
+server {
+    listen 80;
+    server_name 82.146.48.155;
+
+    # API proxy
+    location /api {
+        proxy_pass http://localhost:1337;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+    }
+
+    # Frontend proxy
+    location / {
+        proxy_pass http://localhost:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+    }
+}
+```
+
+Then:
+```bash
+sudo ln -s /etc/nginx/sites-available/stenaskartinami /etc/nginx/sites-enabled/
+sudo nginx -t
+sudo systemctl reload nginx
+```
+
+### Check Docker containers are running:
+
+```bash
+docker ps
+docker compose -f docker-compose.prod.yml logs api-v5
+docker compose -f docker-compose.prod.yml logs front
+```
+
+### Check firewall (if enabled):
+
+```bash
+sudo ufw status
+# If needed, allow ports:
+sudo ufw allow 1337/tcp
+sudo ufw allow 3000/tcp
+```
+
+---
+
 ## 11. Restore database (if needed)
 
 If you have a database dump:
@@ -238,3 +337,199 @@ docker compose -f docker-compose.prod.yml up -d --build
 For production with SSL, set up a reverse proxy to route:
 - `https://api.yourdomain.com` → `api-v5:1337`
 - `https://yourdomain.com` → `front:3000`
+
+---
+
+## Setup domains with nginx and SSL
+
+This section covers setting up both:
+- `api.stenaskartinami.com` → API (port 1337)
+- `stenaskartinami.com` → Frontend (port 3000)
+
+### 1. DNS Configuration
+
+Point your domains to the server IP:
+
+**For API subdomain:**
+- **Type:** A
+- **Name:** `api`
+- **Value:** `82.146.48.155`
+- **TTL:** 3600 (or default)
+
+**For main domain:**
+- **Type:** A
+- **Name:** `@` (or blank/root)
+- **Value:** `82.146.48.155`
+- **TTL:** 3600 (or default)
+
+**For www subdomain (optional but recommended):**
+- **Type:** A
+- **Name:** `www`
+- **Value:** `82.146.48.155`
+- **TTL:** 3600 (or default)
+
+Wait for DNS propagation (can take a few minutes to hours). Verify with:
+```bash
+dig api.stenaskartinami.com
+dig stenaskartinami.com
+```
+
+### 2. Install nginx and certbot
+
+```bash
+sudo apt update
+sudo apt install -y nginx certbot python3-certbot-nginx
+```
+
+### 3. Create nginx configuration
+
+Create `/etc/nginx/sites-available/api.stenaskartinami.com`:
+
+```nginx
+server {
+    listen 80;
+    server_name api.stenaskartinami.com;
+
+    # Redirect HTTP to HTTPS
+    return 301 https://$server_name$request_uri;
+}
+
+server {
+    listen 443 ssl http2;
+    server_name api.stenaskartinami.com;
+
+    # SSL certificates (will be added by certbot)
+    ssl_certificate /etc/letsencrypt/live/api.stenaskartinami.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/api.stenaskartinami.com/privkey.pem;
+
+    # SSL configuration
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers HIGH:!aNULL:!MD5;
+    ssl_prefer_server_ciphers on;
+
+    # Increase body size for file uploads
+    client_max_body_size 100M;
+
+    # Proxy to Docker container
+    location / {
+        proxy_pass http://localhost:1337;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_cache_bypass $http_upgrade;
+        
+        # Timeouts
+        proxy_connect_timeout 60s;
+        proxy_send_timeout 60s;
+        proxy_read_timeout 60s;
+    }
+}
+```
+
+### 4. Enable the site
+
+```bash
+sudo ln -s /etc/nginx/sites-available/api.stenaskartinami.com /etc/nginx/sites-enabled/
+sudo nginx -t  # Test configuration
+```
+
+### 5. Get SSL certificate with Let's Encrypt
+
+```bash
+sudo certbot --nginx -d api.stenaskartinami.com
+```
+
+Follow the prompts. Certbot will automatically:
+- Obtain the certificate
+- Update nginx config with SSL settings
+- Set up auto-renewal
+
+### 6. Reload nginx
+
+```bash
+sudo systemctl reload nginx
+```
+
+### 7. Verify SSL auto-renewal
+
+```bash
+sudo certbot renew --dry-run
+```
+
+### 8. Setup frontend domain (stenaskartinami.com)
+
+Create `/etc/nginx/sites-available/stenaskartinami.com` (or copy the template):
+
+```bash
+sudo cp /opt/stenaskartinami/nginx-stenaskartinami.com.conf /etc/nginx/sites-available/stenaskartinami.com
+```
+
+Enable the site:
+
+```bash
+sudo ln -s /etc/nginx/sites-available/stenaskartinami.com /etc/nginx/sites-enabled/
+sudo nginx -t
+```
+
+Get SSL certificate for main domain:
+
+```bash
+sudo certbot --nginx -d stenaskartinami.com -d www.stenaskartinami.com
+```
+
+Reload nginx:
+
+```bash
+sudo systemctl reload nginx
+```
+
+### 9. Update frontend .env
+
+Update `front/.env` on the server:
+
+```env
+NEXT_PUBLIC_API_URL=https://api.stenaskartinami.com/api
+NEXTAUTH_URL=https://stenaskartinami.com
+```
+
+Then restart the frontend container:
+
+```bash
+docker compose -f docker-compose.prod.yml restart front
+```
+
+### 10. Test
+
+- Visit `https://api.stenaskartinami.com` - you should see the Strapi admin or API response
+- Visit `https://stenaskartinami.com` - you should see your frontend
+
+### Troubleshooting
+
+**Check nginx status:**
+```bash
+sudo systemctl status nginx
+sudo nginx -t
+```
+
+**Check nginx logs:**
+```bash
+sudo tail -f /var/log/nginx/error.log
+sudo tail -f /var/log/nginx/access.log
+```
+
+**Check if Docker container is listening:**
+```bash
+docker compose -f docker-compose.prod.yml ps
+curl http://localhost:1337
+```
+
+**Check DNS:**
+```bash
+dig api.stenaskartinami.com
+# or
+nslookup api.stenaskartinami.com
+```
