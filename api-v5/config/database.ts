@@ -23,34 +23,29 @@ export default ({ env }) => {
       pool: { min: env.int('DATABASE_POOL_MIN', 2), max: env.int('DATABASE_POOL_MAX', 10) },
     },
     postgres: {
-      connection: env('DATABASE_URL')
-        ? {
-            connectionString: env('DATABASE_URL'),
-            schema: env('DATABASE_SCHEMA', 'public'),
-            connectionTimeoutMillis: env.int('DATABASE_CONNECTION_TIMEOUT', 60000),
-          }
-        : {
-            host: env('DATABASE_HOST', 'localhost'),
-            port: env.int('DATABASE_PORT', 5432),
-            database: env('DATABASE_NAME', 'strapi'),
-            user: env('DATABASE_USERNAME', 'strapi'),
-            password: env('DATABASE_PASSWORD', 'strapi'),
-            connectionTimeoutMillis: env.int('DATABASE_CONNECTION_TIMEOUT', 60000),
-            ssl: env.bool('DATABASE_SSL', false) && {
-              key: env('DATABASE_SSL_KEY', undefined),
-              cert: env('DATABASE_SSL_CERT', undefined),
-              ca: env('DATABASE_SSL_CA', undefined),
-              capath: env('DATABASE_SSL_CAPATH', undefined),
-              cipher: env('DATABASE_SSL_CIPHER', undefined),
-              rejectUnauthorized: env.bool('DATABASE_SSL_REJECT_UNAUTHORIZED', true),
-            },
-            schema: env('DATABASE_SCHEMA', 'public'),
-          },
+      connection: {
+        host: env('DATABASE_HOST', 'localhost'),
+        port: env.int('DATABASE_PORT', 5432),
+        database: env('DATABASE_NAME', 'strapi'),
+        user: env('DATABASE_USERNAME', 'strapi'),
+        password: env('DATABASE_PASSWORD', 'strapi'),
+        connectionTimeoutMillis: env.int('DATABASE_CONNECTION_TIMEOUT', 60000),
+        ssl: env.bool('DATABASE_SSL', false) && {
+          key: env('DATABASE_SSL_KEY', undefined),
+          cert: env('DATABASE_SSL_CERT', undefined),
+          ca: env('DATABASE_SSL_CA', undefined),
+          capath: env('DATABASE_SSL_CAPATH', undefined),
+          cipher: env('DATABASE_SSL_CIPHER', undefined),
+          rejectUnauthorized: env.bool('DATABASE_SSL_REJECT_UNAUTHORIZED', true),
+        },
+        schema: env('DATABASE_SCHEMA', 'public'),
+      },
       pool: {
-        min: env.int('DATABASE_POOL_MIN', 2),
-        max: env.int('DATABASE_POOL_MAX', 10),
+        min: env.int('DATABASE_POOL_MIN', 0),
+        max: env.int('DATABASE_POOL_MAX', 5),
         idleTimeoutMillis: 30000,
         createTimeoutMillis: env.int('DATABASE_CONNECTION_TIMEOUT', 60000),
+        acquireTimeoutMillis: env.int('DATABASE_CONNECTION_TIMEOUT', 60000),
       },
     },
     sqlite: {
