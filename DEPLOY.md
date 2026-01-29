@@ -533,3 +533,34 @@ dig api.stenaskartinami.com
 # or
 nslookup api.stenaskartinami.com
 ```
+
+---
+
+## API: "Knex: Timeout acquiring a connection" (database)
+
+If api-v5 logs show this error:
+
+1. **Confirm .env on server:**
+   - `DATABASE_HOST=postgres` (not 127.0.0.1)
+   - Or set: `DATABASE_URL=postgres://postgres:postgres@postgres:5432/stenaskartinami`
+
+2. **Kill stuck connections and restart:**
+```bash
+docker exec -it stenaskartinami-postgres psql -U postgres -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = 'stenaskartinami' AND pid <> pg_backend_pid();"
+docker compose -f docker-compose.prod.yml stop api-v5
+sleep 5
+docker compose -f docker-compose.prod.yml up -d api-v5
+```
+
+3. **Full rebuild (no cache) so config changes are applied:**
+```bash
+docker compose -f docker-compose.prod.yml down
+docker compose -f docker-compose.prod.yml build --no-cache api-v5
+docker compose -f docker-compose.prod.yml up -d
+docker compose -f docker-compose.prod.yml logs -f api-v5
+```
+
+4. **Check what the container sees:**
+```bash
+docker exec -it stenaskartinami-api-v5 env | grep DATABASE
+```
