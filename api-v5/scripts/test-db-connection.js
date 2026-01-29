@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 /**
- * Run inside api-v5 container to test DB connectivity:
- * docker cp api-v5/scripts/test-db-connection.js stenaskartinami-api-v5:/tmp/
- * docker exec -it stenaskartinami-api-v5 node /tmp/test-db-connection.js
+ * Run inside api-v5 container from app dir so pg is found:
+ * docker cp api-v5/scripts/test-db-connection.js stenaskartinami-api-v5:/usr/src/app/scripts/
+ * docker exec -it -w /usr/src/app stenaskartinami-api-v5 node scripts/test-db-connection.js
  */
 const { Client } = require('pg');
 
