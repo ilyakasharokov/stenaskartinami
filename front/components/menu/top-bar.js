@@ -1,7 +1,9 @@
 import { useSession, signIn, signOut } from "next-auth/react";
 import Link from "next/link";
 import React from "react";
-import SearchWidget from '../menu/search';
+import dynamic from 'next/dynamic';
+
+const SearchWidget = dynamic(() => import('../menu/search'), { ssr: false });
 
 export default function TopBar(){
 

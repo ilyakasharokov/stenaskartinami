@@ -14,5 +14,18 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
+  meilisearch:
+    image: getmeili/meilisearch:v1.13
+    container_name: stenaskartinami-meilisearch
+    restart: unless-stopped
+    ports:
+      - "7700:7700"
+    environment:
+      MEILI_NO_ANALYTICS: "true"
+      MEILI_MASTER_KEY: ""
+    volumes:
+      - meilisearch_data:/meili_data
+
 volumes:
   postgres_data:
+  meilisearch_data:
