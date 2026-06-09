@@ -3,17 +3,17 @@ import Link from 'next/link'
 import MainLayout from '@/components/layouts/MainLayout'
 import { API_HOST } from "@/constants/constants"
 import imageUrlBuilder from '@/utils/img-url-builder'
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import serialize from '@/utils/serialize'
 import { fetchStrapi } from '@/utils/strapi'
 import ProductListStatic from '@/components/catalog/product-list-static'
-import { YMaps, Map, Placemark, ZoomControl } from 'react-yandex-maps';
+import dynamic from 'next/dynamic'
+
+const YandexMap = dynamic(() => import('@/components/YandexMap'), { ssr: false });
 
 export default function Home({slides, walls, arts, marquee}) {
 
   const [ currentSlide, setSlide ] = useState(0);
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
 
   function next(){
     if(currentSlide === slides.length - 1){
@@ -118,27 +118,7 @@ export default function Home({slides, walls, arts, marquee}) {
           </div>
         }   
 
-        {
-          mounted && walls &&
-          <div className="index-page__map">
-            <h2>Стены на карте</h2>
-            <YMaps>
-              <Map defaultState={{"center":[58.456994503197755,35.370069459975745],"zoom":5}} style={{width: '100%', height: '400px'}} >
-              <ZoomControl/>
-              {
-                walls.map( (wall, i) =>
-                  wall.Coordinates &&
-                  <Placemark key={i} geometry={wall.Coordinates.center} options={{ iconLayout: 'default#image', iconImageSize: [40, 40], iconImageOffset: [-20, -20], iconImageHref: '/images/mapicon.png' }}
-                    properties={{ iconContent: 1, balloonContentHeader: wall.Title, iconContent: "<div>test</div>",
-                    balloonContentBody: wall.Address,
-                    balloonContentFooter: `<a href="${'/walls/' + wall.slug + '--' + wall.id }">Перейти</a>`}} modules={['geoObject.addon.balloon', 'geoObject.addon.hint', 'layout.ImageWithContent']}/>
-                )
-              }
-              </Map>
-            </YMaps>
-            <Link href="/add-wall" className="btn">Добавить стену</Link>
-          </div>
-        }
+        <YandexMap walls={walls} />
         
       </div>
     </MainLayout>
