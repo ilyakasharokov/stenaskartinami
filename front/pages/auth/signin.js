@@ -1,12 +1,20 @@
 import { signIn } from 'next-auth/react';
 import Head from 'next/head';
 import { useSession } from 'next-auth/react';
-import Router, { useRouter } from 'next/router';
+import Router from 'next/router';
 import Link from 'next/link';
 import { useState, useCallback, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 
 const TelegramLoginButton = dynamic(() => import('@/components/auth/TelegramLoginButton'), { ssr: false });
+
+const ERROR_MESSAGES = {
+  Callback: 'Ошибка при входе через внешний сервис. Попробуйте другой способ.',
+  OAuthSignin: 'Не удалось начать вход через OAuth.',
+  OAuthCallback: 'Ошибка ответа от OAuth-провайдера.',
+  OAuthAccountNotLinked: 'Этот аккаунт уже привязан к другому способу входа.',
+  Default: 'Произошла ошибка. Попробуйте ещё раз.',
+};
 
 function GoogleIcon() {
   return (
@@ -19,25 +27,12 @@ function GoogleIcon() {
   );
 }
 
-const errorMessages = {
-  Callback: 'Ошибка при входе через внешний сервис. Попробуйте другой способ.',
-  OAuthSignin: 'Не удалось начать вход через OAuth.',
-  OAuthCallback: 'Ошибка ответа от OAuth-провайдера.',
-  OAuthAccountNotLinked: 'Этот аккаунт уже привязан к другому способу входа.',
-  Default: 'Произошла ошибка. Попробуйте ещё раз.',
-};
-
-export default function SignIn() {
+export default function SignIn({ authError }) {
   const { data: session } = useSession();
-  const { query } = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState(errorMessages[query?.error] || '');
+  const [error, setError] = useState(authError || '');
   const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    if (query?.error) setError(errorMessages[query.error] || errorMessages.Default);
-  }, [query?.error]);
 
   useEffect(() => { if (session) Router.push('/'); }, [session]);
   if (session) return null;
@@ -117,6 +112,8 @@ export default function SignIn() {
   );
 }
 
-export async function getServerSideProps() {
-  return { props: {} };
+export async function getServerSideProps({ query }) {
+  const errorKey = query?.error || null;
+  const authError = errorKey ? (ERROR_MESSAGES[errorKey] || ERROR_MESSAGES.Default) : null;
+  return { props: { authError } };
 }
