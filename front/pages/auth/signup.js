@@ -9,7 +9,7 @@ const TelegramLoginButton = dynamic(() => import('@/components/auth/TelegramLogi
 
 export default function SignUp() {
   const { data: session } = useSession();
-  const [step, setStep] = useState('phone'); // 'phone' | 'otp'
+  const [step, setStep] = useState('phone');
   const [phone, setPhone] = useState('');
   const [username, setUsername] = useState('');
   const [code, setCode] = useState('');
@@ -77,7 +77,7 @@ export default function SignUp() {
       });
       if (result?.error) { setLoading(false); setError('Ошибка входа через Telegram'); return; }
       Router.push('/');
-    } catch (e) {
+    } catch {
       setLoading(false);
       setError('Ошибка входа через Telegram');
     }
@@ -89,8 +89,12 @@ export default function SignUp() {
       <div className="login-page__wrapper">
         <div className="login-page">
           <div className="login-page__logo">
-            <img src="/images/newlogo2.svg" />
+            <img src="/images/newlogo2.svg" alt="" />
             <div className="login-page__text">Стена с картинами</div>
+          </div>
+
+          <div className="login-page__title">
+            {step === 'phone' ? 'Регистрация' : 'Введите код'}
           </div>
 
           {step === 'phone' && (
@@ -111,7 +115,7 @@ export default function SignUp() {
                 required
               />
               {error && <div className="login-page__error">{error}</div>}
-              <button type="submit" disabled={loading}>
+              <button type="submit" className="login-page__btn-primary" disabled={loading}>
                 {loading ? 'Отправка...' : 'Получить код'}
               </button>
             </form>
@@ -119,10 +123,10 @@ export default function SignUp() {
 
           {step === 'otp' && (
             <form className="login-page__form" onSubmit={handleVerifyOtp}>
-              <p className="login-page__hint">Код отправлен на {phone}</p>
+              <div className="login-page__hint">Код отправлен на {phone}</div>
               <input
                 type="text"
-                placeholder="Введите код из SMS"
+                placeholder="Код из SMS"
                 value={code}
                 onChange={e => setCode(e.target.value)}
                 required
@@ -131,7 +135,7 @@ export default function SignUp() {
                 autoFocus
               />
               {error && <div className="login-page__error">{error}</div>}
-              <button type="submit" disabled={loading}>
+              <button type="submit" className="login-page__btn-primary" disabled={loading}>
                 {loading ? 'Проверка...' : 'Подтвердить'}
               </button>
               <button type="button" className="login-page__link-btn" onClick={() => setStep('phone')}>
@@ -140,8 +144,11 @@ export default function SignUp() {
             </form>
           )}
 
-          <TelegramLoginButton onAuth={handleTelegramAuth} />
-          {loading && <div className="login-page__hint">Подождите...</div>}
+          <div className="login-page__divider">или</div>
+
+          <div className="login-page__social">
+            <TelegramLoginButton onAuth={handleTelegramAuth} />
+          </div>
 
           <div className="login-page__signup-link">
             Уже есть аккаунт? <Link href="/auth/signin">Войти</Link>
