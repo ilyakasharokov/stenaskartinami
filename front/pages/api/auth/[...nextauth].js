@@ -84,12 +84,20 @@ export const authOptions = {
         token.jwt = user.jwt;
         token.id = user.id;
       } else if (user && account) {
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/auth/${account.provider}/callback?access_token=${account?.access_token}`
-        );
-        const data = await response.json();
-        token.jwt = data.jwt;
-        token.id = data.user.id;
+        try {
+          const response = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/auth/${account.provider}/callback?access_token=${account?.access_token}`
+          );
+          const data = await response.json();
+          if (data?.jwt && data?.user) {
+            token.jwt = data.jwt;
+            token.id = data.user.id;
+          } else {
+            token.error = data?.error?.message || 'OAuth error';
+          }
+        } catch (e) {
+          token.error = e.message;
+        }
       }
       return token;
     },

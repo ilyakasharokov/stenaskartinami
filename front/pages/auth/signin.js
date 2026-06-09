@@ -1,7 +1,7 @@
 import { signIn } from 'next-auth/react';
 import Head from 'next/head';
 import { useSession } from 'next-auth/react';
-import Router from 'next/router';
+import Router, { useRouter } from 'next/router';
 import Link from 'next/link';
 import { useState, useCallback, useEffect } from 'react';
 import dynamic from 'next/dynamic';
@@ -19,12 +19,25 @@ function GoogleIcon() {
   );
 }
 
+const errorMessages = {
+  Callback: 'Ошибка при входе через внешний сервис. Попробуйте другой способ.',
+  OAuthSignin: 'Не удалось начать вход через OAuth.',
+  OAuthCallback: 'Ошибка ответа от OAuth-провайдера.',
+  OAuthAccountNotLinked: 'Этот аккаунт уже привязан к другому способу входа.',
+  Default: 'Произошла ошибка. Попробуйте ещё раз.',
+};
+
 export default function SignIn() {
   const { data: session } = useSession();
+  const { query } = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [error, setError] = useState(errorMessages[query?.error] || '');
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (query?.error) setError(errorMessages[query.error] || errorMessages.Default);
+  }, [query?.error]);
 
   useEffect(() => { if (session) Router.push('/'); }, [session]);
   if (session) return null;
