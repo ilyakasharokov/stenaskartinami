@@ -1,13 +1,14 @@
 import { useState, useEffect } from "react"
 import { API_HOST } from "@/constants/constants"
-import { useSession } from "next-auth/client";
+import { useSession } from "next-auth/react";
 import Router from 'next/router';
 
 export default function AddFavorite({art}){
 
     let userArts = [];
 
-    const [session, loading] = useSession()
+    const { data: session, status } = useSession()
+    const loading = status === 'loading'
     let [ isActive, setActive] = useState(false);
 
     useEffect(()=>{

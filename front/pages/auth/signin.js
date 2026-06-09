@@ -1,11 +1,12 @@
-import { getProviders, signIn } from 'next-auth/client'
+import { getProviders, signIn } from 'next-auth/react'
 import Head from 'next/head'
-import { useSession } from "next-auth/client";
+import { useSession } from "next-auth/react";
 import Router from 'next/router'
 
 export default function SignIn({ providers }) {
 
-    const [session, loading] = useSession();
+    const { data: session, status } = useSession();
+    const loading = status === 'loading';
 
     if(session){
         Router.push('/')

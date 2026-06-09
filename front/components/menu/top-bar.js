@@ -1,11 +1,12 @@
-import { useSession, signIn, signOut } from "next-auth/client";
+import { useSession, signIn, signOut } from "next-auth/react";
 import Link from "next/link";
 import React from "react";
 import SearchWidget from '../menu/search';
 
 export default function TopBar(){
 
-    const [session, loading] = useSession()
+    const { data: session, status } = useSession()
+    const loading = status === 'loading'
 
     return (
         <div className="top-bar">

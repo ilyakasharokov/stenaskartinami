@@ -5,7 +5,7 @@ import { useState, useRef } from "react"
 import ImageUploading from "react-images-uploading";
 import ArtistInput from "@/components/input/artist-input";
 import YearInput from "@/components/input/year-input";
-import { useSession, signIn, signOut } from "next-auth/client";
+import { useSession, signIn, signOut } from "next-auth/react";
 import Preloader from "@/components/preloader/preloader"
 import StylesInput from "@/components/input/styles-input";
 import { normalizeStrapiResponse } from "@/utils/strapi";
@@ -14,7 +14,8 @@ const USE_SESSION = true;
 
 export default function AddArt() {
 
-  const [session, loading] = useSession();
+  const { data: session, status } = useSession();
+  const loading = status === 'loading';
   const [ images, setImages ] = useState([]);
   const [ artist, setArtist] = useState({ id: null, name: ''});
   const [ styles, setStyles] = useState([]);

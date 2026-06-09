@@ -1,54 +1,47 @@
 import NextAuth from "next-auth";
-import Providers from "next-auth/providers";
-import { API_HOST  } from '@/constants/constants'
+import FacebookProvider from "next-auth/providers/facebook";
+import GoogleProvider from "next-auth/providers/google";
+import { API_HOST } from '@/constants/constants'
 
-const options = {
+export const authOptions = {
   providers: [
-    Providers.Facebook({
+    FacebookProvider({
       clientId: process.env.FACEBOOK_CLIENT_ID,
       clientSecret: process.env.FACEBOOK_CLIENT_SECRET,
-    }), 
-    Providers.Google({
+    }),
+    GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    }), 
-    /* Providers.VK({
-      clientId: process.env.VK_CLIENT_ID,
-      clientSecret: process.env.VK_CLIENT_SECRET,
-    }) */
+    }),
   ],
   session: {
-    jwt: true,
+    strategy: 'jwt',
   },
   callbacks: {
-    session: async (session, user) => {
-      session.jwt = user.jwt;
-      session.id = user.id;
+    async session({ session, token }) {
+      session.jwt = token.jwt;
+      session.id = token.id;
       const res = await fetch(API_HOST + '/users/me', {
         headers: {
           Authorization: `Bearer ${session.jwt}`,
         }
       });
-      const json = await res.json()
+      const json = await res.json();
       session.info = json;
-      return Promise.resolve(session);
+      return session;
     },
-    jwt: async (token, user, account) => {
-      const isSignIn = user ? true : false;
-      if (isSignIn) {
+    async jwt({ token, user, account }) {
+      if (user && account) {
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/auth/${account.provider}/callback?access_token=${account?.accessToken}`
+          `${process.env.NEXT_PUBLIC_API_URL}/auth/${account.provider}/callback?access_token=${account?.access_token}`
         );
         const data = await response.json();
         token.jwt = data.jwt;
         token.id = data.user.id;
       }
-      return Promise.resolve(token);
+      return token;
     },
   },
 };
 
-const Auth = (req, res) =>
-  NextAuth(req, res, options);
-
-export default Auth;
+export default NextAuth(authOptions);
