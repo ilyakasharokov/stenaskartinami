@@ -151,84 +151,68 @@ Art.getInitialProps = async ({query}) => {
 */
 
 export async function getStaticPaths() {
-  const json = await fetchStrapi(
-    API_HOST + '/arts' + serialize({ populate: ['Pictures', 'Artist'] })
-  )
-  const arts = Array.isArray(json) ? json : []
-  return {
-    paths: arts.map(item => { 
-      return {params: { slug: item.slug + '--' + item.id }}
-  }),
-    fallback: true
+  try {
+    const json = await fetchStrapi(
+      API_HOST + '/arts' + serialize({ populate: ['Pictures', 'Artist'] })
+    )
+    const arts = Array.isArray(json) ? json : []
+    return {
+      paths: arts.map(item => ({ params: { slug: item.slug + '--' + item.id } })),
+      fallback: 'blocking',
+    }
+  } catch {
+    return { paths: [], fallback: 'blocking' }
   }
 }
 
-export const getStaticProps = async ({params: {
-  slug
-}}) => {
-  
-  let id = slug.split('--')[1]
-  // console.log(id)
-  let json;
+export const getStaticProps = async ({params: { slug }}) => {
   try {
-    json = await fetchStrapi(
-      API_HOST + '/arts/all/' + id + serialize({ populate: 'deep,2' })
-    );
-  }catch(e){
-    console.error(e);
-    return {
-      notFound: true,
-    }
+  let id = slug.split('--')[1]
+  let json = await fetchStrapi(
+    API_HOST + '/arts/all/' + id + serialize({ populate: 'deep,2' })
+  )
+
+  if (!json || !json.id) {
+    return { notFound: true }
   }
 
-  if(!json || json && !json.id){
-    return {
-      notFound: true,
-    }
-  }
+  const art = json
 
-  const art = json;
-
-
-
-  let artist = null;
+  let artist = null
   if (art?.Artist?.id) {
-    artist = await fetchStrapi(API_HOST + '/artists/' + art.Artist.id + '?populate=deep,2');
+    artist = await fetchStrapi(API_HOST + '/artists/' + art.Artist.id + '?populate=deep,2')
     if (artist && Array.isArray(artist.Arts)) {
       artist.Arts = artist.Arts.sort((a, b) => {
-        const aPublished = a.publishedAt || a.published_at;
-        const bPublished = b.publishedAt || b.published_at;
-        return aPublished < bPublished ? 1 : -1;
-      }).filter((aa) => aa.id !== art.id).slice(0, 4);
+        const aPublished = a.publishedAt || a.published_at
+        const bPublished = b.publishedAt || b.published_at
+        return aPublished < bPublished ? 1 : -1
+      }).filter((aa) => aa.id !== art.id).slice(0, 4)
     } else if (artist) {
-      artist.Arts = [];
+      artist.Arts = []
     }
   }
 
-  let style = art.styles && art.styles[0] ? art.styles[0] : null;
-  let styleArts = [];
-  if(style){
+  let style = art.styles && art.styles[0] ? art.styles[0] : null
+  let styleArts = []
+  if (style) {
     json = await fetchStrapi(
       API_HOST +
         `/arts?filters[styles][id][$eq]=${style.id}&populate[0]=Pictures&populate[1]=Artist`
     )
-    const styleList = Array.isArray(json) ? json : [];
-    const artistArts = artist?.Arts || [];
+    const styleList = Array.isArray(json) ? json : []
+    const artistArts = artist?.Arts || []
     styleArts = styleList.sort((a, b) => {
-      const aPublished = a.publishedAt || a.published_at;
-      const bPublished = b.publishedAt || b.published_at;
-      return aPublished < bPublished ? 1 : -1;
-    }).filter((_art) => _art.id !== art.id && !artistArts.find((aa) => aa.id === _art.id)).slice(0, 4);
+      const aPublished = a.publishedAt || a.published_at
+      const bPublished = b.publishedAt || b.published_at
+      return aPublished < bPublished ? 1 : -1
+    }).filter((_art) => _art.id !== art.id && !artistArts.find((aa) => aa.id === _art.id)).slice(0, 4)
   }
 
-
   return {
-    props: {
-      art,
-      style,
-      styleArts,
-      artist
-    },
-    revalidate: 60, // In seconds
+    props: { art, style, styleArts, artist },
+    revalidate: 60,
+  }
+  } catch {
+    return { notFound: true }
   }
 }

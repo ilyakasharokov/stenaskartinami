@@ -76,7 +76,7 @@ export default function Home({slides, walls, arts, marquee}) {
           </div>
         }
         {
-          marquee.text &&
+          marquee?.text &&
           <div className="index-page__marquee">
             <div className="marquee-new">
               <div className="marquee__first-half">
@@ -105,7 +105,7 @@ export default function Home({slides, walls, arts, marquee}) {
         </div>
 
         {
-          marquee.text &&
+          marquee?.text &&
           <div className="index-page__marquee">
             <div className="marquee-new">
               <div className="marquee__first-half">
@@ -147,59 +147,65 @@ export default function Home({slides, walls, arts, marquee}) {
   )
 }
 
-export const getStaticProps = async () => {
-  let json = await fetchStrapi(
-    API_HOST +
-      '/slides' +
-      serialize({ populate: ['image'], populateDefaults: [] })
-  )
-  const slides = json && json.sort && json.sort((a,b)=> {
-    return a.updatedAt < b.updatedAt ? 1: -1;
-  }) || [];
-  json = await fetchStrapi(
-    API_HOST +
-      '/walls' +
-      serialize({
-        populate: {
-          Images: true,
-          arts: {
-            populate: ['Pictures', 'Artist', 'styles', 'subjects', 'mediums', 'wall'],
+// getServerSideProps so content is fetched when API is available (no empty build)
+export const getServerSideProps = async () => {
+  try {
+    let json = await fetchStrapi(
+      API_HOST +
+        '/slides' +
+        serialize({ populate: ['image'], populateDefaults: [] })
+    )
+    const slides = json && json.sort && json.sort((a,b)=> {
+      return a.updatedAt < b.updatedAt ? 1: -1;
+    }) || [];
+    json = await fetchStrapi(
+      API_HOST +
+        '/walls' +
+        serialize({
+          populate: {
+            Images: true,
+            arts: {
+              populate: ['Pictures', 'Artist', 'styles', 'subjects', 'mediums', 'wall'],
+            },
           },
-        },
-        populateDefaults: [],
-      })
-  )
-  const walls = Array.isArray(json) ? json : []
-  walls.forEach((wall) => {
-    const wallArts = Array.isArray(wall.arts) ? wall.arts : []
-    wall.arts = wallArts.sort((a, b) => {
+          populateDefaults: [],
+        })
+    )
+    const walls = Array.isArray(json) ? json : []
+    walls.forEach((wall) => {
+      const wallArts = Array.isArray(wall.arts) ? wall.arts : []
+      wall.arts = wallArts.sort((a, b) => {
+        const aPublished = a.publishedAt || a.published_at;
+        const bPublished = b.publishedAt || b.published_at;
+        return aPublished < bPublished ? 1 : -1;
+      });
+    });
+    const query = {
+      _start: 0,
+      _limit: 8,
+      main: true,
+      populate: ['Pictures', 'Artist', 'styles', 'subjects', 'mediums', 'wall'],
+    };
+    json = await fetchStrapi(API_HOST + '/arts' + serialize(query))
+    const list = Array.isArray(json) ? json : []
+    const arts = list.sort((a,b)=> {
       const aPublished = a.publishedAt || a.published_at;
       const bPublished = b.publishedAt || b.published_at;
-      return aPublished < bPublished ? 1 : -1;
-    });
-  });
-  const query = {
-    _start: 0,
-    _limit: 8,
-    main: true,
-    populate: ['Pictures', 'Artist', 'styles', 'subjects', 'mediums', 'wall'],
-  };
-  json = await fetchStrapi(API_HOST + '/arts' + serialize(query))
-  const list = Array.isArray(json) ? json : []
-  const arts = list.sort((a,b)=> {
-    const aPublished = a.publishedAt || a.published_at;
-    const bPublished = b.publishedAt || b.published_at;
-    return aPublished < bPublished ? 1: -1;
-  })
-  json = await fetchStrapi(API_HOST + '/marquee')
-  const marquee = json;
-  return {
-    props: {
-      slides,
-      walls,
+      return aPublished < bPublished ? 1: -1;
+    })
+    json = await fetchStrapi(API_HOST + '/marquee')
+    const marquee = json;
+    return {
+      props: {
+        slides,
+        walls,
       arts,
       marquee
     },
-    revalidate: 60,
+  }
+  } catch {
+    return {
+      props: { slides: [], walls: [], arts: [], marquee: null },
+    }
   }
 }

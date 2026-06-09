@@ -48,14 +48,11 @@ export default function  Artists({ artists }) {
 }
 
 export const getStaticProps = async () => {
-  let artists = await fetchStrapi(API_HOST + '/artists/')
-  artists = artists.sort((a,b) => {
-      return a.full_name < b.full_name ? -1: 1;
-  })
-  return {
-    props: {
-      artists,
-    },
-    revalidate: 60,
+  try {
+    let artists = await fetchStrapi(API_HOST + '/artists/')
+    artists = Array.isArray(artists) ? artists.sort((a,b) => a.full_name < b.full_name ? -1 : 1) : []
+    return { props: { artists }, revalidate: 60 }
+  } catch {
+    return { props: { artists: [] }, revalidate: 60 }
   }
 }

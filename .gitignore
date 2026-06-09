@@ -26,3 +26,9 @@
 /front/.env.development.local
 /front/.env.test.local
 /front/.env.production.local
+
+# AWS secrets (templates: copy to *.template.json or use placeholders)
+/docs/aws-secrets/db.json
+/docs/aws-secrets/api.json
+/docs/aws-secrets/front.json
+/docs/aws-secrets/*.local.json

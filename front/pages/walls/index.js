@@ -43,20 +43,19 @@ export default function Catalog({ walls }) {
 
 
 export const getStaticProps = async () => {
-  const json = await fetchStrapi(API_HOST + '/walls' + serialize({ populate: 'deep,2' }))
-  const walls = Array.isArray(json) ? json : []
-  walls.forEach((wall) => {
-    const wallArts = Array.isArray(wall.arts) ? wall.arts : []
-    wall.arts = wallArts.sort((a, b) => {
-      const aPublished = a.publishedAt || a.published_at;
-      const bPublished = b.publishedAt || b.published_at;
-      return aPublished < bPublished ? 1 : -1;
+  try {
+    const json = await fetchStrapi(API_HOST + '/walls' + serialize({ populate: 'deep,2' }))
+    const walls = Array.isArray(json) ? json : []
+    walls.forEach((wall) => {
+      const wallArts = Array.isArray(wall.arts) ? wall.arts : []
+      wall.arts = wallArts.sort((a, b) => {
+        const aPublished = a.publishedAt || a.published_at;
+        const bPublished = b.publishedAt || b.published_at;
+        return aPublished < bPublished ? 1 : -1;
+      });
     });
-  });
-  return {
-    props: {
-      walls,
-    },
-    revalidate: 60,
+    return { props: { walls }, revalidate: 60 }
+  } catch {
+    return { props: { walls: [] }, revalidate: 60 }
   }
 }

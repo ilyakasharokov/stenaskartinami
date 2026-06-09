@@ -17,32 +17,32 @@ export default function Catalog({ arts }) {
 }
 
 export async function getStaticPaths() {
-  const json = await fetchStrapi(API_HOST + '/styles/')
-  const styles = Array.isArray(json) ? json : []
-  return {
-    paths: styles.map(item => { 
-      return {params: { slug: item.slug }}
-  }),
-    fallback: false
+  try {
+    const json = await fetchStrapi(API_HOST + '/styles/')
+    const styles = Array.isArray(json) ? json : []
+    return {
+      paths: styles.map(item => ({ params: { slug: item.slug } })),
+      fallback: 'blocking',
+    }
+  } catch {
+    return { paths: [], fallback: 'blocking' }
   }
 }
 
-
 export const getStaticProps = async () => {
-  const json = await fetchStrapi(
-    API_HOST + '/arts' + serialize({ populate: ['Pictures', 'Artist', 'styles', 'subjects', 'mediums', 'wall'] })
-  )
-  const list = Array.isArray(json) ? json : []
-  const arts = list.sort((a,b)=> {
-    const aPublished = a.publishedAt || a.published_at;
-    const bPublished = b.publishedAt || b.published_at;
-    return aPublished < bPublished ? 1: -1;
-  })
-
-  return {
-    props: {
-      arts,
-    },
+  try {
+    const json = await fetchStrapi(
+      API_HOST + '/arts' + serialize({ populate: ['Pictures', 'Artist', 'styles', 'subjects', 'mediums', 'wall'] })
+    )
+    const list = Array.isArray(json) ? json : []
+    const arts = list.sort((a, b) => {
+      const aPublished = a.publishedAt || a.published_at
+      const bPublished = b.publishedAt || b.published_at
+      return aPublished < bPublished ? 1 : -1
+    })
+    return { props: { arts } }
+  } catch {
+    return { props: { arts: [] } }
   }
 }
 

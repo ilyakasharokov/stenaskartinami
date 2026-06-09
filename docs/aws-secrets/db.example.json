@@ -1,0 +1,7 @@
+{
+  "username": "stenaskartinami_admin",
+  "password": "REPLACE_WITH_STRONG_PASSWORD",
+  "host": "your-aurora-cluster.cluster-xxxxxxxxxx.region.rds.amazonaws.com",
+  "port": 5432,
+  "dbname": "stenaskartinami"
+}

@@ -29,7 +29,7 @@ services:
       postgres:
         condition: service_healthy
     volumes:
-      - /home/stenaskartinami/api/public/uploads:/usr/src/app/public/uploads
+      - ./api-v5/public/uploads:/usr/src/app/public/uploads
 
   front:
     build:
@@ -39,6 +39,9 @@ services:
     restart: unless-stopped
     env_file:
       - ./front/.env
+    environment:
+      # So getServerSideProps in the container can reach the API
+      - STRAPI_SERVER_URL=http://api-v5:1337/api
     ports:
       - "3000:3000"
     depends_on:

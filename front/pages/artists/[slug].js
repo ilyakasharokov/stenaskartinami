@@ -24,19 +24,20 @@ export default function  Artist({ artist }) {
 }
 
 export async function getStaticPaths() {
-  const json = await fetchStrapi(API_HOST + '/artists/')
-  const artists = Array.isArray(json) ? json : []
-  return {
-    paths: artists.map(item => { 
-      return {params: { slug: item.slug + '--' + item.id }}
-  }),
-    fallback: true
+  try {
+    const json = await fetchStrapi(API_HOST + '/artists/')
+    const artists = Array.isArray(json) ? json : []
+    return {
+      paths: artists.map(item => ({ params: { slug: item.slug + '--' + item.id } })),
+      fallback: 'blocking',
+    }
+  } catch {
+    return { paths: [], fallback: 'blocking' }
   }
 }
 
-export const getStaticProps = async ({params: {
-  slug
-}}) => {
+export const getStaticProps = async ({params: { slug }}) => {
+  try {
   let id = slug.split('--')[1]
   const artist = await fetchStrapi(
     API_HOST +
@@ -51,12 +52,12 @@ export const getStaticProps = async ({params: {
         populateDefaults: [],
       })
   )
-  
   return {
-    props: {
-      artist,
-    },
+    props: { artist },
     revalidate: 60,
+  }
+  } catch {
+    return { notFound: true }
   }
 }
 

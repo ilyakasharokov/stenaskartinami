@@ -2,10 +2,40 @@
 
 Step-by-step guide to deploy **api-v5** (Strapi) and **front** (Next.js) to production.
 
+**AWS (CloudFront + S3 + ALB + ECS Fargate + Aurora + Secrets Manager + Observability):** see **[docs/DEPLOY_AWS.md](docs/DEPLOY_AWS.md)**.
+
 ## Prerequisites
 
 - SSH access to server: `ssh root@82.146.48.155` (or use `deploy` user with sudo)
 - Git repository access
+
+---
+
+## Quick deploy (after first-time setup)
+
+Once Docker and the repo are set up, deploy or update with:
+
+```bash
+cd /opt/stenaskartinami   # or your repo path
+./scripts/deploy.sh
+```
+
+**Faster update (no full rebuild):**
+```bash
+./scripts/deploy-update.sh
+```
+
+**One-liner from anywhere (if repo path is fixed):**
+```bash
+/opt/stenaskartinami/scripts/deploy.sh
+```
+
+**Remote deploy via SSH (e.g. from your machine or CI):**
+```bash
+ssh deploy@82.146.48.155 "cd /opt/stenaskartinami && ./scripts/deploy.sh"
+```
+
+The scripts pull latest code, build, and start containers. They detect `docker compose` vs `docker-compose` (AWS standalone binary).
 
 ---
 
@@ -20,6 +50,8 @@ ssh deploy@82.146.48.155
 ---
 
 ## 2. Install Docker + Docker Compose
+
+### Option A: Ubuntu / Debian (apt)
 
 ```bash
 sudo apt update && sudo apt install -y ca-certificates curl gnupg lsb-release
@@ -36,11 +68,53 @@ sudo apt update && sudo apt install -y docker-ce docker-ce-cli containerd.io doc
 sudo systemctl enable docker && sudo systemctl start docker
 ```
 
-**If using non-root user (e.g., `deploy`):**
+### Option B: AWS / Amazon Linux 2 or 2023 (yum / dnf)
+
+**Amazon Linux 2:**
+```bash
+sudo yum update -y
+sudo yum install -y docker
+sudo systemctl enable docker
+sudo systemctl start docker
+sudo usermod -aG docker ec2-user
+# Install Docker Compose plugin (standalone script)
+sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+sudo chmod +x /usr/local/bin/docker-compose
+# Log out and back in for group changes
+```
+
+**Amazon Linux 2023 (uses dnf):**
+```bash
+sudo dnf update -y
+sudo dnf install -y docker
+sudo systemctl enable docker
+sudo systemctl start docker
+sudo usermod -aG docker ec2-user
+# Install Docker Compose plugin
+sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+sudo chmod +x /usr/local/bin/docker-compose
+# Log out and back in for group changes
+```
+
+**RHEL / CentOS 7+ (yum):**
+```bash
+sudo yum install -y yum-utils
+sudo yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+sudo yum install -y docker-ce docker-ce-cli containerd.io
+sudo systemctl enable docker
+sudo systemctl start docker
+sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+sudo chmod +x /usr/local/bin/docker-compose
+sudo usermod -aG docker $USER
+```
+
+**If using non-root user (e.g., `deploy` or `ec2-user`):**
 ```bash
 sudo usermod -aG docker $USER
-# Log out and back in for group changes to take effect
+# Log out and back in (or run: newgrp docker) for group changes to take effect
 ```
+
+**AWS / Amazon Linux note:** If you installed the standalone `docker-compose` binary (not the plugin), use `docker-compose` (with hyphen) instead of `docker compose` (with space) in all commands below. Example: `docker-compose -f docker-compose.prod.yml up -d --build`.
 
 ---
 
@@ -165,9 +239,18 @@ mkdir -p ~/uploads
 
 ## 8. Build and run everything
 
+**Option A: Use deploy script (recommended)**
 ```bash
 cd /opt/stenaskartinami  # or ~/stenaskartinami if using home directory
+chmod +x scripts/deploy.sh
+./scripts/deploy.sh
+```
+
+**Option B: Manual**
+```bash
+cd /opt/stenaskartinami
 docker compose -f docker-compose.prod.yml up -d --build
+# On AWS with standalone binary: docker-compose -f docker-compose.prod.yml up -d --build
 ```
 
 **Note:** If you cloned to a different location, adjust the path accordingly.
@@ -376,9 +459,30 @@ dig stenaskartinami.com
 
 ### 2. Install nginx and certbot
 
+**Ubuntu / Debian (apt):**
 ```bash
 sudo apt update
 sudo apt install -y nginx certbot python3-certbot-nginx
+```
+
+**AWS / Amazon Linux 2 (yum):**
+```bash
+sudo amazon-linux-extras install nginx1 -y
+sudo yum install -y nginx
+sudo systemctl enable nginx
+sudo systemctl start nginx
+# Certbot: use snap or manual
+sudo yum install -y python3
+sudo pip3 install certbot certbot-nginx
+# Or install certbot via snap: sudo snap install --classic certbot && sudo ln -s /snap/bin/certbot /usr/bin/certbot
+```
+
+**Amazon Linux 2023 (dnf):**
+```bash
+sudo dnf install -y nginx
+sudo systemctl enable nginx
+sudo systemctl start nginx
+sudo dnf install -y certbot python3-certbot-nginx
 ```
 
 ### 3. Create nginx configuration
@@ -432,10 +536,13 @@ server {
 
 ### 4. Enable the site
 
+**Ubuntu / Debian (sites-available/sites-enabled):**
 ```bash
 sudo ln -s /etc/nginx/sites-available/api.stenaskartinami.com /etc/nginx/sites-enabled/
 sudo nginx -t  # Test configuration
 ```
+
+**AWS / Amazon Linux (often uses conf.d only):** If there is no `sites-enabled`, put the config in `/etc/nginx/conf.d/api.stenaskartinami.com.conf` and run `sudo nginx -t`.
 
 ### 5. Get SSL certificate with Let's Encrypt
 

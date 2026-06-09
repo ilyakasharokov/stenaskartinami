@@ -31,39 +31,46 @@ export default function Catalog({ arts, filters, count }) {
 
 
 export const getStaticProps = async () => {
-  const query = {
-    _start: 0,
-    _limit: CATALOG_ITEMS_PER_PAGE,
-    populate: ['Pictures', 'Artist', 'styles', 'subjects', 'mediums', 'wall'],
-  };
-  let json = await fetchStrapi(API_HOST + '/arts' + serialize(query))
-  const list = Array.isArray(json) ? json : []
-  const arts = list.sort((a, b) => {
-    const aPublished = a.publishedAt || a.published_at;
-    const bPublished = b.publishedAt || b.published_at;
-    return aPublished < bPublished ? 1 : -1;
-  })
-  const countResponse = await fetchStrapi(API_HOST + '/arts/count' + serialize(query))
-  const count = countResponse?.count ?? countResponse?.meta?.pagination?.total ?? 0
-  const filters = {
-    styles: [],
-    mediums: [],
-    subjects: [],
-    walls: []
-  }
-  for( let key in filters){
-    json = await fetchStrapi(API_HOST + '/' + key + '/')
-    if(key === 'walls'){
-      key = 'wall'
+  try {
+    const query = {
+      _start: 0,
+      _limit: CATALOG_ITEMS_PER_PAGE,
+      populate: ['Pictures', 'Artist', 'styles', 'subjects', 'mediums', 'wall'],
+    };
+    let json = await fetchStrapi(API_HOST + '/arts' + serialize(query))
+    const list = Array.isArray(json) ? json : []
+    const arts = list.sort((a, b) => {
+      const aPublished = a.publishedAt || a.published_at;
+      const bPublished = b.publishedAt || b.published_at;
+      return aPublished < bPublished ? 1 : -1;
+    })
+    const countResponse = await fetchStrapi(API_HOST + '/arts/count' + serialize(query))
+    const count = countResponse?.count ?? countResponse?.meta?.pagination?.total ?? 0
+    const filters = {
+      styles: [],
+      mediums: [],
+      subjects: [],
+      walls: []
     }
-    filters[key] = Array.isArray(json) ? json : []
-  }
-  return {
-    props: {
-      arts,
-      filters,
-      count
-    },
-    revalidate: 60,
+    for( let key in filters){
+      json = await fetchStrapi(API_HOST + '/' + key + '/')
+      if(key === 'walls'){
+        key = 'wall'
+      }
+      filters[key] = Array.isArray(json) ? json : []
+    }
+    return {
+      props: { arts, filters, count },
+      revalidate: 60,
+    }
+  } catch {
+    return {
+      props: {
+        arts: [],
+        filters: { styles: [], mediums: [], subjects: [], walls: [] },
+        count: 0,
+      },
+      revalidate: 60,
+    }
   }
 }
