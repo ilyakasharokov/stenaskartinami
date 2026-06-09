@@ -2,7 +2,7 @@ import Head from 'next/head';
 import { useSession, signIn } from 'next-auth/react';
 import Router from 'next/router';
 import Link from 'next/link';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 
 const TelegramLoginButton = dynamic(() => import('@/components/auth/TelegramLoginButton'), { ssr: false });
@@ -17,7 +17,8 @@ export default function SignUp() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  if (session) { Router.push('/'); return null; }
+  useEffect(() => { if (session) Router.push('/'); }, [session]);
+  if (session) return null;
 
   const handleSendOtp = async (e) => {
     e.preventDefault();
@@ -59,21 +60,27 @@ export default function SignUp() {
   const handleTelegramAuth = useCallback(async (tgUser) => {
     setError('');
     setLoading(true);
-    const res = await fetch('/api/auth/verify-telegram', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(tgUser),
-    });
-    const data = await res.json();
-    if (!res.ok) { setLoading(false); setError(data.error); return; }
-    await signIn('telegram', {
-      strapiJwt: data.jwt,
-      userId: String(data.user.id),
-      userName: data.user.username,
-      userPhoto: tgUser.photo_url || '',
-      redirect: false,
-    });
-    Router.push('/');
+    try {
+      const res = await fetch('/api/auth/verify-telegram', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(tgUser),
+      });
+      const data = await res.json();
+      if (!res.ok) { setLoading(false); setError(data.error || 'Ошибка входа через Telegram'); return; }
+      const result = await signIn('telegram', {
+        strapiJwt: data.jwt,
+        userId: String(data.user.id),
+        userName: data.user.username,
+        userPhoto: tgUser.photo_url || '',
+        redirect: false,
+      });
+      if (result?.error) { setLoading(false); setError('Ошибка входа через Telegram'); return; }
+      Router.push('/');
+    } catch (e) {
+      setLoading(false);
+      setError('Ошибка входа через Telegram');
+    }
   }, []);
 
   return (

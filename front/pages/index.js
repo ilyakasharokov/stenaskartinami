@@ -3,7 +3,7 @@ import Link from 'next/link'
 import MainLayout from '@/components/layouts/MainLayout'
 import { API_HOST } from "@/constants/constants"
 import imageUrlBuilder from '@/utils/img-url-builder'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import serialize from '@/utils/serialize'
 import { fetchStrapi } from '@/utils/strapi'
 import ProductListStatic from '@/components/catalog/product-list-static'
@@ -11,7 +11,9 @@ import { YMaps, Map, Placemark, ZoomControl } from 'react-yandex-maps';
 
 export default function Home({slides, walls, arts, marquee}) {
 
-  const [ currentSlide, setSlide ] = useState(0); 
+  const [ currentSlide, setSlide ] = useState(0);
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
 
   function next(){
     if(currentSlide === slides.length - 1){
@@ -117,7 +119,7 @@ export default function Home({slides, walls, arts, marquee}) {
         }   
 
         {
-          walls &&
+          mounted && walls &&
           <div className="index-page__map">
             <h2>Стены на карте</h2>
             <YMaps>
