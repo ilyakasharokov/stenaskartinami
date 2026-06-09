@@ -54,7 +54,7 @@ export default function Catalog({ wall }) {
       }
       { 
         <div className="product-list__link">
-          <Link href={`/catalog?wall=${wall.slug}`}><a>Посмотреть все</a></Link>
+          <Link href={`/catalog?wall=${wall.slug}`}>Посмотреть все</Link>
         </div>
       } 
     </div>

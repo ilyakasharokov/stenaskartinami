@@ -176,9 +176,7 @@ export default function Page() {
         <br/>9.4. Действующая Политика конфиденциальности размещена на странице по адресу https://stenaskartinami.com/privacy-policy
         <br/>
         <p>
-          <Link href="/remove-data">
-            <a><h3>Запрос на удаление данных</h3></a>
-          </Link>
+          <Link href="/remove-data"><h3>Запрос на удаление данных</h3></Link>
         </p>
             
     </div>

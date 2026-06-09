@@ -15,14 +15,12 @@ function Item(props) {
           ...props.searchState,
           query: '',
         })}}>
-    <Link href={ '/art/' + props.hit.slug + '--' + props.hit.id} >
-      <a>
-        <div className="search-item__image" style={{ backgroundImage: 'url(' + imageUrlBuilder(props.hit.img) + ')'}}></div>
-        <div className="search-item__text">
-          <div className="search-item__title">{props.hit.Title}</div>
-          <div className="search-item__artist">{props.hit.Artist_full_name}</div>
-        </div>
-      </a>
+    <Link href={ '/art/' + props.hit.slug + '--' + props.hit.id}>
+      <div className="search-item__image" style={{ backgroundImage: 'url(' + imageUrlBuilder(props.hit.img) + ')'}}></div>
+      <div className="search-item__text">
+        <div className="search-item__title">{props.hit.Title}</div>
+        <div className="search-item__artist">{props.hit.Artist_full_name}</div>
+      </div>
     </Link>
   </div>;
 }

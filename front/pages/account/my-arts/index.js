@@ -29,9 +29,7 @@ export default function MyArts() {
           <CatalogCmp arts={arts} hideFiltersForce={true} hideSort={true} emptyText={"Вы пока не добавили ни одной картины :("}
           title="Мои картины"></CatalogCmp>       
                     <p>
-            <Link href="/remove-data">
-              <a><h3>Запрос на удаление данных</h3></a>
-            </Link>
+            <Link href="/remove-data"><h3>Запрос на удаление данных</h3></Link>
           </p>
         </div>
       }

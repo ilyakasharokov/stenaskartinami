@@ -96,9 +96,7 @@ export default function Home({slides, walls, arts, marquee}) {
             <h2>Последние добавленные работы</h2>
             <ProductListStatic arts={arts.slice(0, 8)}></ProductListStatic>
             <div className="index-page__last-arts-link">
-              <Link href="/catalog">
-                <a className="btn">Перейти в каталог</a>
-              </Link>
+              <Link href="/catalog" className="btn">Перейти в каталог</Link>
             </div>
           </div>
         }
@@ -136,9 +134,7 @@ export default function Home({slides, walls, arts, marquee}) {
               }
               </Map>
             </YMaps>
-            <Link href="/add-wall">
-                <a href='/add-wall' className="btn">Добавить стену</a>
-              </Link>
+            <Link href="/add-wall" className="btn">Добавить стену</Link>
           </div>
         }
         

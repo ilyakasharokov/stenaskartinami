@@ -30,28 +30,26 @@ export default function ProductListItem({art}){
                   <Link href={ '/art/' + art.slug + '--' + art.id}>
                     <div>
                     <div className="overlay"></div>
-                      <a>
-                        <div>
-                          {
-                            getPictureUrl(art) &&
-                            <div
-                              className="catalog-item__bg-img"
-                              style={{
-                                backgroundImage: `url(${imageUrlBuilder(getPictureUrl(art))})`,
-                                backgroundSize: 'cover',
-                                backgroundPosition: 'center',
-                              }}
-                            >
-                              <img className="catalog-item__invisible-img" src="/favicon.png"/>
-                            </div>
-                          } 
-                        </div>
-                      </a>
+                      <div>
+                        {
+                          getPictureUrl(art) &&
+                          <div
+                            className="catalog-item__bg-img"
+                            style={{
+                              backgroundImage: `url(${imageUrlBuilder(getPictureUrl(art))})`,
+                              backgroundSize: 'cover',
+                              backgroundPosition: 'center',
+                            }}
+                          >
+                            <img className="catalog-item__invisible-img" src="/favicon.png"/>
+                          </div>
+                        }
+                      </div>
                     </div>
                   </Link>
                 </div>
                 <Link href={ '/art/' + art.slug + '--' + art.id}>
-                    <div className="catalog-item__title"><a title={art.Title}>{art.Title}</a></div>
+                    <div className="catalog-item__title">{art.Title}</div>
                 </Link>
                 <div className="catalog-item__size">
                 { 
@@ -67,7 +65,7 @@ export default function ProductListItem({art}){
                     <div className="catalog-item__artist">
                       {
                         art.Artist.full_name && 
-                        <Link href={ '/artists/' + art.Artist.slug + '--' + art.Artist.id}><a title={art.Artist.full_name}>{art.Artist.full_name}</a></Link> 
+                        <Link href={ '/artists/' + art.Artist.slug + '--' + art.Artist.id} title={art.Artist.full_name}>{art.Artist.full_name}</Link>
                       }
                       {
                         art.Artist.full_name && art.Year &&

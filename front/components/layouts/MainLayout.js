@@ -9,17 +9,15 @@ export default function MainLayout({children}){
       <header>
         <TopBar></TopBar>
         <nav className="top-navigation">
-          <Link href="/">
-            <a className="logo-link">
+          <Link href="/" className="logo-link">
             <div className="logo">
-              <img src="/images/newlogo2.svg"/> 
+              <img src="/images/newlogo2.svg"/>
               <div className="logo__text">Стена с картинами</div>
             </div>
-            </a>
           </Link>
           <Menu></Menu>
           <div className="top-search-desktop">
-            <SearchWidget></SearchWidget> 
+            <SearchWidget></SearchWidget>
           </div>
         </nav>
       </header>
@@ -30,21 +28,15 @@ export default function MainLayout({children}){
       </main>
       <footer>
         <nav className="bottom-navigation">
-          <Link href="/">
-            <a className="logo-link">
+          <Link href="/" className="logo-link">
             <div className="logo">
-              <img src="/images/newlogo2.svg"/> 
+              <img src="/images/newlogo2.svg"/>
               <div className="logo__text">Стена с картинами</div>
             </div>
-            </a>
           </Link>
           <div className="footer__links">
-            <Link href="/privacy-policy">
-              <a>Политика конфиденциальности</a>
-            </Link>
-            <Link href="/remove-data">
-              <a>Запрос на удаление данных</a>
-            </Link>
+            <Link href="/privacy-policy">Политика конфиденциальности</Link>
+            <Link href="/remove-data">Запрос на удаление данных</Link>
           </div>
           <div className="bottom-social">
             <a href="https://www.instagram.com/stena_s_kartinami/" target="_blank" title="Стена с картинами в Instagram"><img src="/images/instagram.svg"/></a>

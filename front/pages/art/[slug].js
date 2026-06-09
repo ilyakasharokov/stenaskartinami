@@ -40,8 +40,8 @@ export default function Art({ art, style, styleArts, artist }) {
             <div className="art-page__info-title">{art.Title}</div>
             {art.Artist && (
               <div className="art-page__info-author">
-                <Link href={ '/artists/' + art.Artist.slug + '--' + art.Artist.id}>
-                  <a title={art.Artist.full_name}>{art.Artist.full_name}</a>
+                <Link href={ '/artists/' + art.Artist.slug + '--' + art.Artist.id} title={art.Artist.full_name}>
+                  {art.Artist.full_name}
                 </Link>
                 {
                   art.Year && 
@@ -89,7 +89,7 @@ export default function Art({ art, style, styleArts, artist }) {
             art.wall && art.wall.id !== FREE_ID &&
             <div className="art-page__wall-block">
               <div className="art-page__wall-block-text">
-                Картина находится на стене в <Link href={ '/walls/' + art.wall.slug + '--' + art.wall.id }><a>{ art.wall.Title }</a></Link>
+                Картина находится на стене в <Link href={ '/walls/' + art.wall.slug + '--' + art.wall.id }>{ art.wall.Title }</Link>
               </div>
               {
                 art.wall.Coordinates && 
@@ -112,7 +112,7 @@ export default function Art({ art, style, styleArts, artist }) {
           {
             artist.Arts.length === 4 &&
           <div className="product-list__link">
-            <Link href={ '/artists/' + artist.slug + '--' + artist.id}><a title={artist.full_name}>Перейти в каталог работ художника</a></Link> 
+            <Link href={ '/artists/' + artist.slug + '--' + artist.id} title={artist.full_name}>Перейти в каталог работ художника</Link>
           </div>
           } 
         </div>
@@ -123,7 +123,7 @@ export default function Art({ art, style, styleArts, artist }) {
           <h2>Работы в стиле { style.Title.toLowerCase() }</h2>
           <ProductListStatic arts={styleArts}></ProductListStatic>
           <div className="product-list__link">
-      <Link href={ '/catalog/?styles=' + style.slug}><a title={`Перейти в каталог работ в стиле ${style.Title.toLowerCase()}`}>Перейти в каталог работ в стиле {style.Title.toLowerCase()}</a></Link> 
+      <Link href={ '/catalog/?styles=' + style.slug} title={`Перейти в каталог работ в стиле ${style.Title.toLowerCase()}`}>Перейти в каталог работ в стиле {style.Title.toLowerCase()}</Link>
           </div>
         </div>
       }

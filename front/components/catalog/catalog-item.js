@@ -30,20 +30,18 @@ export default function CatalogItem({art, imageOnLoad}){
                             </div>
                         }
                         <div className="overlay"></div>
-                        <Link href={ '/art/' + art.slug + '--' + art.id}>
-                        <a className="catalog-item__img-link" title={art.Title}>
+                        <Link href={ '/art/' + art.slug + '--' + art.id} className="catalog-item__img-link" title={art.Title}>
                             <img
                               className="catalog-item__img"
                               src={imageUrlBuilder(getPictureUrl(art))}
                               alt={art.Title}
                               onLoad={()=> {imageOnLoad()}}
                             />
-                        </a>
                         </Link>
                     </div>
                 }
                 <Link href={ '/art/' + art.slug + '--' + art.id}>
-                    <div className="catalog-item__title"><a title={art.Title}>{art.Title}</a></div>
+                    <div className="catalog-item__title">{art.Title}</div>
                 </Link>
                 { 
                     art.width && art.height &&
@@ -55,7 +53,7 @@ export default function CatalogItem({art, imageOnLoad}){
                     <div className="catalog-item__artist">
                         {
                         art.Artist.full_name && 
-                        <Link href={ '/artists/' + art.Artist.slug + '--' + art.Artist.id}><a title={art.Artist.full_name}>{art.Artist.full_name}</a></Link> 
+                        <Link href={ '/artists/' + art.Artist.slug + '--' + art.Artist.id} title={art.Artist.full_name}>{art.Artist.full_name}</Link>
                         }
                         {
                         art.Artist.full_name && art.Year &&

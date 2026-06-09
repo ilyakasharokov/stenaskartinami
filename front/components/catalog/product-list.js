@@ -29,7 +29,7 @@ export default function ProductList({artist}){
         {
           arts.length === 4 &&
           <div className="product-list__link">
-            <Link href={ '/artists/' + artist.slug + '--' + artist.id}><a title={artist.full_name}>Перейти в каталог работ художника</a></Link> 
+            <Link href={ '/artists/' + artist.slug + '--' + artist.id} title={artist.full_name}>Перейти в каталог работ художника</Link>
           </div>
         }
       </div>

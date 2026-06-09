@@ -19,11 +19,8 @@ export default function TopBar(){
                     <div className="top-bar__login">
                     {
                         !session &&
-                        <Link href="/auth/signin">
-                            <a className="top-bar__auth-link"
-                            >
-                                Войти
-                            </a>
+                        <Link href="/auth/signin" className="top-bar__auth-link">
+                            Войти
                         </Link>
                     }
                     {
@@ -31,26 +28,20 @@ export default function TopBar(){
                         <div className="top-bar__signed">
                             {
                                 session.info && session.info.arts &&
-                                <Link href="/account/favorite">
-                                    <a title="Избранное" className={`favorite-btn ${ session.info.arts.length > 0 ? 'active': ''}`}></a>
-                                </Link>
+                                <Link href="/account/favorite" title="Избранное" className={`favorite-btn ${ session.info.arts.length > 0 ? 'active': ''}`}></Link>
                             }
                             {
                                 session.info && 
-                                <Link href="/account/my-arts">
-                                    <a className="top-bar__user-name">{ session.user.name }</a>
-                                </Link>
+                                <Link href="/account/my-arts" className="top-bar__user-name">{ session.user.name }</Link>
                             }
                             | 
-                            <Link href="/api/auth/signout">
-                                <a className="top-bar__auth-link"
-                                    onClick={(e) => {
+                            <Link href="/api/auth/signout" className="top-bar__auth-link"
+                                onClick={(e) => {
                                     e.preventDefault();
                                     signOut();
-                                    }}
-                                >
-                                    Выйти
-                                </a>
+                                }}
+                            >
+                                Выйти
                             </Link>
                         </div>
                     }

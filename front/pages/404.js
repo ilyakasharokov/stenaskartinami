@@ -10,7 +10,7 @@ export default function ErrorPage({ Component, pageProps }) {
     <div className="page-404">
       <div className="vertical-flex">
         <h1>404</h1>
-        <p>Упс! Такой страницы не существует, вернитесь на <Link href={'/'}><a>главную</a></Link> или в <Link href={'/catalog'}><a>каталог</a></Link>. </p>
+        <p>Упс! Такой страницы не существует, вернитесь на <Link href={'/'}>главную</Link> или в <Link href={'/catalog'}>каталог</Link>. </p>
       </div>
     </div>
   </MainLayout>
