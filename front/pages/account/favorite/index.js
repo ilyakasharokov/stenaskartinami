@@ -12,11 +12,10 @@ export default function Catalog() {
   const [ arts, setArts ] = useState([]);
 
   useEffect(()=> {
-	  if(session && session.info){
-		  setArts(session.info.arts.reverse())
-		console.log(arts)
-	  }
-  }, [session, session && session.info.arts])
+    if(session && session.info && Array.isArray(session.info.arts)){
+      setArts([...session.info.arts].reverse())
+    }
+  }, [session])
 
   return (<MainLayout>
     <Head>

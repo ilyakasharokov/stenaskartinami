@@ -12,11 +12,10 @@ export default function MyArts() {
   const [ arts, setArts ] = useState([]);
 
   useEffect(()=> {
-	  if(session && session.info){
-		  setArts(session.info.created_arts.reverse())
-		console.log(session.info.created_arts)
-	  }
-  }, [session, session && session.info.created_arts])
+    if(session && session.info && Array.isArray(session.info.created_arts)){
+      setArts([...session.info.created_arts].reverse())
+    }
+  }, [session])
 
   return (<MainLayout>
     <Head>
