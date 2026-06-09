@@ -1,6 +1,6 @@
 import { signIn } from 'next-auth/react';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '@/pages/api/auth/[...nextauth]';
+import { authOptions } from '@/lib/authOptions';
 import Head from 'next/head';
 import Router from 'next/router';
 import Link from 'next/link';
