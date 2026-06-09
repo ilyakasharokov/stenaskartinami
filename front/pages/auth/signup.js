@@ -1,14 +1,15 @@
 import Head from 'next/head';
-import { useSession, signIn } from 'next-auth/react';
+import { signIn } from 'next-auth/react';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/pages/api/auth/[...nextauth]';
 import Router from 'next/router';
 import Link from 'next/link';
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 import dynamic from 'next/dynamic';
 
 const TelegramLoginButton = dynamic(() => import('@/components/auth/TelegramLoginButton'), { ssr: false });
 
 export default function SignUp() {
-  const { data: session } = useSession();
   const [step, setStep] = useState('phone');
   const [phone, setPhone] = useState('');
   const [username, setUsername] = useState('');
@@ -16,9 +17,6 @@ export default function SignUp() {
   const [otpToken, setOtpToken] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-
-  useEffect(() => { if (session) Router.push('/'); }, [session]);
-  if (session) return null;
 
   const handleSendOtp = async (e) => {
     e.preventDefault();
@@ -157,4 +155,12 @@ export default function SignUp() {
       </div>
     </>
   );
+}
+
+export async function getServerSideProps(context) {
+  const session = await getServerSession(context.req, context.res, authOptions);
+  if (session) {
+    return { redirect: { destination: '/', permanent: false } };
+  }
+  return { props: {} };
 }

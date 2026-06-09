@@ -1,9 +1,10 @@
 import { signIn } from 'next-auth/react';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/pages/api/auth/[...nextauth]';
 import Head from 'next/head';
-import { useSession } from 'next-auth/react';
 import Router from 'next/router';
 import Link from 'next/link';
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 import dynamic from 'next/dynamic';
 
 const TelegramLoginButton = dynamic(() => import('@/components/auth/TelegramLoginButton'), { ssr: false });
@@ -28,14 +29,10 @@ function GoogleIcon() {
 }
 
 export default function SignIn({ authError }) {
-  const { data: session } = useSession();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState(authError || '');
   const [loading, setLoading] = useState(false);
-
-  useEffect(() => { if (session) Router.push('/'); }, [session]);
-  if (session) return null;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -112,8 +109,12 @@ export default function SignIn({ authError }) {
   );
 }
 
-export async function getServerSideProps({ query }) {
-  const errorKey = query?.error || null;
+export async function getServerSideProps(context) {
+  const session = await getServerSession(context.req, context.res, authOptions);
+  if (session) {
+    return { redirect: { destination: '/', permanent: false } };
+  }
+  const errorKey = context.query?.error || null;
   const authError = errorKey ? (ERROR_MESSAGES[errorKey] || ERROR_MESSAGES.Default) : null;
   return { props: { authError } };
 }
