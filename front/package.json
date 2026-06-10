@@ -8,6 +8,7 @@
     "start": "next start"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.104.1",
     "@meilisearch/instant-meilisearch": "^0.31.1",
     "@sentry/nextjs": "^10.57.0",
     "jsonwebtoken": "^9.0.3",
