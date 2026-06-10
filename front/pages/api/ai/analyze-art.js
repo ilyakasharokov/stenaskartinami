@@ -55,7 +55,10 @@ export default async function handler(req, res) {
     const suggestions = JSON.parse(jsonMatch[0]);
     return res.status(200).json(suggestions);
   } catch (err) {
-    console.error('AI analyze error:', err);
-    return res.status(500).json({ error: 'Ошибка анализа изображения' });
+    console.error('AI analyze error:', err?.status, err?.message, JSON.stringify(err?.error));
+    const msg = err?.status === 403 ? 'API ключ недействителен или нет доступа к модели'
+      : err?.status === 429 ? 'Превышен лимит запросов, попробуйте позже'
+      : 'Ошибка анализа изображения';
+    return res.status(500).json({ error: msg });
   }
 }
