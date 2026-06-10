@@ -4,13 +4,13 @@ import { fetchStrapi } from "@/utils/strapi"
 import Preloader from "../preloader/preloader";
 // const cache = {};
 
-export default function ArtistInput({onArtistChange}){
+export default function ArtistInput({onArtistChange, initialValue}){
 
     let [ options, setOptions] = useState([]);
-    let [ value, setValue ] = useState("");
+    let [ value, setValue ] = useState(initialValue?.full_name || "");
     let [ loading, setLoading ] = useState(false);
     let timerId = null;
-    let [ newArtist, setNewArtist ] = useState({id:null, full_name: ""});
+    let [ newArtist, setNewArtist ] = useState(initialValue || {id:null, full_name: ""});
     let [ focus, setFocus ] = useState(false);
     
     function  debounceFunction(func, delay) {
@@ -22,7 +22,7 @@ export default function ArtistInput({onArtistChange}){
     }
 
     function loadArtists(newVal){
-        fetchStrapi(API_HOST + `/artists?filters[full_name][$contains]=${encodeURIComponent(newVal)}`)
+        fetchStrapi(API_HOST + `/artists?filters[full_name][$containsi]=${encodeURIComponent(newVal)}`)
         .then(json => {
             // console.log(json)
             if(json && json.length){

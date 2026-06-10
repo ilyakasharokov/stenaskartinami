@@ -8,12 +8,20 @@ import ArtistInput from "@/components/input/artist-input"
 import YearInput from "@/components/input/year-input"
 import Preloader from "@/components/preloader/preloader"
 import MultiSelectInput from "@/components/input/multi-select-input"
-import { normalizeStrapiResponse } from "@/utils/strapi"
+import { normalizeStrapiResponse, fetchStrapi } from "@/utils/strapi"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/authOptions"
 
 const MIN_WIDTH = 800
 const MIN_HEIGHT = 600
+
+const ASPECT_OPTIONS = [
+  { label: '⬜ Свободно', value: null },
+  { label: '1:1', value: 1 },
+  { label: '4:3', value: 4/3 },
+  { label: '3:4', value: 3/4 },
+  { label: '16:9', value: 16/9 },
+]
 
 function getImageDimensions(dataUrl) {
   return new Promise(resolve => {
@@ -24,19 +32,33 @@ function getImageDimensions(dataUrl) {
   })
 }
 
-async function getCroppedDataUrl(imageSrc, pixelCrop) {
+async function getCroppedDataUrl(imageSrc, pixelCrop, rotation = 0) {
   const image = await new Promise((resolve, reject) => {
     const img = new Image()
     img.onload = () => resolve(img)
     img.onerror = reject
     img.src = imageSrc
   })
+
+  const rad = (rotation * Math.PI) / 180
+  const sin = Math.abs(Math.sin(rad))
+  const cos = Math.abs(Math.cos(rad))
+  const bboxW = Math.round(image.width * cos + image.height * sin)
+  const bboxH = Math.round(image.width * sin + image.height * cos)
+
   const canvas = document.createElement('canvas')
-  canvas.width = pixelCrop.width
-  canvas.height = pixelCrop.height
+  canvas.width = bboxW
+  canvas.height = bboxH
   const ctx = canvas.getContext('2d')
-  ctx.drawImage(image, pixelCrop.x, pixelCrop.y, pixelCrop.width, pixelCrop.height, 0, 0, pixelCrop.width, pixelCrop.height)
-  return canvas.toDataURL('image/jpeg', 0.92)
+  ctx.translate(bboxW / 2, bboxH / 2)
+  ctx.rotate(rad)
+  ctx.drawImage(image, -image.width / 2, -image.height / 2)
+
+  const rotated = document.createElement('canvas')
+  rotated.width = pixelCrop.width
+  rotated.height = pixelCrop.height
+  rotated.getContext('2d').drawImage(canvas, pixelCrop.x, pixelCrop.y, pixelCrop.width, pixelCrop.height, 0, 0, pixelCrop.width, pixelCrop.height)
+  return rotated.toDataURL('image/jpeg', 0.92)
 }
 
 // ── Step 1: Upload + Crop ──────────────────────────────────────────
@@ -44,11 +66,13 @@ function UploadStep({ onNext }) {
   const [images, setImages] = useState([])
   const [quality, setQuality] = useState(null)
   const [checking, setChecking] = useState(false)
-  const [cropIndex, setCropIndex] = useState(null) // index of image being cropped
+  const [cropIndex, setCropIndex] = useState(null)
   const [crop, setCrop] = useState({ x: 0, y: 0 })
   const [zoom, setZoom] = useState(1)
+  const [rotation, setRotation] = useState(0)
+  const [aspect, setAspect] = useState(null)
   const [croppedAreaPixels, setCroppedAreaPixels] = useState(null)
-  const [croppedImages, setCroppedImages] = useState([]) // final data_urls after crop
+  const [croppedImages, setCroppedImages] = useState([])
 
   const handleChange = useCallback(async (list) => {
     setImages(list)
@@ -65,11 +89,13 @@ function UploadStep({ onNext }) {
     setCropIndex(index)
     setCrop({ x: 0, y: 0 })
     setZoom(1)
+    setRotation(0)
+    setAspect(null)
     setCroppedAreaPixels(null)
   }
 
   const confirmCrop = async () => {
-    const dataUrl = await getCroppedDataUrl(images[cropIndex].data_url, croppedAreaPixels)
+    const dataUrl = await getCroppedDataUrl(images[cropIndex].data_url, croppedAreaPixels, rotation)
     setCroppedImages(prev => {
       const next = [...prev]
       next[cropIndex] = dataUrl
@@ -80,12 +106,13 @@ function UploadStep({ onNext }) {
 
   const skipCrop = () => setCropIndex(null)
 
+  const rotateCW = () => setRotation(r => (r + 90) % 360)
+
   const finalImages = images.map((img, i) => ({
     ...img,
     data_url: croppedImages[i] || img.data_url,
   }))
 
-  // Crop modal
   if (cropIndex !== null && images[cropIndex]) {
     return (
       <div className="crop-modal">
@@ -93,12 +120,30 @@ function UploadStep({ onNext }) {
           <span>Обрежьте изображение</span>
           <button className="login-page__link-btn" onClick={skipCrop}>Пропустить</button>
         </div>
+
+        <div className="crop-modal__aspect-btns">
+          {ASPECT_OPTIONS.map(opt => (
+            <button
+              key={opt.label}
+              type="button"
+              className={`crop-aspect-btn${aspect === opt.value ? ' active' : ''}`}
+              onClick={() => { setAspect(opt.value); setCrop({ x: 0, y: 0 }); setCroppedAreaPixels(null) }}
+            >
+              {opt.label}
+            </button>
+          ))}
+          <button type="button" className="crop-aspect-btn crop-rotate-btn" onClick={rotateCW} title="Повернуть по часовой стрелке">
+            ↻ 90°
+          </button>
+        </div>
+
         <div className="crop-modal__canvas">
           <Cropper
             image={images[cropIndex].data_url}
             crop={crop}
             zoom={zoom}
-            aspect={undefined}
+            rotation={rotation}
+            aspect={aspect || undefined}
             onCropChange={setCrop}
             onZoomChange={setZoom}
             onCropComplete={(_, pixels) => setCroppedAreaPixels(pixels)}
@@ -167,9 +212,9 @@ function UploadStep({ onNext }) {
 }
 
 // ── Step 2: Fill details ───────────────────────────────────────────
-function DetailsStep({ images, sessionJwt, userId, onSuccess }) {
+function DetailsStep({ images, sessionJwt, userId, initialArtist, onSuccess }) {
   const [fields, setFields] = useState({ title: '', description: '', materials: '', price: '', width: '', height: '' })
-  const [artist, setArtist] = useState({ id: null, full_name: '' })
+  const [artist, setArtist] = useState(initialArtist || { id: null, full_name: '' })
   const [styles, setStyles] = useState([])
   const [subjects, setSubjects] = useState([])
   const [mediums, setMediums] = useState([])
@@ -177,7 +222,7 @@ function DetailsStep({ images, sessionJwt, userId, onSuccess }) {
   const [aiUsed, setAiUsed] = useState(false)
   const [analyzing, setAnalyzing] = useState(false)
   const [aiError, setAiError] = useState('')
-  const [aiSuggestions, setAiSuggestions] = useState(null) // { style_names, subject_names, medium_names }
+  const [aiSuggestions, setAiSuggestions] = useState(null)
   const [uploading, setUploading] = useState(false)
   const [imageLoadingProcess, setImageLoadingProcess] = useState(null)
   const [errors, setErrors] = useState({})
@@ -217,7 +262,6 @@ function DetailsStep({ images, sessionJwt, userId, onSuccess }) {
     const uploaded = []
     for (let i = 0; i < images.length; i++) {
       const fd = new FormData()
-      // Use cropped data_url as blob if available
       const dataUrl = images[i].data_url
       const blob = await (await fetch(dataUrl)).blob()
       fd.append('files', blob, (images[i].file?.name) || `image_${i}.jpg`)
@@ -329,7 +373,7 @@ function DetailsStep({ images, sessionJwt, userId, onSuccess }) {
             </div>
 
             <div className="form-group-input">
-              <ArtistInput onArtistChange={setArtist} />
+              <ArtistInput onArtistChange={setArtist} initialValue={initialArtist} />
               <YearInput onChange={setDate} />
             </div>
 
@@ -370,6 +414,7 @@ function DetailsStep({ images, sessionJwt, userId, onSuccess }) {
             <MultiSelectInput
               endpoint="mediums"
               label="Техника"
+              titleField="title"
               onChange={setMediums}
               aiNames={aiSuggestions?.medium_names || []}
             />
@@ -392,7 +437,7 @@ function DetailsStep({ images, sessionJwt, userId, onSuccess }) {
 }
 
 // ── Main ───────────────────────────────────────────────────────────
-export default function AddArt({ sessionJwt, userId }) {
+export default function AddArt({ sessionJwt, userId, initialArtist }) {
   const [step, setStep] = useState('upload')
   const [images, setImages] = useState([])
   const [result, setResult] = useState(null)
@@ -409,7 +454,13 @@ export default function AddArt({ sessionJwt, userId }) {
           <UploadStep onNext={imgs => { setImages(imgs); setStep('details') }} />
         )}
         {step === 'details' && (
-          <DetailsStep images={images} sessionJwt={sessionJwt} userId={userId} onSuccess={json => { setResult(json); setStep('success') }} />
+          <DetailsStep
+            images={images}
+            sessionJwt={sessionJwt}
+            userId={userId}
+            initialArtist={initialArtist}
+            onSuccess={json => { setResult(json); setStep('success') }}
+          />
         )}
         {step === 'success' && (
           <div className="form-page__sent">
@@ -427,5 +478,23 @@ export async function getServerSideProps(context) {
   if (!session?.jwt) {
     return { redirect: { destination: '/auth/signin?callbackUrl=/account/add-art', permanent: false } }
   }
-  return { props: { sessionJwt: session.jwt, userId: session.info?.id || null } }
+
+  let initialArtist = null
+  const email = session.info?.email
+  if (email) {
+    try {
+      const { STRAPI_SERVER_URL } = process.env
+      const base = STRAPI_SERVER_URL || process.env.NEXT_PUBLIC_API_URL
+      const res = await fetch(`${base}/artists?filters[email][$eqi]=${encodeURIComponent(email)}&pagination[limit]=1`, {
+        headers: { Authorization: `Bearer ${session.jwt}` },
+      })
+      if (res.ok) {
+        const data = await res.json()
+        const first = data?.data?.[0]
+        if (first) initialArtist = { id: first.id, full_name: first.full_name || first.attributes?.full_name || '' }
+      }
+    } catch {}
+  }
+
+  return { props: { sessionJwt: session.jwt, userId: session.info?.id || null, initialArtist } }
 }
