@@ -72,7 +72,7 @@ module.exports = (plugin) => {
     ctx.send(sanitizeUser(updated, ctx));
   };
 
-  plugin.controllers.user.setPhone = async (ctx) => {
+  plugin.controllers.user.setphone = async (ctx) => {
     const user = ctx.state.user;
     if (!user) return ctx.unauthorized();
     const { phone } = ctx.request.body?.data || ctx.request.body || {};
@@ -85,7 +85,7 @@ module.exports = (plugin) => {
     }
   };
 
-  plugin.controllers.user.setRealEmail = async (ctx) => {
+  plugin.controllers.user.setrealemail = async (ctx) => {
     const user = ctx.state.user;
     if (!user) return ctx.unauthorized();
     const { email } = ctx.request.body?.data || ctx.request.body || {};
@@ -94,7 +94,7 @@ module.exports = (plugin) => {
     ctx.send({ ok: true });
   };
 
-  plugin.controllers.user.claimArtist = async (ctx) => {
+  plugin.controllers.user.claimartist = async (ctx) => {
     const user = ctx.state.user;
     if (!user) return ctx.unauthorized();
     const { artistId } = ctx.request.body?.data || ctx.request.body || {};
@@ -113,9 +113,9 @@ module.exports = (plugin) => {
 
   plugin.routes['content-api'].routes.push(
     { method: 'PUT', path: '/users/me', handler: 'user.updateme', config: { policies: [] } },
-    { method: 'POST', path: '/users/me/set-phone', handler: 'user.setPhone', config: { policies: [] } },
-    { method: 'POST', path: '/users/me/set-email', handler: 'user.setRealEmail', config: { policies: [] } },
-    { method: 'POST', path: '/users/me/claim-artist', handler: 'user.claimArtist', config: { policies: [] } },
+    { method: 'POST', path: '/users/me/set-phone', handler: 'user.setphone', config: { policies: [] } },
+    { method: 'POST', path: '/users/me/set-email', handler: 'user.setrealemail', config: { policies: [] } },
+    { method: 'POST', path: '/users/me/claim-artist', handler: 'user.claimartist', config: { policies: [] } },
   );
 
   return plugin;
