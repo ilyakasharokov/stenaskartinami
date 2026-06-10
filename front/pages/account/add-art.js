@@ -10,164 +10,335 @@ import StylesInput from "@/components/input/styles-input"
 import { normalizeStrapiResponse } from "@/utils/strapi"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/authOptions"
-import Link from "next/link"
 
-export default function AddArt({ sessionJwt, userId }) {
+const MIN_WIDTH = 800
+const MIN_HEIGHT = 600
+
+function getImageDimensions(dataUrl) {
+  return new Promise((resolve) => {
+    const img = new Image()
+    img.onload = () => resolve({ width: img.naturalWidth, height: img.naturalHeight })
+    img.onerror = () => resolve(null)
+    img.src = dataUrl
+  })
+}
+
+// ── Step 1: Upload ─────────────────────────────────────────────────
+function UploadStep({ onNext }) {
   const [images, setImages] = useState([])
-  const [artist, setArtist] = useState({ id: null, name: '' })
-  const [styles, setStyles] = useState([])
-  const [date, setDate] = useState(new Date())
-  const [errors, setErrors] = useState({})
-  const [uploading, setUploading] = useState(false)
-  const [loaded, setLoaded] = useState(null)
-  const [imageLoadingProcess, setImageLoadingProcess] = useState(null)
-  const [analyzing, setAnalyzing] = useState(false)
-  const [aiSuggestions, setAiSuggestions] = useState(null)
-  const formRef = useRef(null)
+  const [quality, setQuality] = useState(null) // null | { ok, w, h }
+  const [checking, setChecking] = useState(false)
 
-  const onImagesChange = useCallback((imageList) => {
-    setImages(imageList)
-    setErrors(e => ({ ...e, imageUploadError: false }))
+  const handleChange = useCallback(async (list) => {
+    setImages(list)
+    setQuality(null)
+    if (!list[0]?.data_url) return
+    setChecking(true)
+    const dims = await getImageDimensions(list[0].data_url)
+    setChecking(false)
+    if (!dims) return
+    setQuality({ ok: dims.width >= MIN_WIDTH && dims.height >= MIN_HEIGHT, ...dims })
   }, [])
 
+  return (
+    <div className="add-art-step">
+      <h2 className="add-art-step__title">Шаг 1 — Загрузите изображение</h2>
+      <p className="add-art-step__hint">
+        Фото при хорошем дневном освещении, без бликов. Рекомендуемое разрешение — не менее {MIN_WIDTH}×{MIN_HEIGHT} пикселей.
+      </p>
+
+      <ImageUploading
+        value={images}
+        onChange={handleChange}
+        maxNumber={5}
+        dataURLKey="data_url"
+        maxFileSize={10485760}
+      >
+        {({ imageList, onImageUpload, onImageRemove, isDragging, dragProps }) => (
+          <div className={`upload__image-wrapper${isDragging ? ' dragging' : ''}`}>
+            {imageList.length === 0 ? (
+              <div className="upload__image-btn" onClick={onImageUpload} {...dragProps}>
+                <img className="upload__logo" src="/images/square_logo.png" alt="" />
+                <strong>Кликните или перетащите изображение</strong>
+                <span>JPG, PNG · до 10 МБ</span>
+              </div>
+            ) : (
+              <div className="upload__preview-list">
+                {imageList.map((img, i) => (
+                  <div key={i} className="upload__preview-item">
+                    <img src={img.data_url} alt="" />
+                    <button type="button" className="upload__remove-btn" onClick={() => onImageRemove(i)}>×</button>
+                  </div>
+                ))}
+                {imageList.length < 5 && (
+                  <div className="upload__add-more" onClick={onImageUpload} {...dragProps}>+ ещё</div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+      </ImageUploading>
+
+      {checking && <p className="add-art-quality add-art-quality--checking">Проверяем качество…</p>}
+
+      {quality && (
+        <div className={`add-art-quality add-art-quality--${quality.ok ? 'ok' : 'warn'}`}>
+          {quality.ok
+            ? `✓ Качество подходит (${quality.width}×${quality.height} px)`
+            : `⚠ Низкое разрешение (${quality.width}×${quality.height} px). Рекомендуем фото получше, но можно продолжить.`}
+        </div>
+      )}
+
+      <div className="add-art-step__actions">
+        <button
+          className="btn"
+          disabled={images.length === 0}
+          onClick={() => onNext(images)}
+        >
+          Далее →
+        </button>
+      </div>
+    </div>
+  )
+}
+
+// ── Step 2: Fill details ───────────────────────────────────────────
+function DetailsStep({ images, sessionJwt, userId, onSuccess }) {
+  const [fields, setFields] = useState({ title: '', description: '', materials: '', price: '', width: '', height: '' })
+  const [artist, setArtist] = useState({ id: null, full_name: '' })
+  const [styles, setStyles] = useState([])
+  const [date, setDate] = useState(new Date())
+  const [aiUsed, setAiUsed] = useState(false)
+  const [analyzing, setAnalyzing] = useState(false)
+  const [aiError, setAiError] = useState('')
+  const [uploading, setUploading] = useState(false)
+  const [imageLoadingProcess, setImageLoadingProcess] = useState(null)
+  const [errors, setErrors] = useState({})
+
+  const set = (key) => (e) => setFields(f => ({ ...f, [key]: e.target.value }))
+
   const analyzeWithAI = async () => {
-    if (!images[0]?.data_url) return
     setAnalyzing(true)
+    setAiError('')
     try {
       const res = await fetch('/api/ai/analyze-art', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ imageDataUrl: images[0].data_url }),
       })
-      if (res.ok) {
-        const data = await res.json()
-        setAiSuggestions(data)
-        if (formRef.current) {
-          if (data.title) formRef.current.elements.Title.value = data.title
-          if (data.description) formRef.current.elements.Description.value = data.description
-          if (data.materials) formRef.current.elements.Materials.value = data.materials
-        }
-      }
-    } catch {}
+      if (!res.ok) throw new Error('Ошибка сервера')
+      const data = await res.json()
+      setFields(f => ({
+        ...f,
+        title: data.title || f.title,
+        description: data.description || f.description,
+        materials: data.materials || f.materials,
+      }))
+      setAiUsed(true)
+    } catch (e) {
+      setAiError(e.message || 'Не удалось проанализировать изображение')
+    }
     setAnalyzing(false)
   }
 
-  async function postArtist(e, artist) {
-    const data = new FormData(e.target)
-    const res = await fetch(API_HOST + '/artists', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        data: {
-          full_name: artist.full_name,
-          description: data.get("Artist_description"),
-        },
-      }),
-    })
-    const json = await res.json()
-    return normalizeStrapiResponse(json)
-  }
-
-  async function uploadImages(imgs) {
+  async function uploadImages() {
     const uploaded = []
-    for (let i = 0; i < imgs.length; i++) {
+    for (let i = 0; i < images.length; i++) {
       const fd = new FormData()
-      fd.append('files', imgs[i].file, imgs[i].file.name)
-      setImageLoadingProcess({ index: i, length: imgs.length })
-      const res = await fetch(API_HOST + '/upload', { method: 'POST', body: fd })
+      fd.append('files', images[i].file, images[i].file.name)
+      setImageLoadingProcess({ index: i, length: images.length })
+      const res = await fetch(API_HOST + '/upload', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${sessionJwt}` },
+        body: fd,
+      })
       const image = normalizeStrapiResponse(await res.json())
       const first = Array.isArray(image) ? image[0] : image
       if (first) uploaded.push(first)
     }
-    setImageLoadingProcess({ index: imgs.length, length: imgs.length })
     return uploaded
   }
 
-  async function submitForm(e) {
+  async function handleSubmit(e) {
     e.preventDefault()
-    if (images.length === 0) {
-      setErrors(er => ({ ...er, imageUploadError: true }))
-      return
-    }
+    const errs = {}
+    if (!fields.title.trim()) errs.title = true
+    if (!fields.description.trim()) errs.description = true
+    if (!fields.materials.trim()) errs.materials = true
+    if (Object.keys(errs).length) { setErrors(errs); return }
+
     setUploading(true)
 
-    if (!artist.id) {
-      const uploadedArtist = await postArtist(e, artist)
-      if (uploadedArtist?.id) {
-        artist.id = uploadedArtist.id
-        setArtist({ id: uploadedArtist.id, full_name: uploadedArtist.full_name })
-      }
+    let artistId = artist.id
+    if (!artistId && artist.full_name?.trim()) {
+      const r = await fetch(API_HOST + '/artists', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${sessionJwt}` },
+        body: JSON.stringify({ data: { full_name: artist.full_name } }),
+      })
+      const a = normalizeStrapiResponse(await r.json())
+      artistId = a?.id || null
     }
 
-    const imagesUploaded = await uploadImages(images)
+    const imagesUploaded = await uploadImages()
     if (!imagesUploaded[0]?.id) {
       setUploading(false)
-      setErrors(er => ({ ...er, imageUploadError: true }))
+      setErrors(er => ({ ...er, upload: true }))
       return
     }
 
-    const data = new FormData(e.target)
-    const ownersPrice = parseInt(data.get("Owners_price")) || 0
-
-    const art = {
-      Title: data.get("Title"),
-      Description: data.get("Description"),
-      Articul: "",
-      Artist: artist.id,
-      Year: date.getFullYear() + '-' + String(date.getMonth() + 1).padStart(2, '0') + '-' + String(date.getDate()).padStart(2, '0'),
-      Materials: data.get("Materials"),
-      Owners_price: ownersPrice,
-      width: data.get("width"),
-      height: data.get("height"),
-      styles,
-      user_uploader: userId,
-      Pictures: imagesUploaded.map(p => p.id),
-    }
-
+    const year = date.getFullYear()
     const res = await fetch(API_HOST + '/artsd', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${sessionJwt}`,
-      },
-      body: JSON.stringify(art),
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${sessionJwt}` },
+      body: JSON.stringify({
+        Title: fields.title,
+        Description: fields.description,
+        Materials: fields.materials,
+        Owners_price: parseInt(fields.price) || 0,
+        width: fields.width,
+        height: fields.height,
+        Year: `${year}-01-01`,
+        Artist: artistId,
+        styles,
+        user_uploader: userId,
+        Pictures: imagesUploaded.map(p => p.id),
+      }),
     })
     const json = normalizeStrapiResponse(await res.json())
     setUploading(false)
-    setLoaded(json)
+    onSuccess(json)
   }
 
-  function resetForm() {
-    setLoaded(null)
+  return (
+    <div className="add-art-step">
+      {uploading && (
+        <div className="overlay">
+          <Preloader>
+            <div className="preloader__text">Загружаем картину…</div>
+            {imageLoadingProcess && (
+              <div>изображение {Math.min(imageLoadingProcess.index + 1, imageLoadingProcess.length)} из {imageLoadingProcess.length}</div>
+            )}
+          </Preloader>
+        </div>
+      )}
+
+      <div className="add-art-details">
+        <div className="add-art-details__preview">
+          <img src={images[0]?.data_url} alt="" />
+          {images.length > 1 && <div className="add-art-details__more-count">+{images.length - 1} фото</div>}
+        </div>
+
+        <div className="add-art-details__form">
+          <h2 className="add-art-step__title">Шаг 2 — Заполните информацию</h2>
+
+          {!aiUsed && (
+            <div className="add-art-ai-block">
+              <button
+                type="button"
+                className="btn btn--outline add-art-ai-btn"
+                onClick={analyzeWithAI}
+                disabled={analyzing}
+              >
+                {analyzing ? 'Анализирую…' : '✦ Определить поля с помощью ИИ'}
+              </button>
+              <span className="add-art-ai-hint">Поля заполнятся автоматически — один раз для этого изображения</span>
+              {aiError && <div className="login-page__error">{aiError}</div>}
+            </div>
+          )}
+          {aiUsed && (
+            <div className="add-art-ai-used">✓ ИИ заполнил поля — проверьте и при необходимости отредактируйте</div>
+          )}
+
+          <form onSubmit={handleSubmit}>
+            <div className="form-input">
+              <label>Название работы *</label>
+              <input
+                type="text"
+                placeholder="Чёрный квадрат"
+                value={fields.title}
+                onChange={set('title')}
+                className={errors.title ? 'input--error' : ''}
+              />
+            </div>
+
+            <div className="form-group-input">
+              <ArtistInput onArtistChange={setArtist} />
+              <YearInput onChange={setDate} />
+            </div>
+
+            <div className="form-group-input">
+              <div className="form-input">
+                <label>Материалы и техника *</label>
+                <input
+                  type="text"
+                  placeholder="Холст, масло"
+                  value={fields.materials}
+                  onChange={set('materials')}
+                  className={errors.materials ? 'input--error' : ''}
+                />
+              </div>
+              <div className="form-input">
+                <label>Размеры, см</label>
+                <div className="form-input__group">
+                  <input type="number" placeholder="100" value={fields.width} onChange={set('width')} />
+                  <div className="form-input__spacer">×</div>
+                  <input type="number" placeholder="100" value={fields.height} onChange={set('height')} />
+                </div>
+              </div>
+            </div>
+
+            <div className="form-input">
+              <label>Описание *</label>
+              <textarea
+                placeholder="Расскажите об этой работе…"
+                value={fields.description}
+                onChange={set('description')}
+                className={errors.description ? 'input--error' : ''}
+                rows={4}
+              />
+            </div>
+
+            <div className="form-group-input">
+              <StylesInput onStylesChange={setStyles} />
+              <div className="form-input">
+                <label>Желаемая цена, ₽</label>
+                <input type="number" placeholder="10000" value={fields.price} onChange={set('price')} />
+              </div>
+            </div>
+
+            {errors.upload && <div className="login-page__error">Ошибка загрузки изображения, попробуйте ещё раз</div>}
+
+            <div className="add-art-step__actions">
+              <button className="btn" type="submit">Отправить на модерацию</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ── Main page ──────────────────────────────────────────────────────
+export default function AddArt({ sessionJwt, userId }) {
+  const [step, setStep] = useState('upload') // 'upload' | 'details' | 'success'
+  const [images, setImages] = useState([])
+  const [result, setResult] = useState(null)
+
+  const handleUploadNext = (imgs) => {
+    setImages(imgs)
+    setStep('details')
+  }
+
+  const handleSuccess = (art) => {
+    setResult(art)
+    setStep('success')
+  }
+
+  const reset = () => {
+    setStep('upload')
     setImages([])
-    setAiSuggestions(null)
-    if (formRef.current) formRef.current.reset()
-  }
-
-  if (loaded?.Title) {
-    return (
-      <MainLayout>
-        <div className="form-page">
-          <div className="form-page__sent">
-            Спасибо! Работа «{loaded.Title}» добавлена в очередь на модерацию, скоро появится на сайте!
-            <button className="btn" onClick={resetForm}>Добавить ещё одну</button>
-          </div>
-        </div>
-      </MainLayout>
-    )
-  }
-
-  if (loaded && !loaded.Title) {
-    return (
-      <MainLayout>
-        <div className="form-page">
-          <div className="form-page__sent">
-            Упс, произошла непредвиденная ошибка :(
-            <button className="btn" onClick={resetForm}>Попробовать заново</button>
-          </div>
-        </div>
-      </MainLayout>
-    )
+    setResult(null)
   }
 
   return (
@@ -176,137 +347,28 @@ export default function AddArt({ sessionJwt, userId }) {
         <title>Добавить картину | Стена с картинами</title>
       </Head>
       <div className="form-page add-art-page">
-        {uploading && (
-          <div className="overlay">
-            <Preloader>
-              <div className="preloader__text">Загружаем картину…</div>
-              {imageLoadingProcess && (
-                <div>
-                  (изображения: {imageLoadingProcess.index === imageLoadingProcess.length
-                    ? imageLoadingProcess.index
-                    : imageLoadingProcess.index + 1} из {imageLoadingProcess.length})
-                </div>
-              )}
-            </Preloader>
-          </div>
+        <h1>Добавить картину</h1>
+
+        {step === 'upload' && <UploadStep onNext={handleUploadNext} />}
+
+        {step === 'details' && (
+          <DetailsStep
+            images={images}
+            sessionJwt={sessionJwt}
+            userId={userId}
+            onSuccess={handleSuccess}
+          />
         )}
 
-        <h1>Добавить картину</h1>
-        <div className="form-page__wrapper">
-          <form ref={formRef} onSubmit={submitForm}>
-
-            <div className="form-group-input">
-              <div className="form-input">
-                <label>Название работы</label>
-                <input type="text" name="Title" placeholder="Чёрный квадрат" required />
-              </div>
-              <YearInput onChange={setDate} />
-            </div>
-
-            <div className="form-group-input">
-              <ArtistInput onArtistChange={setArtist} />
-              <div className="form-input">
-                <label>Размеры (см)</label>
-                <div className="form-input__group">
-                  <input type="number" name="width" placeholder="100" required />
-                  <div className="form-input__spacer">×</div>
-                  <input type="number" name="height" placeholder="100" required />
-                </div>
-              </div>
-            </div>
-
-            {artist?.full_name && artist.id === null && (
-              <div className="form-input">
-                <label>Об авторе</label>
-                <textarea name="Artist_description" placeholder="Краткая биография, творческий путь, участие в выставках…" required />
-              </div>
-            )}
-
-            <h3>Загрузите изображения</h3>
-            <p>Качественные фотографии при хорошем дневном освещении.
-              Чем качественнее фото, тем выше вероятность публикации.</p>
-
-            <ImageUploading
-              multiple
-              value={images}
-              onChange={onImagesChange}
-              maxNumber={5}
-              dataURLKey="data_url"
-              imgExtension={['.jpg', '.png']}
-              maxFileSize={5242880}
-            >
-              {({ imageList, onImageUpload, onImageRemove, isDragging, dragProps }) => (
-                <div className={`upload__image-wrapper${errors.imageUploadError ? ' error' : ''}`}>
-                  <div
-                    className="upload__image-btn"
-                    onClick={onImageUpload}
-                    {...dragProps}
-                  >
-                    <img className="upload__logo" src="/images/square_logo.png" alt="" />
-                    <strong>Кликните или перетащите изображение</strong>
-                    <span>(.jpg, .png, до 5 МБ)</span>
-                    {imageList.length > 0 && (
-                      <div className="upload__images-list">
-                        {imageList.map((image, index) => (
-                          <div key={index} className="image-item">
-                            <img src={image.data_url} alt="" width="100" />
-                            <div className="image-item__btn-wrapper">
-                              <button type="button" onClick={e => { e.stopPropagation(); onImageRemove(index) }}>×</button>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-            </ImageUploading>
-
-            {images.length > 0 && (
-              <div style={{ margin: '8px 0 16px' }}>
-                <button
-                  type="button"
-                  className="btn btn--outline"
-                  onClick={analyzeWithAI}
-                  disabled={analyzing}
-                >
-                  {analyzing ? 'Анализирую…' : '✦ Определить стиль и заполнить поля с помощью ИИ'}
-                </button>
-                {aiSuggestions && (
-                  <div className="ai-suggestions">
-                    <strong>ИИ предложил:</strong>
-                    {aiSuggestions.style && <span> стиль: {aiSuggestions.style};</span>}
-                    {aiSuggestions.subject && <span> тематика: {aiSuggestions.subject}</span>}
-                  </div>
-                )}
-              </div>
-            )}
-
-            <div className="form-input">
-              <label>Описание и история работы</label>
-              <textarea name="Description" placeholder="Напишите об этой работе, её истории, вдохновении…" required />
-            </div>
-
-            <div className="form-group-input">
-              <div className="form-input">
-                <label>Материалы и техника</label>
-                <input type="text" name="Materials" placeholder="Холст, масло" required />
-              </div>
-              <div className="form-input">
-                <label>Желаемая цена (₽)</label>
-                <input type="number" name="Owners_price" placeholder="10000" required />
-              </div>
-            </div>
-
-            <div className="form-group-input">
-              <StylesInput onStylesChange={setStyles} />
-            </div>
-
-            <div className="align-right">
-              <button className="btn" type="submit">Отправить на модерацию</button>
-            </div>
-          </form>
-        </div>
+        {step === 'success' && (
+          <div className="form-page__sent">
+            {result?.Title
+              ? <>Работа «{result.Title}» добавлена и отправлена на модерацию — скоро появится на сайте!</>
+              : <>Работа добавлена и отправлена на модерацию!</>
+            }
+            <button className="btn" onClick={reset} style={{ marginTop: 24 }}>Добавить ещё одну</button>
+          </div>
+        )}
       </div>
     </MainLayout>
   )
