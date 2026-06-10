@@ -1,7 +1,7 @@
 import MainLayout from "@/components/layouts/MainLayout"
 import { API_HOST } from "@/constants/constants"
 import Head from 'next/head'
-import { useState, useCallback, useMemo, Fragment } from "react"
+import { useState, useCallback, useMemo, useRef, Fragment } from "react"
 import ImageUploading from "react-images-uploading"
 import ReactCrop from "react-image-crop"
 import ArtistInput from "@/components/input/artist-input"
@@ -9,8 +9,7 @@ import YearInput from "@/components/input/year-input"
 import Preloader from "@/components/preloader/preloader"
 import MultiSelectInput from "@/components/input/multi-select-input"
 import { normalizeStrapiResponse, fetchStrapi } from "@/utils/strapi"
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/authOptions"
+import { getSession } from "@/lib/getSession"
 
 const MIN_WIDTH = 800
 const MIN_HEIGHT = 600
@@ -242,6 +241,19 @@ function UploadStep({ onNext }) {
   const [completedCrop, setCompletedCrop] = useState(null)
   const [imgRef, setImgRef] = useState(null)
   const [croppedImages, setCroppedImages] = useState([])
+  const addMoreRef = useRef(null)
+
+  const handleAddMore = async (e) => {
+    const files = Array.from(e.target.files || [])
+    if (!files.length) return
+    const newImages = await Promise.all(files.map(file => new Promise(resolve => {
+      const reader = new FileReader()
+      reader.onload = ev => resolve({ data_url: ev.target.result, file })
+      reader.readAsDataURL(file)
+    })))
+    setImages(prev => [...prev, ...newImages].slice(0, 5))
+    e.target.value = ''
+  }
 
   const handleChange = useCallback(async (list) => {
     setImages(list)
@@ -318,6 +330,14 @@ function UploadStep({ onNext }) {
         Чем лучше качество снимка, тем убедительнее выглядит работа.
       </p>
 
+      <input
+        ref={addMoreRef}
+        type="file"
+        accept="image/*"
+        multiple
+        style={{ display: 'none' }}
+        onChange={handleAddMore}
+      />
       <ImageUploading
         value={images}
         onChange={handleChange}
@@ -361,8 +381,7 @@ function UploadStep({ onNext }) {
                 {imageList.length < 5 && (
                   <div
                     className="upload-preview-item upload-preview-item--add"
-                    onClick={onImageUpload}
-                    {...dragProps}
+                    onClick={() => addMoreRef.current?.click()}
                   >
                     + ещё фото
                   </div>
@@ -400,7 +419,7 @@ function UploadStep({ onNext }) {
 
 // ── Step 2: Details ────────────────────────────────────────
 
-function DetailsStep({ images, sessionJwt, userId, initialArtist, onBack, onSuccess }) {
+function DetailsStep({ images, onImagesChange, sessionJwt, userId, initialArtist, onBack, onSuccess }) {
   const [fields, setFields] = useState({
     title: '', description: '', materials: '', price: '', width: '', height: '', depth: '',
   })
@@ -417,6 +436,51 @@ function DetailsStep({ images, sessionJwt, userId, initialArtist, onBack, onSucc
   const [uploading, setUploading] = useState(false)
   const [imageLoadingProcess, setImageLoadingProcess] = useState(null)
   const [errors, setErrors] = useState({})
+  const [cropIndex, setCropIndex] = useState(null)
+  const [cropSrc, setCropSrc] = useState(null)
+  const [crop, setCrop] = useState({})
+  const [completedCrop, setCompletedCrop] = useState(null)
+  const [imgRef, setImgRef] = useState(null)
+
+  const startCrop = (index) => {
+    setCropIndex(index)
+    setCropSrc(images[index].data_url)
+    setCrop({})
+    setCompletedCrop(null)
+    setImgRef(null)
+  }
+
+  const rotateCW = async () => {
+    const rotated = await rotateDataUrl(cropSrc)
+    setCropSrc(rotated)
+    setCrop({})
+    setCompletedCrop(null)
+  }
+
+  const confirmCrop = () => {
+    const dataUrl = completedCrop?.width && completedCrop?.height && imgRef
+      ? applyCrop(imgRef, completedCrop)
+      : cropSrc
+    onImagesChange(images.map((img, i) => i === cropIndex ? { ...img, data_url: dataUrl } : img))
+    setCropIndex(null)
+  }
+
+  const removeImage = (index) => {
+    onImagesChange(images.filter((_, i) => i !== index))
+  }
+
+  const detailsAddMoreRef = useRef(null)
+  const handleDetailsAddMore = async (e) => {
+    const files = Array.from(e.target.files || [])
+    if (!files.length) return
+    const newImages = await Promise.all(files.map(file => new Promise(resolve => {
+      const reader = new FileReader()
+      reader.onload = ev => resolve({ data_url: ev.target.result, file })
+      reader.readAsDataURL(file)
+    })))
+    onImagesChange([...images, ...newImages].slice(0, 5))
+    e.target.value = ''
+  }
 
   const set = key => e => setFields(f => ({ ...f, [key]: e.target.value }))
   const priceSuggestion = usePriceSuggestion(fields.width, fields.height, fields.materials)
@@ -431,22 +495,26 @@ function DetailsStep({ images, sessionJwt, userId, initialArtist, onBack, onSucc
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ imageDataUrl: images[0].data_url }),
       })
-      if (!res.ok) { const d = await res.json(); throw new Error(d.error || 'Ошибка сервера') }
+      if (!res.ok) throw new Error('Ошибка сервера')
       const data = await res.json()
-      setFields(f => ({
-        ...f,
-        title: data.title || f.title,
-        description: data.description || f.description,
-        materials: data.materials || f.materials,
-      }))
-      setAiSuggestions({
-        style_names: data.style_names || [],
-        subject_names: data.subject_names || [],
-        medium_names: data.medium_names || [],
-      })
-      setAiUsed(true)
+      if (data._error) {
+        setAiError(data._error)
+      } else {
+        setFields(f => ({
+          ...f,
+          title: data.title || f.title,
+          description: data.description || f.description,
+          materials: data.materials || f.materials,
+        }))
+        setAiSuggestions({
+          style_names: data.style_names || [],
+          subject_names: data.subject_names || [],
+          medium_names: data.medium_names || [],
+        })
+        setAiUsed(true)
+      }
     } catch (e) {
-      setAiError(e.message || 'Не удалось проанализировать изображение')
+      setAiError('Ошибка ИИ — заполните поля самостоятельно')
     }
     setAnalyzing(false)
   }
@@ -541,19 +609,76 @@ function DetailsStep({ images, sessionJwt, userId, initialArtist, onBack, onSucc
 
       <div className="details-step">
         {/* ── Left: artwork hero ── */}
-        <div className="art-preview-hero">
-          <div className="art-preview-hero__image-wrap">
-            <img src={images[0]?.data_url} alt="Предпросмотр работы" />
-            {aiUsed && <span className="art-preview-hero__ai-badge">✦ AI</span>}
-            <div className="art-preview-hero__zoom">⊕</div>
+        {cropIndex !== null && cropSrc ? (
+          <div className="crop-modal">
+            <div className="crop-modal__header">
+              <span>Обрежьте изображение</span>
+              <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+                <button type="button" className="crop-rotate-btn" onClick={rotateCW}>↻ 90°</button>
+                <button type="button" className="art-btn art-btn--ghost" onClick={() => setCropIndex(null)}>
+                  Пропустить
+                </button>
+              </div>
+            </div>
+            <div className="crop-modal__canvas">
+              <ReactCrop crop={crop} onChange={c => setCrop(c)} onComplete={c => setCompletedCrop(c)}>
+                <img
+                  src={cropSrc}
+                  onLoad={e => setImgRef(e.currentTarget)}
+                  style={{ maxHeight: 480, maxWidth: '100%', display: 'block' }}
+                  alt=""
+                />
+              </ReactCrop>
+            </div>
+            <div className="crop-modal__controls">
+              <button type="button" className="art-btn art-btn--primary" onClick={confirmCrop}>
+                Применить кадрирование
+              </button>
+            </div>
           </div>
-          <button type="button" className="art-preview-hero__change-btn" onClick={onBack}>
-            ← Изменить изображение
-          </button>
-          {images.length > 1 && (
-            <div className="art-preview-hero__more-count">+{images.length - 1} ещё фото</div>
-          )}
-        </div>
+        ) : (
+          <div className="art-preview-hero">
+            <input
+              ref={detailsAddMoreRef}
+              type="file"
+              accept="image/*"
+              multiple
+              style={{ display: 'none' }}
+              onChange={handleDetailsAddMore}
+            />
+            <div className="art-preview-hero__image-wrap">
+              <img src={images[0]?.data_url} alt="Предпросмотр работы" />
+              {aiUsed && <span className="art-preview-hero__ai-badge">✦ AI</span>}
+              <div className="upload-preview-item__overlay">
+                <button type="button" className="upload-preview-item__btn" onClick={() => startCrop(0)} title="Кадрировать">✂</button>
+                {images.length > 1 && (
+                  <button type="button" className="upload-preview-item__btn upload-preview-item__btn--danger" onClick={() => removeImage(0)} title="Удалить">×</button>
+                )}
+              </div>
+            </div>
+            {(images.length > 1 || images.length < 5) && (
+              <div className="upload-preview-grid upload-preview-grid--small">
+                {images.slice(1).map((img, i) => (
+                  <div key={i + 1} className="upload-preview-item">
+                    <img src={img.data_url} alt="" />
+                    <div className="upload-preview-item__overlay">
+                      <button type="button" className="upload-preview-item__btn" onClick={() => startCrop(i + 1)} title="Кадрировать">✂</button>
+                      <button type="button" className="upload-preview-item__btn upload-preview-item__btn--danger" onClick={() => removeImage(i + 1)} title="Удалить">×</button>
+                    </div>
+                  </div>
+                ))}
+                {images.length < 5 && (
+                  <div className="upload-preview-item upload-preview-item--add" onClick={() => detailsAddMoreRef.current?.click()}>
+                    + ещё
+                  </div>
+                )}
+              </div>
+            )}
+            <button type="button" className="art-preview-hero__change-btn" onClick={onBack}>
+              ← Изменить изображение
+            </button>
+          </div>
+        )}
 
         {/* ── Right: form ── */}
         <form className="details-form" onSubmit={handleSubmit}>
@@ -765,6 +890,7 @@ export default function AddArt({ sessionJwt, userId, initialArtist }) {
         {step === 'details' && (
           <DetailsStep
             images={images}
+            onImagesChange={setImages}
             sessionJwt={sessionJwt}
             userId={userId}
             initialArtist={initialArtist}
@@ -781,7 +907,7 @@ export default function AddArt({ sessionJwt, userId, initialArtist }) {
 }
 
 export async function getServerSideProps(context) {
-  const session = await getServerSession(context.req, context.res, authOptions)
+  const session = await getSession(context.req, context.res)
   if (!session?.jwt) {
     return { redirect: { destination: '/auth/signin?callbackUrl=/account/add-art', permanent: false } }
   }
