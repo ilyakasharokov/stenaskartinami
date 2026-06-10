@@ -9,7 +9,7 @@ import dynamic from 'next/dynamic';
 
 const TelegramLoginButton = dynamic(() => import('@/components/auth/TelegramLoginButton'), { ssr: false });
 
-export default function SignUp() {
+export default function SignUp({ smsEnabled }) {
   const [step, setStep] = useState('phone');
   const [phone, setPhone] = useState('');
   const [username, setUsername] = useState('');
@@ -91,11 +91,9 @@ export default function SignUp() {
             <div className="login-page__text">Стена с картинами</div>
           </div>
 
-          <div className="login-page__title">
-            {step === 'phone' ? 'Регистрация' : 'Введите код'}
-          </div>
+          <div className="login-page__title">Регистрация</div>
 
-          {step === 'phone' && (
+          {smsEnabled && step === 'phone' && (
             <form className="login-page__form" onSubmit={handleSendOtp}>
               <input
                 type="text"
@@ -119,7 +117,7 @@ export default function SignUp() {
             </form>
           )}
 
-          {step === 'otp' && (
+          {smsEnabled && step === 'otp' && (
             <form className="login-page__form" onSubmit={handleVerifyOtp}>
               <div className="login-page__hint">Код отправлен на {phone}</div>
               <input
@@ -142,11 +140,13 @@ export default function SignUp() {
             </form>
           )}
 
-          <div className="login-page__divider">или</div>
+          {smsEnabled && <div className="login-page__divider">или</div>}
 
           <div className="login-page__social">
             <TelegramLoginButton onAuth={handleTelegramAuth} />
           </div>
+
+          {error && !smsEnabled && <div className="login-page__error">{error}</div>}
 
           <div className="login-page__signup-link">
             Уже есть аккаунт? <Link href="/auth/signin">Войти</Link>
@@ -162,5 +162,5 @@ export async function getServerSideProps(context) {
   if (session) {
     return { redirect: { destination: '/', permanent: false } };
   }
-  return { props: {} };
+  return { props: { smsEnabled: process.env.NEXT_PUBLIC_SMS_ENABLED !== 'false' } };
 }

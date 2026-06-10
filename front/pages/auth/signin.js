@@ -29,6 +29,7 @@ function GoogleIcon() {
 }
 
 export default function SignIn({ authError }) {
+  const smsEnabled = process.env.NEXT_PUBLIC_SMS_ENABLED !== 'false';
   const [tab, setTab] = useState('email'); // 'email' | 'phone'
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -132,22 +133,24 @@ export default function SignIn({ authError }) {
 
           <div className="login-page__title">Войти</div>
 
-          <div className="login-page__tabs">
-            <button
-              type="button"
-              className={`login-page__tab${tab === 'email' ? ' active' : ''}`}
-              onClick={() => switchTab('email')}
-            >
-              Email
-            </button>
-            <button
-              type="button"
-              className={`login-page__tab${tab === 'phone' ? ' active' : ''}`}
-              onClick={() => switchTab('phone')}
-            >
-              Телефон
-            </button>
-          </div>
+          {smsEnabled && (
+            <div className="login-page__tabs">
+              <button
+                type="button"
+                className={`login-page__tab${tab === 'email' ? ' active' : ''}`}
+                onClick={() => switchTab('email')}
+              >
+                Email
+              </button>
+              <button
+                type="button"
+                className={`login-page__tab${tab === 'phone' ? ' active' : ''}`}
+                onClick={() => switchTab('phone')}
+              >
+                Телефон
+              </button>
+            </div>
+          )}
 
           {tab === 'email' && (
             <form className="login-page__form" onSubmit={handleEmailSubmit}>
@@ -160,7 +163,7 @@ export default function SignIn({ authError }) {
             </form>
           )}
 
-          {tab === 'phone' && otpStep === 'phone' && (
+          {smsEnabled && tab === 'phone' && otpStep === 'phone' && (
             <form className="login-page__form" onSubmit={handleSendOtp}>
               <input
                 type="tel"
@@ -177,7 +180,7 @@ export default function SignIn({ authError }) {
             </form>
           )}
 
-          {tab === 'phone' && otpStep === 'code' && (
+          {smsEnabled && tab === 'phone' && otpStep === 'code' && (
             <form className="login-page__form" onSubmit={handleVerifyOtp}>
               <div className="login-page__hint">Код отправлен на {phone}</div>
               <input

@@ -277,10 +277,11 @@ export async function getServerSideProps(context) {
     if (r.ok) userInfo = await r.json();
   } catch {}
 
+  const smsEnabled = process.env.NEXT_PUBLIC_SMS_ENABLED !== 'false';
   const steps = [];
   if (userInfo) {
-    if (needsPhone(userInfo)) steps.push('phone');
-    if (needsEmail(userInfo)) steps.push('email');
+    if (smsEnabled && needsPhone(userInfo)) steps.push('phone');
+    if (smsEnabled && needsEmail(userInfo)) steps.push('email');
     // Always offer artist claim if not yet claimed
     if (!userInfo.pending_artist) steps.push('artist');
   }
