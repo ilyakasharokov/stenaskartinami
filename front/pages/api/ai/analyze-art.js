@@ -30,7 +30,7 @@ export default async function handler(req, res) {
         body: JSON.stringify({
           model: `gpt://${process.env.YC_FOLDER_ID}/qwen3.6-35b-a3b`,
           temperature: 0.6,
-          max_tokens: 8000,
+          max_tokens: 3000,
           messages: [
             {
               role: 'system',
