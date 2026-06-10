@@ -24,7 +24,7 @@ export default function Menu(){
     }, 
     {
       title: 'Добавить картину',
-      link: '/account/add-art'
+      link: '/add-art'
     },    
     {
       title: 'Добавить стену',
