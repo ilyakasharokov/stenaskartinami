@@ -3,7 +3,7 @@ import { API_HOST } from "@/constants/constants"
 import Head from 'next/head'
 import { useState, useCallback } from "react"
 import ImageUploading from "react-images-uploading"
-import Cropper from "react-easy-crop"
+import ReactCrop from "react-image-crop"
 import ArtistInput from "@/components/input/artist-input"
 import YearInput from "@/components/input/year-input"
 import Preloader from "@/components/preloader/preloader"
@@ -15,14 +15,6 @@ import { authOptions } from "@/lib/authOptions"
 const MIN_WIDTH = 800
 const MIN_HEIGHT = 600
 
-const ASPECT_OPTIONS = [
-  { label: '⬜ Свободно', value: null },
-  { label: '1:1', value: 1 },
-  { label: '4:3', value: 4/3 },
-  { label: '3:4', value: 3/4 },
-  { label: '16:9', value: 16/9 },
-]
-
 function getImageDimensions(dataUrl) {
   return new Promise(resolve => {
     const img = new Image()
@@ -32,33 +24,36 @@ function getImageDimensions(dataUrl) {
   })
 }
 
-async function getCroppedDataUrl(imageSrc, pixelCrop, rotation = 0) {
-  const image = await new Promise((resolve, reject) => {
+function rotateDataUrl(dataUrl) {
+  return new Promise(resolve => {
     const img = new Image()
-    img.onload = () => resolve(img)
-    img.onerror = reject
-    img.src = imageSrc
+    img.onload = () => {
+      const canvas = document.createElement('canvas')
+      canvas.width = img.height
+      canvas.height = img.width
+      const ctx = canvas.getContext('2d')
+      ctx.translate(canvas.width / 2, canvas.height / 2)
+      ctx.rotate(Math.PI / 2)
+      ctx.drawImage(img, -img.width / 2, -img.height / 2)
+      resolve(canvas.toDataURL('image/jpeg', 0.92))
+    }
+    img.src = dataUrl
   })
+}
 
-  const rad = (rotation * Math.PI) / 180
-  const sin = Math.abs(Math.sin(rad))
-  const cos = Math.abs(Math.cos(rad))
-  const bboxW = Math.round(image.width * cos + image.height * sin)
-  const bboxH = Math.round(image.width * sin + image.height * cos)
-
+function applyCrop(imgEl, completedCrop) {
+  const scaleX = imgEl.naturalWidth / imgEl.width
+  const scaleY = imgEl.naturalHeight / imgEl.height
   const canvas = document.createElement('canvas')
-  canvas.width = bboxW
-  canvas.height = bboxH
-  const ctx = canvas.getContext('2d')
-  ctx.translate(bboxW / 2, bboxH / 2)
-  ctx.rotate(rad)
-  ctx.drawImage(image, -image.width / 2, -image.height / 2)
-
-  const rotated = document.createElement('canvas')
-  rotated.width = pixelCrop.width
-  rotated.height = pixelCrop.height
-  rotated.getContext('2d').drawImage(canvas, pixelCrop.x, pixelCrop.y, pixelCrop.width, pixelCrop.height, 0, 0, pixelCrop.width, pixelCrop.height)
-  return rotated.toDataURL('image/jpeg', 0.92)
+  canvas.width = Math.round(completedCrop.width * scaleX)
+  canvas.height = Math.round(completedCrop.height * scaleY)
+  canvas.getContext('2d').drawImage(
+    imgEl,
+    completedCrop.x * scaleX, completedCrop.y * scaleY,
+    completedCrop.width * scaleX, completedCrop.height * scaleY,
+    0, 0, canvas.width, canvas.height
+  )
+  return canvas.toDataURL('image/jpeg', 0.92)
 }
 
 // ── Step 1: Upload + Crop ──────────────────────────────────────────
@@ -67,11 +62,10 @@ function UploadStep({ onNext }) {
   const [quality, setQuality] = useState(null)
   const [checking, setChecking] = useState(false)
   const [cropIndex, setCropIndex] = useState(null)
-  const [crop, setCrop] = useState({ x: 0, y: 0 })
-  const [zoom, setZoom] = useState(1)
-  const [rotation, setRotation] = useState(0)
-  const [aspect, setAspect] = useState(null)
-  const [croppedAreaPixels, setCroppedAreaPixels] = useState(null)
+  const [cropSrc, setCropSrc] = useState(null)     // possibly rotated data url shown in cropper
+  const [crop, setCrop] = useState({})
+  const [completedCrop, setCompletedCrop] = useState(null)
+  const [imgRef, setImgRef] = useState(null)
   const [croppedImages, setCroppedImages] = useState([])
 
   const handleChange = useCallback(async (list) => {
@@ -87,15 +81,26 @@ function UploadStep({ onNext }) {
 
   const startCrop = (index) => {
     setCropIndex(index)
-    setCrop({ x: 0, y: 0 })
-    setZoom(1)
-    setRotation(0)
-    setAspect(null)
-    setCroppedAreaPixels(null)
+    setCropSrc(croppedImages[index] || images[index].data_url)
+    setCrop({})
+    setCompletedCrop(null)
+    setImgRef(null)
   }
 
-  const confirmCrop = async () => {
-    const dataUrl = await getCroppedDataUrl(images[cropIndex].data_url, croppedAreaPixels, rotation)
+  const rotateCW = async () => {
+    const rotated = await rotateDataUrl(cropSrc)
+    setCropSrc(rotated)
+    setCrop({})
+    setCompletedCrop(null)
+  }
+
+  const confirmCrop = () => {
+    let dataUrl
+    if (completedCrop?.width && completedCrop?.height && imgRef) {
+      dataUrl = applyCrop(imgRef, completedCrop)
+    } else {
+      dataUrl = cropSrc
+    }
     setCroppedImages(prev => {
       const next = [...prev]
       next[cropIndex] = dataUrl
@@ -106,52 +111,37 @@ function UploadStep({ onNext }) {
 
   const skipCrop = () => setCropIndex(null)
 
-  const rotateCW = () => setRotation(r => (r + 90) % 360)
-
   const finalImages = images.map((img, i) => ({
     ...img,
     data_url: croppedImages[i] || img.data_url,
   }))
 
-  if (cropIndex !== null && images[cropIndex]) {
+  if (cropIndex !== null && cropSrc) {
     return (
       <div className="crop-modal">
         <div className="crop-modal__header">
           <span>Обрежьте изображение</span>
-          <button className="login-page__link-btn" onClick={skipCrop}>Пропустить</button>
+          <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+            <button type="button" className="crop-rotate-btn" onClick={rotateCW}>↻ 90°</button>
+            <button className="login-page__link-btn" onClick={skipCrop}>Пропустить</button>
+          </div>
         </div>
-
-        <div className="crop-modal__aspect-btns">
-          {ASPECT_OPTIONS.map(opt => (
-            <button
-              key={opt.label}
-              type="button"
-              className={`crop-aspect-btn${aspect === opt.value ? ' active' : ''}`}
-              onClick={() => { setAspect(opt.value); setCrop({ x: 0, y: 0 }); setCroppedAreaPixels(null) }}
-            >
-              {opt.label}
-            </button>
-          ))}
-          <button type="button" className="crop-aspect-btn crop-rotate-btn" onClick={rotateCW} title="Повернуть по часовой стрелке">
-            ↻ 90°
-          </button>
-        </div>
-
         <div className="crop-modal__canvas">
-          <Cropper
-            image={images[cropIndex].data_url}
+          <ReactCrop
             crop={crop}
-            zoom={zoom}
-            rotation={rotation}
-            aspect={aspect || undefined}
-            onCropChange={setCrop}
-            onZoomChange={setZoom}
-            onCropComplete={(_, pixels) => setCroppedAreaPixels(pixels)}
-          />
+            onChange={c => setCrop(c)}
+            onComplete={c => setCompletedCrop(c)}
+          >
+            <img
+              src={cropSrc}
+              onLoad={e => setImgRef(e.currentTarget)}
+              style={{ maxHeight: 480, maxWidth: '100%', display: 'block' }}
+              alt=""
+            />
+          </ReactCrop>
         </div>
         <div className="crop-modal__controls">
-          <input type="range" min={1} max={3} step={0.05} value={zoom} onChange={e => setZoom(Number(e.target.value))} />
-          <button className="btn" onClick={confirmCrop} disabled={!croppedAreaPixels}>Применить</button>
+          <button className="btn" onClick={confirmCrop}>Применить</button>
         </div>
       </div>
     )

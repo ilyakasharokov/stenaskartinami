@@ -1,4 +1,5 @@
 import '../styles/index.scss'
+import 'react-image-crop/dist/ReactCrop.css'
 import { SessionProvider as Provider } from 'next-auth/react'
 import Head from 'next/head'
 
