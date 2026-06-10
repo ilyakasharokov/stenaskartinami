@@ -39,38 +39,74 @@ export default function MultiSelectInput({ endpoint, label, titleField = 'Title'
     })
   }
 
+  function isAiMatch(opt) {
+    if (!aiNames.length) return false
+    const name = (opt[titleField] || '').toLowerCase().trim()
+    return aiNames.some(n => name.includes(n.toLowerCase().trim()) || n.toLowerCase().trim().includes(name))
+  }
+
   const filterLower = filter.toLowerCase()
-  const visible = filter
-    ? options.filter(opt => (opt[titleField] || '').toLowerCase().includes(filterLower))
-    : options
+  const selectedOptions = options.filter(opt => selected.has(opt.id))
+  const availableOptions = options.filter(opt =>
+    !selected.has(opt.id) &&
+    (!filter || (opt[titleField] || '').toLowerCase().includes(filterLower))
+  )
 
   return (
-    <div className="form-input">
-      <label>{label}</label>
-      {options.length > 8 && (
-        <input
-          type="text"
-          className="multi-select-filter"
-          placeholder={`Фильтр…`}
-          value={filter}
-          onChange={e => setFilter(e.target.value)}
-        />
-      )}
-      <div className="form-input__hints-wrapper">
-        <div className="form-input__hints">
-          {visible.map(opt => (
-            <div
-              key={opt.id}
-              className={`form-input__suggestion${selected.has(opt.id) ? ' active' : ''}`}
+    <div className="ms-field">
+      <label className="art-field__label">{label}</label>
+
+      {/* Selected pills */}
+      <div className="ms-selected">
+        {selectedOptions.map(opt => (
+          <span key={opt.id} className={`ms-pill${isAiMatch(opt) ? ' ms-pill--ai' : ''}`}>
+            {isAiMatch(opt) && <span className="ms-pill__icon">✦</span>}
+            {opt[titleField]}
+            <button
+              type="button"
+              className="ms-pill__remove"
               onClick={() => toggle(opt.id)}
+              aria-label={`Убрать ${opt[titleField]}`}
             >
-              {opt[titleField]}
-            </div>
-          ))}
-          {visible.length === 0 && filter && (
-            <span className="multi-select-empty">Ничего не найдено</span>
-          )}
+              ×
+            </button>
+          </span>
+        ))}
+      </div>
+
+      {/* Search filter */}
+      {options.length > 7 && (
+        <div className="ms-search-wrap">
+          <i className="ms-search-wrap__icon">⌕</i>
+          <input
+            type="text"
+            placeholder={`Поиск…`}
+            value={filter}
+            onChange={e => setFilter(e.target.value)}
+          />
         </div>
+      )}
+
+      {/* Available chips */}
+      <div className="ms-options">
+        {availableOptions.map(opt => (
+          <div
+            key={opt.id}
+            className={`ms-chip${isAiMatch(opt) ? ' ms-chip--ai-hint' : ''}`}
+            onClick={() => toggle(opt.id)}
+            role="button"
+            tabIndex={0}
+            onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && toggle(opt.id)}
+          >
+            {opt[titleField]}
+          </div>
+        ))}
+        {availableOptions.length === 0 && filter && (
+          <span className="ms-empty-hint">Ничего не найдено по «{filter}»</span>
+        )}
+        {availableOptions.length === 0 && !filter && selectedOptions.length > 0 && (
+          <span className="ms-empty-hint">Все варианты выбраны</span>
+        )}
       </div>
     </div>
   )
