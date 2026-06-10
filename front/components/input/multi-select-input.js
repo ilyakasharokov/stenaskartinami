@@ -19,16 +19,17 @@ export default function MultiSelectInput({ endpoint, label, titleField = 'Title'
   useEffect(() => {
     if (!aiNames.length || !options.length) return
     const newSelected = new Set()
+    const matched = new Set()
     for (const opt of options) {
       const name = (opt[titleField] || '').toLowerCase().trim()
-      if (aiNames.some(n => name.includes(n.toLowerCase().trim()) || n.toLowerCase().trim().includes(name))) {
-        newSelected.add(opt.id)
-      }
+      const hit = aiNames.find(n => name.includes(n.toLowerCase().trim()) || n.toLowerCase().trim().includes(name))
+      if (hit) { newSelected.add(opt.id); matched.add(hit.toLowerCase().trim()) }
     }
-    if (newSelected.size > 0) {
-      setSelected(newSelected)
-      onChange({ ids: [...newSelected], custom })
-    }
+    const unmatched = aiNames.filter(n => !matched.has(n.toLowerCase().trim()))
+    const newCustom = unmatched.filter(n => n.trim())
+    setSelected(newSelected)
+    setCustom(newCustom)
+    onChange({ ids: [...newSelected], custom: newCustom })
   }, [aiNames, options])
 
   function notify(nextSelected, nextCustom) {
