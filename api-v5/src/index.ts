@@ -60,6 +60,39 @@ export default {
 
     await ensurePublicUploadPermissions();
 
+    const ensureAuthenticatedPermissions = async () => {
+      const role = await strapi.db
+        .query('plugin::users-permissions.role')
+        .findOne({ where: { type: 'authenticated' } });
+      if (!role) return;
+
+      const actions = [
+        'plugin::users-permissions.user.setphone',
+        'plugin::users-permissions.user.setrealemail',
+        'plugin::users-permissions.user.claimartist',
+      ];
+
+      const existing = await strapi.db
+        .query('plugin::users-permissions.permission')
+        .findMany({
+          where: { role: role.id, action: { $in: actions } },
+          select: ['action'],
+        });
+
+      const existingActions = new Set((existing || []).map((item: any) => item.action));
+      const missing = actions.filter((action) => !existingActions.has(action));
+
+      await Promise.all(
+        missing.map((action) =>
+          strapi.db.query('plugin::users-permissions.permission').create({
+            data: { action, role: role.id },
+          })
+        )
+      );
+    };
+
+    await ensureAuthenticatedPermissions();
+
     const ensureUploadFilesPublished = async () => {
       const now = new Date().toISOString();
       await strapi.db.query('plugin::upload.file').updateMany({

@@ -19,7 +19,8 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Неверный код' });
     }
 
-    const r = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/me/set-phone`, {
+    const STRAPI = process.env.STRAPI_SERVER_URL || process.env.NEXT_PUBLIC_API_URL;
+    const r = await fetch(`${STRAPI}/users/me/set-phone`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.jwt}` },
       body: JSON.stringify({ phone: payload.phone }),
