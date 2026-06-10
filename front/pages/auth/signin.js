@@ -41,7 +41,7 @@ export default function SignIn({ authError }) {
     const res = await signIn('credentials', { email, password, redirect: false });
     setLoading(false);
     if (res?.error) { setError('Неверный email или пароль'); return; }
-    Router.push('/');
+    Router.push('/auth/onboarding');
   };
 
   const handleTelegramAuth = useCallback(async (tgUser) => {
@@ -63,7 +63,7 @@ export default function SignIn({ authError }) {
         redirect: false,
       });
       if (result?.error) { setLoading(false); setError('Ошибка входа через Telegram'); return; }
-      Router.push('/');
+      Router.push('/auth/onboarding');
     } catch {
       setLoading(false);
       setError('Ошибка входа через Telegram');
