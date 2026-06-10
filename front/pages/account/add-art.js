@@ -1,7 +1,7 @@
 import MainLayout from "@/components/layouts/MainLayout"
 import { API_HOST } from "@/constants/constants"
 import Head from 'next/head'
-import { useState, useCallback, useMemo, useRef, Fragment } from "react"
+import { useState, useCallback, useMemo, useRef, useEffect, Fragment } from "react"
 import ImageUploading from "react-images-uploading"
 import ReactCrop from "react-image-crop"
 import ArtistInput from "@/components/input/artist-input"
