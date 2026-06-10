@@ -987,6 +987,18 @@
     color: var(--c-ai);
     background: var(--c-ai-bg);
   }
+
+  &--add {
+    border-style: dashed;
+    border-color: var(--c-border-focus);
+    color: var(--c-text-sec);
+    &:hover { background: rgba(0,0,0,0.03); color: var(--c-text); }
+  }
+}
+
+.ms-pill--custom {
+  background: rgba(0,0,0,0.04);
+  border-color: var(--c-border-focus);
 }
 
 .ms-empty-hint {

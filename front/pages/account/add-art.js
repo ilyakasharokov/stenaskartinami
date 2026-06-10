@@ -447,9 +447,9 @@ function DetailsStep({ images, onImagesChange, sessionJwt, userId, initialArtist
   })
   const [unit, setUnit] = useState('см')
   const [artist, setArtist] = useState(initialArtist || { id: null, full_name: '' })
-  const [styles, setStyles] = useState([])
-  const [subjects, setSubjects] = useState([])
-  const [mediums, setMediums] = useState([])
+  const [styles, setStyles] = useState({ ids: [], custom: [] })
+  const [subjects, setSubjects] = useState({ ids: [], custom: [] })
+  const [mediums, setMediums] = useState({ ids: [], custom: [] })
   const [date, setDate] = useState(new Date())
   const [aiUsed, setAiUsed] = useState(false)
   const [analyzing, setAnalyzing] = useState(false)
@@ -536,7 +536,6 @@ function DetailsStep({ images, onImagesChange, sessionJwt, userId, initialArtist
       } else {
         setFields(f => ({
           ...f,
-          title: data.title || f.title,
           description: data.description || f.description,
           materials: data.materials || f.materials,
         }))
@@ -594,6 +593,32 @@ function DetailsStep({ images, onImagesChange, sessionJwt, userId, initialArtist
       artistId = a?.id || null
     }
 
+    async function createCustomEntries(endpoint, nameField, names) {
+      const ids = []
+      for (const name of names) {
+        try {
+          const r = await fetch(API_HOST + `/${endpoint}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${sessionJwt}` },
+            body: JSON.stringify({ data: { [nameField]: name } }),
+          })
+          const item = normalizeStrapiResponse(await r.json())
+          if (item?.id) ids.push(item.id)
+        } catch {}
+      }
+      return ids
+    }
+
+    const [customStyleIds, customSubjectIds, customMediumIds] = await Promise.all([
+      createCustomEntries('styles', 'Title', styles.custom),
+      createCustomEntries('subjects', 'Title', subjects.custom),
+      createCustomEntries('mediums', 'title', mediums.custom),
+    ])
+
+    const allStyles = [...styles.ids, ...customStyleIds]
+    const allSubjects = [...subjects.ids, ...customSubjectIds]
+    const allMediums = [...mediums.ids, ...customMediumIds]
+
     const imagesUploaded = await uploadImages()
     if (!imagesUploaded[0]?.id) {
       setUploading(false)
@@ -614,9 +639,9 @@ function DetailsStep({ images, onImagesChange, sessionJwt, userId, initialArtist
         height: fields.height,
         Year: `${year}-01-01`,
         Artist: artistId,
-        styles,
-        subjects,
-        mediums,
+        styles: allStyles,
+        subjects: allSubjects,
+        mediums: allMediums,
         user_uploader: userId,
         Pictures: imagesUploaded.map(p => p.id),
       }),

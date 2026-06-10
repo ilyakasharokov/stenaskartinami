@@ -5,6 +5,7 @@ import { fetchStrapi } from '@/utils/strapi'
 export default function MultiSelectInput({ endpoint, label, titleField = 'Title', onChange, aiNames = [] }) {
   const [options, setOptions] = useState([])
   const [selected, setSelected] = useState(new Set())
+  const [custom, setCustom] = useState([]) // string[]
   const [filter, setFilter] = useState('')
 
   useEffect(() => {
@@ -26,17 +27,36 @@ export default function MultiSelectInput({ endpoint, label, titleField = 'Title'
     }
     if (newSelected.size > 0) {
       setSelected(newSelected)
-      onChange([...newSelected])
+      onChange({ ids: [...newSelected], custom })
     }
   }, [aiNames, options])
+
+  function notify(nextSelected, nextCustom) {
+    onChange({ ids: [...nextSelected], custom: nextCustom })
+  }
 
   function toggle(id) {
     setSelected(prev => {
       const next = new Set(prev)
       next.has(id) ? next.delete(id) : next.add(id)
-      onChange([...next])
+      notify(next, custom)
       return next
     })
+  }
+
+  function addCustom(text) {
+    const trimmed = text.trim()
+    if (!trimmed || custom.includes(trimmed)) return
+    const next = [...custom, trimmed]
+    setCustom(next)
+    notify(selected, next)
+    setFilter('')
+  }
+
+  function removeCustom(text) {
+    const next = custom.filter(c => c !== text)
+    setCustom(next)
+    notify(selected, next)
   }
 
   function isAiMatch(opt) {
@@ -51,6 +71,9 @@ export default function MultiSelectInput({ endpoint, label, titleField = 'Title'
     !selected.has(opt.id) &&
     (!filter || (opt[titleField] || '').toLowerCase().includes(filterLower))
   )
+  const canAddCustom = filter.trim().length > 1 &&
+    !options.some(o => (o[titleField] || '').toLowerCase() === filter.toLowerCase()) &&
+    !custom.includes(filter.trim())
 
   return (
     <div className="ms-field">
@@ -62,30 +85,33 @@ export default function MultiSelectInput({ endpoint, label, titleField = 'Title'
           <span key={opt.id} className={`ms-pill${isAiMatch(opt) ? ' ms-pill--ai' : ''}`}>
             {isAiMatch(opt) && <span className="ms-pill__icon">✦</span>}
             {opt[titleField]}
-            <button
-              type="button"
-              className="ms-pill__remove"
-              onClick={() => toggle(opt.id)}
-              aria-label={`Убрать ${opt[titleField]}`}
-            >
-              ×
-            </button>
+            <button type="button" className="ms-pill__remove" onClick={() => toggle(opt.id)}>×</button>
+          </span>
+        ))}
+        {custom.map(text => (
+          <span key={text} className="ms-pill ms-pill--custom">
+            {text}
+            <button type="button" className="ms-pill__remove" onClick={() => removeCustom(text)}>×</button>
           </span>
         ))}
       </div>
 
-      {/* Search filter */}
-      {options.length > 7 && (
-        <div className="ms-search-wrap">
-          <i className="ms-search-wrap__icon">⌕</i>
-          <input
-            type="text"
-            placeholder={`Поиск…`}
-            value={filter}
-            onChange={e => setFilter(e.target.value)}
-          />
-        </div>
-      )}
+      {/* Search / add input */}
+      <div className="ms-search-wrap">
+        <i className="ms-search-wrap__icon">⌕</i>
+        <input
+          type="text"
+          placeholder={`Поиск или свой вариант…`}
+          value={filter}
+          onChange={e => setFilter(e.target.value)}
+          onKeyDown={e => {
+            if ((e.key === 'Enter' || e.key === ',') && canAddCustom) {
+              e.preventDefault()
+              addCustom(filter)
+            }
+          }}
+        />
+      </div>
 
       {/* Available chips */}
       <div className="ms-options">
@@ -101,10 +127,18 @@ export default function MultiSelectInput({ endpoint, label, titleField = 'Title'
             {opt[titleField]}
           </div>
         ))}
-        {availableOptions.length === 0 && filter && (
-          <span className="ms-empty-hint">Ничего не найдено по «{filter}»</span>
+        {canAddCustom && (
+          <div
+            className="ms-chip ms-chip--add"
+            onClick={() => addCustom(filter)}
+            role="button"
+            tabIndex={0}
+            onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && addCustom(filter)}
+          >
+            + Добавить «{filter.trim()}»
+          </div>
         )}
-        {availableOptions.length === 0 && !filter && selectedOptions.length > 0 && (
+        {availableOptions.length === 0 && !canAddCustom && !filter && selectedOptions.length > 0 && (
           <span className="ms-empty-hint">Все варианты выбраны</span>
         )}
       </div>
