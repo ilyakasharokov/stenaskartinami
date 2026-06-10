@@ -29,18 +29,60 @@ function GoogleIcon() {
 }
 
 export default function SignIn({ authError }) {
+  const [tab, setTab] = useState('email'); // 'email' | 'phone'
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [phone, setPhone] = useState('');
+  const [code, setCode] = useState('');
+  const [otpToken, setOtpToken] = useState('');
+  const [otpStep, setOtpStep] = useState('phone'); // 'phone' | 'code'
   const [error, setError] = useState(authError || '');
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e) => {
+  const handleEmailSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setLoading(true);
     const res = await signIn('credentials', { email, password, redirect: false });
     setLoading(false);
     if (res?.error) { setError('Неверный email или пароль'); return; }
+    Router.push('/auth/onboarding');
+  };
+
+  const handleSendOtp = async (e) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
+    const res = await fetch('/api/auth/send-otp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ phone }),
+    });
+    const data = await res.json();
+    setLoading(false);
+    if (!res.ok) { setError(data.error); return; }
+    setOtpToken(data.token);
+    setOtpStep('code');
+  };
+
+  const handleVerifyOtp = async (e) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
+    const res = await fetch('/api/auth/verify-otp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token: otpToken, code }),
+    });
+    const data = await res.json();
+    if (!res.ok) { setLoading(false); setError(data.error); return; }
+    await signIn('phone', {
+      strapiJwt: data.jwt,
+      userId: String(data.user.id),
+      userName: data.user.username,
+      userEmail: data.user.email,
+      redirect: false,
+    });
     Router.push('/auth/onboarding');
   };
 
@@ -70,6 +112,14 @@ export default function SignIn({ authError }) {
     }
   }, []);
 
+  const switchTab = (t) => {
+    setTab(t);
+    setError('');
+    setOtpStep('phone');
+    setCode('');
+    setOtpToken('');
+  };
+
   return (
     <>
       <Head><title>Войти | Стена с картинами</title></Head>
@@ -82,14 +132,73 @@ export default function SignIn({ authError }) {
 
           <div className="login-page__title">Войти</div>
 
-          <form className="login-page__form" onSubmit={handleSubmit}>
-            <input type="email" placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} required />
-            <input type="password" placeholder="Пароль" value={password} onChange={e => setPassword(e.target.value)} required />
-            {error && <div className="login-page__error">{error}</div>}
-            <button type="submit" className="login-page__btn-primary" disabled={loading}>
-              {loading ? 'Вход...' : 'Войти'}
+          <div className="login-page__tabs">
+            <button
+              type="button"
+              className={`login-page__tab${tab === 'email' ? ' active' : ''}`}
+              onClick={() => switchTab('email')}
+            >
+              Email
             </button>
-          </form>
+            <button
+              type="button"
+              className={`login-page__tab${tab === 'phone' ? ' active' : ''}`}
+              onClick={() => switchTab('phone')}
+            >
+              Телефон
+            </button>
+          </div>
+
+          {tab === 'email' && (
+            <form className="login-page__form" onSubmit={handleEmailSubmit}>
+              <input type="email" placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} required />
+              <input type="password" placeholder="Пароль" value={password} onChange={e => setPassword(e.target.value)} required />
+              {error && <div className="login-page__error">{error}</div>}
+              <button type="submit" className="login-page__btn-primary" disabled={loading}>
+                {loading ? 'Вход...' : 'Войти'}
+              </button>
+            </form>
+          )}
+
+          {tab === 'phone' && otpStep === 'phone' && (
+            <form className="login-page__form" onSubmit={handleSendOtp}>
+              <input
+                type="tel"
+                placeholder="+7 900 000 00 00"
+                value={phone}
+                onChange={e => setPhone(e.target.value)}
+                required
+                autoFocus
+              />
+              {error && <div className="login-page__error">{error}</div>}
+              <button type="submit" className="login-page__btn-primary" disabled={loading}>
+                {loading ? 'Отправка...' : 'Получить код'}
+              </button>
+            </form>
+          )}
+
+          {tab === 'phone' && otpStep === 'code' && (
+            <form className="login-page__form" onSubmit={handleVerifyOtp}>
+              <div className="login-page__hint">Код отправлен на {phone}</div>
+              <input
+                type="text"
+                placeholder="Код из SMS"
+                value={code}
+                onChange={e => setCode(e.target.value)}
+                required
+                maxLength={4}
+                inputMode="numeric"
+                autoFocus
+              />
+              {error && <div className="login-page__error">{error}</div>}
+              <button type="submit" className="login-page__btn-primary" disabled={loading}>
+                {loading ? 'Проверка...' : 'Войти'}
+              </button>
+              <button type="button" className="login-page__link-btn" onClick={() => setOtpStep('phone')}>
+                Изменить номер
+              </button>
+            </form>
+          )}
 
           <div className="login-page__divider">или</div>
 
