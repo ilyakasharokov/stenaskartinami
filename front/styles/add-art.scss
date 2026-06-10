@@ -591,6 +591,21 @@
     font-weight: 500;
   }
 
+  &__counter {
+    font-size: 11px;
+    color: var(--c-text-muted);
+    font-weight: 500;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  &__header-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+
   &__spinner {
     display: inline-block;
     width: 14px;

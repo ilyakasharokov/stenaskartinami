@@ -110,7 +110,17 @@ function StepIndicator({ currentStep }) {
 
 // ── AI Block ───────────────────────────────────────────────
 
-function AiBlock({ aiUsed, analyzing, aiError, aiSuggestions, fields, onAnalyze }) {
+const DAILY_LIMIT = 5;
+
+function AiBlock({ aiUsed, analyzing, aiError, aiSuggestions, fields, remaining, onAnalyze }) {
+  const limitExceeded = remaining !== null && remaining <= 0;
+
+  const counter = remaining !== null && (
+    <span className="ai-block__counter">
+      {remaining} из {DAILY_LIMIT} анализов сегодня
+    </span>
+  );
+
   if (analyzing) {
     return (
       <div className="ai-block">
@@ -132,15 +142,22 @@ function AiBlock({ aiUsed, analyzing, aiError, aiSuggestions, fields, onAnalyze 
             <span>✦</span>
             ИИ-ассистент
           </div>
+          {counter}
         </div>
         <div className="ai-block__body">
-          <p className="ai-block__description">
-            Автоматически заполнит название, технику, стиль и теги — на основе изображения. Всё можно будет отредактировать вручную.
-          </p>
-          <button type="button" className="ai-block__analyze-btn" onClick={onAnalyze}>
-            <span>✦</span> Проанализировать с ИИ
-          </button>
-          {aiError && <p className="ai-block__error">{aiError}</p>}
+          {limitExceeded ? (
+            <p className="ai-block__error">Лимит исчерпан — приходите завтра</p>
+          ) : (
+            <>
+              <p className="ai-block__description">
+                Автоматически заполнит название, технику, стиль и теги — на основе изображения. Всё можно будет отредактировать вручную.
+              </p>
+              <button type="button" className="ai-block__analyze-btn" onClick={onAnalyze}>
+                <span>✦</span> Проанализировать с ИИ
+              </button>
+              {aiError && <p className="ai-block__error">{aiError}</p>}
+            </>
+          )}
         </div>
       </div>
     )
@@ -153,9 +170,14 @@ function AiBlock({ aiUsed, analyzing, aiError, aiSuggestions, fields, onAnalyze 
           <span>✓</span>
           ИИ проанализировал изображение
         </div>
-        <button type="button" className="ai-block__rerun-btn" onClick={onAnalyze}>
-          Повторить
-        </button>
+        <div className="ai-block__header-right">
+          {counter}
+          {!limitExceeded && (
+            <button type="button" className="ai-block__rerun-btn" onClick={onAnalyze}>
+              Повторить
+            </button>
+          )}
+        </div>
       </div>
       <div className="ai-block__body">
         <div className="ai-block__results">
@@ -433,6 +455,14 @@ function DetailsStep({ images, onImagesChange, sessionJwt, userId, initialArtist
   const [analyzing, setAnalyzing] = useState(false)
   const [aiError, setAiError] = useState('')
   const [aiSuggestions, setAiSuggestions] = useState(null)
+  const [aiRemaining, setAiRemaining] = useState(null)
+
+  useEffect(() => {
+    fetch('/api/ai/analyze-art')
+      .then(r => r.ok ? r.json() : null)
+      .then(d => { if (d?.remaining !== undefined) setAiRemaining(d.remaining) })
+      .catch(() => {})
+  }, [])
   const [uploading, setUploading] = useState(false)
   const [imageLoadingProcess, setImageLoadingProcess] = useState(null)
   const [errors, setErrors] = useState({})
@@ -497,7 +527,11 @@ function DetailsStep({ images, onImagesChange, sessionJwt, userId, initialArtist
       })
       if (!res.ok) throw new Error('Ошибка сервера')
       const data = await res.json()
-      if (data._error) {
+      if (data._remaining !== undefined) setAiRemaining(data._remaining)
+      if (data.remaining !== undefined) setAiRemaining(data.remaining)
+      if (data._limitExceeded) {
+        setAiRemaining(0)
+      } else if (data._error) {
         setAiError(data._error)
       } else {
         setFields(f => ({
@@ -689,6 +723,7 @@ function DetailsStep({ images, onImagesChange, sessionJwt, userId, initialArtist
             aiError={aiError}
             aiSuggestions={aiSuggestions}
             fields={fields}
+            remaining={aiRemaining}
             onAnalyze={analyzeWithAI}
           />
 
