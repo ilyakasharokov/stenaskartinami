@@ -47,7 +47,7 @@ export default async function handler(req, res) {
     return res.status(200).json({ _limitExceeded: true, remaining: 0 });
   }
 
-  const { imageDataUrl } = req.body;
+  const { imageDataUrl, availableStyles = [], availableSubjects = [], availableMediums = [] } = req.body;
   if (!imageDataUrl) return res.status(400).json({ error: 'imageDataUrl required' });
 
   const match = imageDataUrl.match(/^data:([^;]+);base64,(.+)$/);
@@ -79,9 +79,9 @@ export default async function handler(req, res) {
                   type: 'text',
                   text: `Проанализируй прикреплённую картину и верни ТОЛЬКО JSON (без пояснений и markdown) в формате:
 {
-  "style_names": ["художественные стили работы (например: Импрессионизм, Абстракционизм, Реализм и т.п.)"],
-  "subject_names": ["тематика и сюжеты (например: Пейзаж, Портрет, Город, Животные и т.п.)"],
-  "medium_names": ["техника и материалы (например: Масло, Акварель, Акрил и т.п.)"],
+  "style_names": ["выбери подходящие из списка: ${availableStyles.join(', ')}"],
+  "subject_names": ["выбери подходящие из списка: ${availableSubjects.join(', ')}"],
+  "medium_names": ["выбери подходящие из списка: ${availableMediums.join(', ')}"],
   "materials": "строка с материалами (например: холст, масло)",
   "description": "краткое описание работы (2-3 предложения на русском)"
 }`,

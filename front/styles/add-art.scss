@@ -1007,6 +1007,16 @@
   padding: 6px 4px;
 }
 
+.ms-moderation-note {
+  font-size: 12px;
+  color: var(--c-text-muted);
+  margin-top: 8px;
+  padding: 8px 12px;
+  background: rgba(0,0,0,0.03);
+  border-radius: var(--radius-sm);
+  border-left: 3px solid var(--c-border-focus);
+}
+
 // ═══════════════════════════════════════════════════════════
 // Buttons
 // ═══════════════════════════════════════════════════════════

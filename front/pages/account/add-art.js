@@ -450,6 +450,21 @@ function DetailsStep({ images, onImagesChange, sessionJwt, userId, initialArtist
   const [styles, setStyles] = useState({ ids: [], custom: [] })
   const [subjects, setSubjects] = useState({ ids: [], custom: [] })
   const [mediums, setMediums] = useState({ ids: [], custom: [] })
+  const [availableOptions, setAvailableOptions] = useState({ styles: [], subjects: [], mediums: [] })
+
+  useEffect(() => {
+    Promise.all([
+      fetchStrapi(API_HOST + '/styles?pagination[limit]=200'),
+      fetchStrapi(API_HOST + '/subjects?pagination[limit]=200'),
+      fetchStrapi(API_HOST + '/mediums?pagination[limit]=200'),
+    ]).then(([s, sub, m]) => {
+      setAvailableOptions({
+        styles: (s || []).map(x => x.Title).filter(Boolean),
+        subjects: (sub || []).map(x => x.Title).filter(Boolean),
+        mediums: (m || []).map(x => x.title).filter(Boolean),
+      })
+    }).catch(() => {})
+  }, [])
   const [date, setDate] = useState(new Date())
   const [aiUsed, setAiUsed] = useState(false)
   const [analyzing, setAnalyzing] = useState(false)
@@ -523,7 +538,12 @@ function DetailsStep({ images, onImagesChange, sessionJwt, userId, initialArtist
       const res = await fetch('/api/ai/analyze-art', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ imageDataUrl: images[0].data_url }),
+        body: JSON.stringify({
+          imageDataUrl: images[0].data_url,
+          availableStyles: availableOptions.styles,
+          availableSubjects: availableOptions.subjects,
+          availableMediums: availableOptions.mediums,
+        }),
       })
       if (!res.ok) throw new Error('Ошибка сервера')
       const data = await res.json()
@@ -597,7 +617,7 @@ function DetailsStep({ images, onImagesChange, sessionJwt, userId, initialArtist
       const ids = []
       for (const name of names) {
         try {
-          const r = await fetch(API_HOST + `/${endpoint}`, {
+          const r = await fetch(API_HOST + `/${endpoint}?status=draft`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${sessionJwt}` },
             body: JSON.stringify({ data: { [nameField]: name } }),
@@ -848,6 +868,11 @@ function DetailsStep({ images, onImagesChange, sessionJwt, userId, initialArtist
               onChange={setMediums}
               aiNames={aiSuggestions?.medium_names || []}
             />
+            {(styles.custom.length > 0 || subjects.custom.length > 0 || mediums.custom.length > 0) && (
+              <p className="ms-moderation-note">
+                Ваши варианты будут добавлены после проверки модератором
+              </p>
+            )}
           </SectionCard>
 
           <SectionCard title="Цена" icon="💰">
