@@ -1,14 +1,18 @@
-import https from 'https';
+import { fetch as undiciFetch, Agent } from 'undici';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/authOptions';
 
 export const config = { api: { bodyParser: { sizeLimit: '10mb' } } };
 
-// GigaChat uses a self-signed CA — disable verification only for their endpoints
-const agent = new https.Agent({ rejectUnauthorized: false });
+// GigaChat uses a self-signed cert — bypass TLS verification for their endpoints only
+const agent = new Agent({ connect: { rejectUnauthorized: false } });
+
+async function gigaFetch(url, options) {
+  return undiciFetch(url, { ...options, dispatcher: agent });
+}
 
 async function getGigaChatToken() {
-  const res = await fetch('https://ngw.devices.sberbank.ru:9443/api/v2/oauth', {
+  const res = await gigaFetch('https://ngw.devices.sberbank.ru:9443/api/v2/oauth', {
     method: 'POST',
     headers: {
       'Authorization': `Basic ${process.env.GIGACHAT_API_KEY}`,
@@ -16,8 +20,6 @@ async function getGigaChatToken() {
       'RqUID': crypto.randomUUID(),
     },
     body: 'scope=GIGACHAT_API_PERS',
-    // @ts-ignore
-    agent,
   });
   if (!res.ok) {
     const text = await res.text();
@@ -43,7 +45,7 @@ export default async function handler(req, res) {
   try {
     const token = await getGigaChatToken();
 
-    const chatRes = await fetch('https://gigachat.devices.sberbank.ru/api/v1/chat/completions', {
+    const chatRes = await gigaFetch('https://gigachat.devices.sberbank.ru/api/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -74,13 +76,11 @@ export default async function handler(req, res) {
           },
         ],
       }),
-      // @ts-ignore
-      agent,
     });
 
     if (!chatRes.ok) {
       const text = await chatRes.text();
-      throw new Error(`GigaChat chat failed: ${chatRes.status} ${text}`);
+      throw new Error(`GigaChat error: ${chatRes.status} ${text}`);
     }
 
     const data = await chatRes.json();
