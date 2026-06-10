@@ -259,7 +259,7 @@ function UploadStep({ onNext }) {
   const [checking, setChecking] = useState(false)
   const [cropIndex, setCropIndex] = useState(null)
   const [cropSrc, setCropSrc] = useState(null)
-  const [crop, setCrop] = useState({})
+  const [crop, setCrop] = useState(undefined)
   const [completedCrop, setCompletedCrop] = useState(null)
   const [imgRef, setImgRef] = useState(null)
   const [croppedImages, setCroppedImages] = useState([])
@@ -291,7 +291,7 @@ function UploadStep({ onNext }) {
   const startCrop = (index) => {
     setCropIndex(index)
     setCropSrc(croppedImages[index] || images[index].data_url)
-    setCrop({})
+    setCrop(undefined)
     setCompletedCrop(null)
     setImgRef(null)
   }
@@ -299,7 +299,7 @@ function UploadStep({ onNext }) {
   const rotateCW = async () => {
     const rotated = await rotateDataUrl(cropSrc)
     setCropSrc(rotated)
-    setCrop({})
+    setCrop(undefined)
     setCompletedCrop(null)
   }
 
@@ -468,14 +468,14 @@ function DetailsStep({ images, onImagesChange, sessionJwt, userId, initialArtist
   const [errors, setErrors] = useState({})
   const [cropIndex, setCropIndex] = useState(null)
   const [cropSrc, setCropSrc] = useState(null)
-  const [crop, setCrop] = useState({})
+  const [crop, setCrop] = useState(undefined)
   const [completedCrop, setCompletedCrop] = useState(null)
   const [imgRef, setImgRef] = useState(null)
 
   const startCrop = (index) => {
     setCropIndex(index)
     setCropSrc(images[index].data_url)
-    setCrop({})
+    setCrop(undefined)
     setCompletedCrop(null)
     setImgRef(null)
   }
@@ -483,7 +483,7 @@ function DetailsStep({ images, onImagesChange, sessionJwt, userId, initialArtist
   const rotateCW = async () => {
     const rotated = await rotateDataUrl(cropSrc)
     setCropSrc(rotated)
-    setCrop({})
+    setCrop(undefined)
     setCompletedCrop(null)
   }
 
