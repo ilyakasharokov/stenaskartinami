@@ -997,8 +997,13 @@
 }
 
 .ms-pill--custom {
-  background: rgba(0,0,0,0.04);
-  border-color: var(--c-border-focus);
+  background: #e8e8e8;
+  color: #444;
+
+  .ms-pill__remove {
+    color: rgba(0, 0, 0, 0.4);
+    &:hover { color: #000; }
+  }
 }
 
 .ms-empty-hint {
