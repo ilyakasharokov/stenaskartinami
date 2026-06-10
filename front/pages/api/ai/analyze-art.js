@@ -1,32 +1,49 @@
-import { fetch as undiciFetch, Agent } from 'undici';
+import https from 'https';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/authOptions';
 
 export const config = { api: { bodyParser: { sizeLimit: '10mb' } } };
 
-// GigaChat uses a self-signed cert — bypass TLS verification for their endpoints only
-const agent = new Agent({ connect: { rejectUnauthorized: false } });
-
-async function gigaFetch(url, options) {
-  return undiciFetch(url, { ...options, dispatcher: agent });
+function httpsPost(url, headers, body) {
+  return new Promise((resolve, reject) => {
+    const u = new URL(url);
+    const bodyStr = typeof body === 'string' ? body : JSON.stringify(body);
+    const req = https.request(
+      {
+        hostname: u.hostname,
+        port: u.port || 443,
+        path: u.pathname + u.search,
+        method: 'POST',
+        headers: { ...headers, 'Content-Length': Buffer.byteLength(bodyStr) },
+        rejectUnauthorized: false,
+      },
+      (res) => {
+        const chunks = [];
+        res.on('data', (c) => chunks.push(c));
+        res.on('end', () => {
+          const text = Buffer.concat(chunks).toString();
+          resolve({ status: res.statusCode, text, json: () => JSON.parse(text) });
+        });
+      }
+    );
+    req.on('error', reject);
+    req.write(bodyStr);
+    req.end();
+  });
 }
 
 async function getGigaChatToken() {
-  const res = await gigaFetch('https://ngw.devices.sberbank.ru:9443/api/v2/oauth', {
-    method: 'POST',
-    headers: {
+  const r = await httpsPost(
+    'https://ngw.devices.sberbank.ru:9443/api/v2/oauth',
+    {
       'Authorization': `Basic ${process.env.GIGACHAT_API_KEY}`,
       'Content-Type': 'application/x-www-form-urlencoded',
       'RqUID': crypto.randomUUID(),
     },
-    body: 'scope=GIGACHAT_API_PERS',
-  });
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error(`GigaChat auth failed: ${res.status} ${text}`);
-  }
-  const data = await res.json();
-  return data.access_token;
+    'scope=GIGACHAT_API_PERS'
+  );
+  if (r.status !== 200) throw new Error(`GigaChat auth failed: ${r.status} ${r.text}`);
+  return r.json().access_token;
 }
 
 export default async function handler(req, res) {
@@ -45,13 +62,13 @@ export default async function handler(req, res) {
   try {
     const token = await getGigaChatToken();
 
-    const chatRes = await gigaFetch('https://gigachat.devices.sberbank.ru/api/v1/chat/completions', {
-      method: 'POST',
-      headers: {
+    const r = await httpsPost(
+      'https://gigachat.devices.sberbank.ru/api/v1/chat/completions',
+      {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
+      {
         model: 'GigaChat-Pro',
         messages: [
           {
@@ -75,21 +92,17 @@ export default async function handler(req, res) {
             ],
           },
         ],
-      }),
-    });
+      }
+    );
 
-    if (!chatRes.ok) {
-      const text = await chatRes.text();
-      throw new Error(`GigaChat error: ${chatRes.status} ${text}`);
-    }
+    if (r.status !== 200) throw new Error(`GigaChat error: ${r.status} ${r.text}`);
 
-    const data = await chatRes.json();
+    const data = r.json();
     const text = data.choices?.[0]?.message?.content || '';
     const jsonMatch = text.match(/\{[\s\S]*\}/);
     if (!jsonMatch) return res.status(200).json({});
 
-    const suggestions = JSON.parse(jsonMatch[0]);
-    return res.status(200).json(suggestions);
+    return res.status(200).json(JSON.parse(jsonMatch[0]));
   } catch (err) {
     console.error('AI analyze error:', err?.message);
     return res.status(500).json({ error: err?.message || 'Ошибка анализа изображения' });
