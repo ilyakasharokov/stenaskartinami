@@ -4,6 +4,26 @@ import { API_HOST } from '@/constants/constants';
 
 export const authOptions = {
   providers: [
+    ...(process.env.DEV_AUTO_EMAIL ? [
+      CredentialsProvider({
+        id: 'dev-auto',
+        name: 'Dev Auto',
+        credentials: {},
+        async authorize() {
+          const apiUrl = process.env.STRAPI_SERVER_URL || process.env.NEXT_PUBLIC_API_URL
+          try {
+            const res = await fetch(`${apiUrl}/auth/local`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ identifier: process.env.DEV_AUTO_EMAIL, password: process.env.DEV_AUTO_PASSWORD }),
+            })
+            const data = await res.json()
+            if (data.jwt) return { id: data.user.id, jwt: data.jwt, name: data.user.username, email: data.user.email }
+          } catch {}
+          return null
+        },
+      }),
+    ] : []),
     CredentialsProvider({
       id: 'phone',
       name: 'Phone',
@@ -52,7 +72,8 @@ export const authOptions = {
         password: { type: 'password' },
       },
       async authorize(credentials) {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/local`, {
+        const apiUrl = process.env.STRAPI_SERVER_URL || process.env.NEXT_PUBLIC_API_URL;
+        const res = await fetch(`${apiUrl}/auth/local`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ identifier: credentials.email, password: credentials.password }),
@@ -79,7 +100,7 @@ export const authOptions = {
 
   callbacks: {
     async jwt({ token, user, account }) {
-      if (account?.provider === 'phone' || account?.provider === 'telegram' || account?.provider === 'credentials') {
+      if (account?.provider === 'phone' || account?.provider === 'telegram' || account?.provider === 'credentials' || account?.provider === 'dev-auto') {
         token.jwt = user.jwt;
         token.id = user.id;
       } else if (user && account) {
