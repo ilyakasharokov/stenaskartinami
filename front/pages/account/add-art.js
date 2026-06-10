@@ -1,12 +1,13 @@
 import MainLayout from "@/components/layouts/MainLayout"
 import { API_HOST } from "@/constants/constants"
 import Head from 'next/head'
-import { useState, useRef, useCallback } from "react"
+import { useState, useCallback } from "react"
 import ImageUploading from "react-images-uploading"
+import Cropper from "react-easy-crop"
 import ArtistInput from "@/components/input/artist-input"
 import YearInput from "@/components/input/year-input"
 import Preloader from "@/components/preloader/preloader"
-import StylesInput from "@/components/input/styles-input"
+import MultiSelectInput from "@/components/input/multi-select-input"
 import { normalizeStrapiResponse } from "@/utils/strapi"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/authOptions"
@@ -15,7 +16,7 @@ const MIN_WIDTH = 800
 const MIN_HEIGHT = 600
 
 function getImageDimensions(dataUrl) {
-  return new Promise((resolve) => {
+  return new Promise(resolve => {
     const img = new Image()
     img.onload = () => resolve({ width: img.naturalWidth, height: img.naturalHeight })
     img.onerror = () => resolve(null)
@@ -23,22 +24,93 @@ function getImageDimensions(dataUrl) {
   })
 }
 
-// ── Step 1: Upload ─────────────────────────────────────────────────
+async function getCroppedDataUrl(imageSrc, pixelCrop) {
+  const image = await new Promise((resolve, reject) => {
+    const img = new Image()
+    img.onload = () => resolve(img)
+    img.onerror = reject
+    img.src = imageSrc
+  })
+  const canvas = document.createElement('canvas')
+  canvas.width = pixelCrop.width
+  canvas.height = pixelCrop.height
+  const ctx = canvas.getContext('2d')
+  ctx.drawImage(image, pixelCrop.x, pixelCrop.y, pixelCrop.width, pixelCrop.height, 0, 0, pixelCrop.width, pixelCrop.height)
+  return canvas.toDataURL('image/jpeg', 0.92)
+}
+
+// ── Step 1: Upload + Crop ──────────────────────────────────────────
 function UploadStep({ onNext }) {
   const [images, setImages] = useState([])
-  const [quality, setQuality] = useState(null) // null | { ok, w, h }
+  const [quality, setQuality] = useState(null)
   const [checking, setChecking] = useState(false)
+  const [cropIndex, setCropIndex] = useState(null) // index of image being cropped
+  const [crop, setCrop] = useState({ x: 0, y: 0 })
+  const [zoom, setZoom] = useState(1)
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState(null)
+  const [croppedImages, setCroppedImages] = useState([]) // final data_urls after crop
 
   const handleChange = useCallback(async (list) => {
     setImages(list)
+    setCroppedImages([])
     setQuality(null)
     if (!list[0]?.data_url) return
     setChecking(true)
     const dims = await getImageDimensions(list[0].data_url)
     setChecking(false)
-    if (!dims) return
-    setQuality({ ok: dims.width >= MIN_WIDTH && dims.height >= MIN_HEIGHT, ...dims })
+    if (dims) setQuality({ ok: dims.width >= MIN_WIDTH && dims.height >= MIN_HEIGHT, ...dims })
   }, [])
+
+  const startCrop = (index) => {
+    setCropIndex(index)
+    setCrop({ x: 0, y: 0 })
+    setZoom(1)
+    setCroppedAreaPixels(null)
+  }
+
+  const confirmCrop = async () => {
+    const dataUrl = await getCroppedDataUrl(images[cropIndex].data_url, croppedAreaPixels)
+    setCroppedImages(prev => {
+      const next = [...prev]
+      next[cropIndex] = dataUrl
+      return next
+    })
+    setCropIndex(null)
+  }
+
+  const skipCrop = () => setCropIndex(null)
+
+  const finalImages = images.map((img, i) => ({
+    ...img,
+    data_url: croppedImages[i] || img.data_url,
+  }))
+
+  // Crop modal
+  if (cropIndex !== null && images[cropIndex]) {
+    return (
+      <div className="crop-modal">
+        <div className="crop-modal__header">
+          <span>Обрежьте изображение</span>
+          <button className="login-page__link-btn" onClick={skipCrop}>Пропустить</button>
+        </div>
+        <div className="crop-modal__canvas">
+          <Cropper
+            image={images[cropIndex].data_url}
+            crop={crop}
+            zoom={zoom}
+            aspect={undefined}
+            onCropChange={setCrop}
+            onZoomChange={setZoom}
+            onCropComplete={(_, pixels) => setCroppedAreaPixels(pixels)}
+          />
+        </div>
+        <div className="crop-modal__controls">
+          <input type="range" min={1} max={3} step={0.05} value={zoom} onChange={e => setZoom(Number(e.target.value))} />
+          <button className="btn" onClick={confirmCrop} disabled={!croppedAreaPixels}>Применить</button>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="add-art-step">
@@ -47,13 +119,7 @@ function UploadStep({ onNext }) {
         Фото при хорошем дневном освещении, без бликов. Рекомендуемое разрешение — не менее {MIN_WIDTH}×{MIN_HEIGHT} пикселей.
       </p>
 
-      <ImageUploading
-        value={images}
-        onChange={handleChange}
-        maxNumber={5}
-        dataURLKey="data_url"
-        maxFileSize={10485760}
-      >
+      <ImageUploading value={images} onChange={handleChange} maxNumber={5} dataURLKey="data_url" maxFileSize={10485760}>
         {({ imageList, onImageUpload, onImageRemove, isDragging, dragProps }) => (
           <div className={`upload__image-wrapper${isDragging ? ' dragging' : ''}`}>
             {imageList.length === 0 ? (
@@ -66,8 +132,11 @@ function UploadStep({ onNext }) {
               <div className="upload__preview-list">
                 {imageList.map((img, i) => (
                   <div key={i} className="upload__preview-item">
-                    <img src={img.data_url} alt="" />
-                    <button type="button" className="upload__remove-btn" onClick={() => onImageRemove(i)}>×</button>
+                    <img src={croppedImages[i] || img.data_url} alt="" />
+                    <div className="upload__preview-actions">
+                      <button type="button" className="upload__crop-btn" onClick={() => startCrop(i)} title="Обрезать">✂</button>
+                      <button type="button" className="upload__remove-btn" onClick={() => onImageRemove(i)}>×</button>
+                    </div>
                   </div>
                 ))}
                 {imageList.length < 5 && (
@@ -80,7 +149,6 @@ function UploadStep({ onNext }) {
       </ImageUploading>
 
       {checking && <p className="add-art-quality add-art-quality--checking">Проверяем качество…</p>}
-
       {quality && (
         <div className={`add-art-quality add-art-quality--${quality.ok ? 'ok' : 'warn'}`}>
           {quality.ok
@@ -90,11 +158,7 @@ function UploadStep({ onNext }) {
       )}
 
       <div className="add-art-step__actions">
-        <button
-          className="btn"
-          disabled={images.length === 0}
-          onClick={() => onNext(images)}
-        >
+        <button className="btn" disabled={images.length === 0} onClick={() => onNext(finalImages)}>
           Далее →
         </button>
       </div>
@@ -107,10 +171,13 @@ function DetailsStep({ images, sessionJwt, userId, onSuccess }) {
   const [fields, setFields] = useState({ title: '', description: '', materials: '', price: '', width: '', height: '' })
   const [artist, setArtist] = useState({ id: null, full_name: '' })
   const [styles, setStyles] = useState([])
+  const [subjects, setSubjects] = useState([])
+  const [mediums, setMediums] = useState([])
   const [date, setDate] = useState(new Date())
   const [aiUsed, setAiUsed] = useState(false)
   const [analyzing, setAnalyzing] = useState(false)
   const [aiError, setAiError] = useState('')
+  const [aiSuggestions, setAiSuggestions] = useState(null) // { style_names, subject_names, medium_names }
   const [uploading, setUploading] = useState(false)
   const [imageLoadingProcess, setImageLoadingProcess] = useState(null)
   const [errors, setErrors] = useState({})
@@ -126,7 +193,7 @@ function DetailsStep({ images, sessionJwt, userId, onSuccess }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ imageDataUrl: images[0].data_url }),
       })
-      if (!res.ok) throw new Error('Ошибка сервера')
+      if (!res.ok) { const d = await res.json(); throw new Error(d.error || 'Ошибка сервера') }
       const data = await res.json()
       setFields(f => ({
         ...f,
@@ -134,6 +201,11 @@ function DetailsStep({ images, sessionJwt, userId, onSuccess }) {
         description: data.description || f.description,
         materials: data.materials || f.materials,
       }))
+      setAiSuggestions({
+        style_names: data.style_names || [],
+        subject_names: data.subject_names || [],
+        medium_names: data.medium_names || [],
+      })
       setAiUsed(true)
     } catch (e) {
       setAiError(e.message || 'Не удалось проанализировать изображение')
@@ -145,7 +217,10 @@ function DetailsStep({ images, sessionJwt, userId, onSuccess }) {
     const uploaded = []
     for (let i = 0; i < images.length; i++) {
       const fd = new FormData()
-      fd.append('files', images[i].file, images[i].file.name)
+      // Use cropped data_url as blob if available
+      const dataUrl = images[i].data_url
+      const blob = await (await fetch(dataUrl)).blob()
+      fd.append('files', blob, (images[i].file?.name) || `image_${i}.jpg`)
       setImageLoadingProcess({ index: i, length: images.length })
       const res = await fetch(API_HOST + '/upload', {
         method: 'POST',
@@ -201,6 +276,8 @@ function DetailsStep({ images, sessionJwt, userId, onSuccess }) {
         Year: `${year}-01-01`,
         Artist: artistId,
         styles,
+        subjects,
+        mediums,
         user_uploader: userId,
         Pictures: imagesUploaded.map(p => p.id),
       }),
@@ -234,16 +311,11 @@ function DetailsStep({ images, sessionJwt, userId, onSuccess }) {
 
           {!aiUsed && (
             <div className="add-art-ai-block">
-              <button
-                type="button"
-                className="btn btn--outline add-art-ai-btn"
-                onClick={analyzeWithAI}
-                disabled={analyzing}
-              >
-                {analyzing ? 'Анализирую…' : '✦ Определить поля с помощью ИИ'}
+              <button type="button" className="btn btn--outline add-art-ai-btn" onClick={analyzeWithAI} disabled={analyzing}>
+                {analyzing ? 'Анализирую…' : '✦ Заполнить с помощью ИИ'}
               </button>
-              <span className="add-art-ai-hint">Поля заполнятся автоматически — один раз для этого изображения</span>
-              {aiError && <div className="login-page__error">{aiError}</div>}
+              <span className="add-art-ai-hint">Поля и категории заполнятся автоматически — один раз</span>
+              {aiError && <div className="login-page__error" style={{width:'100%'}}>{aiError}</div>}
             </div>
           )}
           {aiUsed && (
@@ -253,13 +325,7 @@ function DetailsStep({ images, sessionJwt, userId, onSuccess }) {
           <form onSubmit={handleSubmit}>
             <div className="form-input">
               <label>Название работы *</label>
-              <input
-                type="text"
-                placeholder="Чёрный квадрат"
-                value={fields.title}
-                onChange={set('title')}
-                className={errors.title ? 'input--error' : ''}
-              />
+              <input type="text" placeholder="Чёрный квадрат" value={fields.title} onChange={set('title')} className={errors.title ? 'input--error' : ''} />
             </div>
 
             <div className="form-group-input">
@@ -270,13 +336,7 @@ function DetailsStep({ images, sessionJwt, userId, onSuccess }) {
             <div className="form-group-input">
               <div className="form-input">
                 <label>Материалы и техника *</label>
-                <input
-                  type="text"
-                  placeholder="Холст, масло"
-                  value={fields.materials}
-                  onChange={set('materials')}
-                  className={errors.materials ? 'input--error' : ''}
-                />
+                <input type="text" placeholder="Холст, масло" value={fields.materials} onChange={set('materials')} className={errors.materials ? 'input--error' : ''} />
               </div>
               <div className="form-input">
                 <label>Размеры, см</label>
@@ -290,21 +350,33 @@ function DetailsStep({ images, sessionJwt, userId, onSuccess }) {
 
             <div className="form-input">
               <label>Описание *</label>
-              <textarea
-                placeholder="Расскажите об этой работе…"
-                value={fields.description}
-                onChange={set('description')}
-                className={errors.description ? 'input--error' : ''}
-                rows={4}
-              />
+              <textarea placeholder="Расскажите об этой работе…" value={fields.description} onChange={set('description')} className={errors.description ? 'input--error' : ''} rows={4} />
             </div>
 
-            <div className="form-group-input">
-              <StylesInput onStylesChange={setStyles} />
-              <div className="form-input">
-                <label>Желаемая цена, ₽</label>
-                <input type="number" placeholder="10000" value={fields.price} onChange={set('price')} />
-              </div>
+            <MultiSelectInput
+              endpoint="styles"
+              label="Стиль"
+              onChange={setStyles}
+              aiNames={aiSuggestions?.style_names || []}
+            />
+
+            <MultiSelectInput
+              endpoint="subjects"
+              label="Теги"
+              onChange={setSubjects}
+              aiNames={aiSuggestions?.subject_names || []}
+            />
+
+            <MultiSelectInput
+              endpoint="mediums"
+              label="Техника"
+              onChange={setMediums}
+              aiNames={aiSuggestions?.medium_names || []}
+            />
+
+            <div className="form-input">
+              <label>Желаемая цена, ₽</label>
+              <input type="number" placeholder="10000" value={fields.price} onChange={set('price')} />
             </div>
 
             {errors.upload && <div className="login-page__error">Ошибка загрузки изображения, попробуйте ещё раз</div>}
@@ -319,53 +391,29 @@ function DetailsStep({ images, sessionJwt, userId, onSuccess }) {
   )
 }
 
-// ── Main page ──────────────────────────────────────────────────────
+// ── Main ───────────────────────────────────────────────────────────
 export default function AddArt({ sessionJwt, userId }) {
-  const [step, setStep] = useState('upload') // 'upload' | 'details' | 'success'
+  const [step, setStep] = useState('upload')
   const [images, setImages] = useState([])
   const [result, setResult] = useState(null)
 
-  const handleUploadNext = (imgs) => {
-    setImages(imgs)
-    setStep('details')
-  }
-
-  const handleSuccess = (art) => {
-    setResult(art)
-    setStep('success')
-  }
-
-  const reset = () => {
-    setStep('upload')
-    setImages([])
-    setResult(null)
-  }
+  const reset = () => { setStep('upload'); setImages([]); setResult(null) }
 
   return (
     <MainLayout>
-      <Head>
-        <title>Добавить картину | Стена с картинами</title>
-      </Head>
+      <Head><title>Добавить картину | Стена с картинами</title></Head>
       <div className="form-page add-art-page">
         <h1>Добавить картину</h1>
 
-        {step === 'upload' && <UploadStep onNext={handleUploadNext} />}
-
-        {step === 'details' && (
-          <DetailsStep
-            images={images}
-            sessionJwt={sessionJwt}
-            userId={userId}
-            onSuccess={handleSuccess}
-          />
+        {step === 'upload' && (
+          <UploadStep onNext={imgs => { setImages(imgs); setStep('details') }} />
         )}
-
+        {step === 'details' && (
+          <DetailsStep images={images} sessionJwt={sessionJwt} userId={userId} onSuccess={json => { setResult(json); setStep('success') }} />
+        )}
         {step === 'success' && (
           <div className="form-page__sent">
-            {result?.Title
-              ? <>Работа «{result.Title}» добавлена и отправлена на модерацию — скоро появится на сайте!</>
-              : <>Работа добавлена и отправлена на модерацию!</>
-            }
+            {result?.Title ? <>Работа «{result.Title}» отправлена на модерацию!</> : <>Работа отправлена на модерацию!</>}
             <button className="btn" onClick={reset} style={{ marginTop: 24 }}>Добавить ещё одну</button>
           </div>
         )}
@@ -379,10 +427,5 @@ export async function getServerSideProps(context) {
   if (!session?.jwt) {
     return { redirect: { destination: '/auth/signin?callbackUrl=/account/add-art', permanent: false } }
   }
-  return {
-    props: {
-      sessionJwt: session.jwt,
-      userId: session.info?.id || null,
-    },
-  }
+  return { props: { sessionJwt: session.jwt, userId: session.info?.id || null } }
 }
