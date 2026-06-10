@@ -13,6 +13,11 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   meilisearch:
     image: getmeili/meilisearch:v1.13
@@ -25,6 +30,40 @@ services:
       MEILI_MASTER_KEY: ""
     volumes:
       - meilisearch_data:/meili_data
+
+  api-v5:
+    build:
+      context: ./api-v5
+      dockerfile: dockerfile
+    container_name: stenaskartinami-api-v5
+    restart: unless-stopped
+    env_file:
+      - ./api-v5/.env.local
+    ports:
+      - "1337:1337"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./api-v5/public/uploads:/usr/src/app/public/uploads
+
+  front:
+    build:
+      context: ./front
+      dockerfile: dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: http://localhost:1337/api
+    container_name: stenaskartinami-front
+    restart: unless-stopped
+    env_file:
+      - ./front/.env
+    environment:
+      - STRAPI_SERVER_URL=http://api-v5:1337/api
+      - NEXTAUTH_URL=http://localhost:3000
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api-v5
 
 volumes:
   postgres_data:

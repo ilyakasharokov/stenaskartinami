@@ -35,6 +35,8 @@ services:
     build:
       context: ./front
       dockerfile: dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: https://api.stenaskartinami.com/api
     container_name: stenaskartinami-front
     restart: unless-stopped
     env_file:
