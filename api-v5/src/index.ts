@@ -93,6 +93,55 @@ export default {
 
     await ensureAuthenticatedPermissions();
 
+    const registerUserRoutes = () => {
+      const jwtService = strapi.plugins['users-permissions'].services.jwt;
+      const userUid = 'plugin::users-permissions.user';
+
+      const withAuth = async (ctx: any, next: () => Promise<void>) => {
+        const raw = ctx.request.headers.authorization || '';
+        const token = raw.startsWith('Bearer ') ? raw.slice(7).trim() : '';
+        if (!token) { ctx.status = 401; ctx.body = { error: 'Unauthorized' }; return; }
+        try {
+          const { id } = await jwtService.verify(token);
+          const user = await strapi.entityService.findOne(userUid, id, {});
+          if (!user) { ctx.status = 401; ctx.body = { error: 'Unauthorized' }; return; }
+          ctx.state.user = user;
+          return next();
+        } catch {
+          ctx.status = 401; ctx.body = { error: 'Unauthorized' }; return;
+        }
+      };
+
+      strapi.server.router.post('/api/users/me/set-phone', withAuth, async (ctx: any) => {
+        const { phone } = ctx.request.body || {};
+        if (!phone) { ctx.status = 400; ctx.body = { error: 'phone required' }; return; }
+        try {
+          await strapi.entityService.update(userUid, ctx.state.user.id, { data: { phone } });
+          ctx.body = { ok: true };
+        } catch (e: any) {
+          ctx.status = 400; ctx.body = { error: e.message };
+        }
+      });
+
+      strapi.server.router.post('/api/users/me/set-email', withAuth, async (ctx: any) => {
+        const { email } = ctx.request.body || {};
+        if (!email) { ctx.status = 400; ctx.body = { error: 'email required' }; return; }
+        await strapi.entityService.update(userUid, ctx.state.user.id, { data: { real_email: email } });
+        ctx.body = { ok: true };
+      });
+
+      strapi.server.router.post('/api/users/me/claim-artist', withAuth, async (ctx: any) => {
+        const { artistId } = ctx.request.body || {};
+        if (!artistId) { ctx.status = 400; ctx.body = { error: 'artistId required' }; return; }
+        await strapi.entityService.update(userUid, ctx.state.user.id, {
+          data: { pending_artist: artistId, artist_confirmed: false },
+        });
+        ctx.body = { ok: true };
+      });
+    };
+
+    registerUserRoutes();
+
     const ensureUploadFilesPublished = async () => {
       const now = new Date().toISOString();
       await strapi.db.query('plugin::upload.file').updateMany({
