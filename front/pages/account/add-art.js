@@ -500,7 +500,7 @@ function DetailsStep({ images, sessionJwt, userId, initialArtist, onBack, onSucc
     }
 
     const year = date.getFullYear()
-    const res = await fetch(API_HOST + '/artsd', {
+    const res = await fetch(API_HOST + '/arts', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${sessionJwt}` },
       body: JSON.stringify({

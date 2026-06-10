@@ -19,7 +19,7 @@ export default function YearInput({onChange}){
         <div className="form-input">
             <label>Дата создания</label>
             <div className="form-input__options-wrapper">
-                <DatePicker dateFormat="dd.MM.yyyy" showYearDropdown required locale="ru" selected={startDate} onChange={(date) => onDateChange(date)} />
+                <DatePicker dateFormat="dd.MM.yyyy" showYearDropdown required locale="ru" selected={startDate} onChange={(date) => onDateChange(date)} popperProps={{ strategy: "fixed" }} />
             </div>
         </div>
     )
