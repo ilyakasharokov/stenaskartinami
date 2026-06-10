@@ -22,6 +22,7 @@
 /front/yarn-error.log*
 
 # local env files
+/front/.env
 /front/.env.local
 /front/.env.development.local
 /front/.env.test.local
