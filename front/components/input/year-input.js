@@ -6,9 +6,9 @@ registerLocale('ru', ru)
 
 import "react-datepicker/dist/react-datepicker.css";
 
-export default function YearInput({onChange}){
+export default function YearInput({onChange, initialDate}){
 
-    const [startDate, setStartDate] = useState(new Date());
+    const [startDate, setStartDate] = useState(initialDate ? new Date(initialDate) : new Date());
 
     function onDateChange(date){
         setStartDate(date);

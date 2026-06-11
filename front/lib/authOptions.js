@@ -127,7 +127,7 @@ export const authOptions = {
       session.id = token.id;
       if (token.jwt) {
         try {
-          const res = await fetch(API_HOST + '/users/me', {
+          const res = await fetch(API_HOST + '/users/me?populate=role', {
             headers: { Authorization: `Bearer ${token.jwt}` },
           });
           if (res.ok) session.info = await res.json();

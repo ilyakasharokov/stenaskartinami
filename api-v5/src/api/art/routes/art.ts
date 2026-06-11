@@ -8,6 +8,18 @@ export default {
     },
     {
       method: 'GET',
+      path: '/arts/my',
+      handler: 'art.findMy',
+      config: { policies: [] },
+    },
+    {
+      method: 'GET',
+      path: '/arts/my/:documentId',
+      handler: 'art.findMyOne',
+      config: { policies: [] },
+    },
+    {
+      method: 'GET',
       path: '/arts/all',
       handler: 'art.allArts',
       config: { policies: [] },

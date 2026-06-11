@@ -28,27 +28,31 @@ export default function CatalogCmp({arts, hideFiltersForce, title, description, 
       window.addEventListener('resize', resizeThrottled)
       window.addEventListener('load', resizeThrottled)
       resizeThrottled()
-    
+
       let selectedSortValue = (Router && Router.query || {})._sort;
-      
-      if(useURLParams && Router && Router.query && Object.entries(Router.query).length){
-        const query = Router.query;
-        const _start = query.page ? ( query.page - 1)  * CATALOG_ITEMS_PER_PAGE: 0;
-        const newQuery = Object.assign({
-          _start,
-          _limit: CATALOG_ITEMS_PER_PAGE,
-          populate: ['Pictures', 'Artist', 'styles', 'subjects', 'mediums', 'wall'],
-        }, query);
-        delete newQuery.page;
-        let json = await fetchStrapi(API_HOST + '/arts' + serialize(newQuery))
-        const arts = Array.isArray(json) ? json : []
-        const countResponse = await fetchStrapi(API_HOST + '/arts/count' + serialize(newQuery))
-        const newCount = countResponse?.count ?? countResponse?.meta?.pagination?.total ?? 0
-        setState({arts, showPreloader:false, selectedSortValue, page: parseInt(Router.query && Router.query.page, 10) || 1, count: newCount})
-      }else{
-        setState({arts, showPreloader:false, selectedSortValue, page: parseInt(Router.query && Router.query.page, 10) || 1, count: count})
+
+      try {
+        if(useURLParams && Router && Router.query && Object.entries(Router.query).length){
+          const query = Router.query;
+          const _start = query.page ? ( query.page - 1)  * CATALOG_ITEMS_PER_PAGE: 0;
+          const newQuery = Object.assign({
+            _start,
+            _limit: CATALOG_ITEMS_PER_PAGE,
+            populate: ['Pictures', 'Artist', 'styles', 'subjects', 'mediums', 'wall'],
+          }, query);
+          delete newQuery.page;
+          let json = await fetchStrapi(API_HOST + '/arts' + serialize(newQuery))
+          const arts = Array.isArray(json) ? json : []
+          const countResponse = await fetchStrapi(API_HOST + '/arts/count' + serialize(newQuery))
+          const newCount = countResponse?.count ?? countResponse?.meta?.pagination?.total ?? 0
+          setState({arts, showPreloader:false, selectedSortValue, page: parseInt(Router.query && Router.query.page, 10) || 1, count: newCount})
+        }else{
+          setState({arts, showPreloader:false, selectedSortValue, page: parseInt(Router.query && Router.query.page, 10) || 1, count: count})
+        }
+      } catch {
+        setState(prev => ({ ...prev, showPreloader: false }))
       }
-      
+
       window.scrollTo(0, 0)
     }
 
@@ -104,8 +108,8 @@ export default function CatalogCmp({arts, hideFiltersForce, title, description, 
           <div className="catalog__sort">
             <select className="stena-select" value={ state.selectedSortValue } onChange={(event)=>changeSort(event)}>
               <option value="">По новизне</option>
-              <option value="Price:asc">Цена: по возрастанию</option>
-              <option value="Price:desc">Цена: по убыванию</option>
+              <option value="Price:asc">Дешевле</option>
+              <option value="Price:desc">Дороже</option>
             </select>
           </div>
         }

@@ -1,49 +1,43 @@
 import Link from 'next/link'
-import { useState } from 'react';
+import { useState } from 'react'
+import { useRouter } from 'next/router'
 
-export default function Menu(){
+const menuItems = [
+  { title: 'Главная',          link: '/' },
+  { title: 'Каталог',          link: '/catalog' },
+  { title: 'Добавить картину', link: '/account/add-art' },
+  { title: 'Добавить стену',   link: '/add-wall' },
+]
 
+export default function Menu() {
   const [showMenu, setShowMenu] = useState(false)
+  const router = useRouter()
 
-  function toggleMenu(){
-    setShowMenu(!showMenu)
+  const isActive = (link) => {
+    if (link === '/') return router.pathname === '/'
+    return router.pathname.startsWith(link)
   }
-
-  const menuItems = [
-    {
-      title: 'Главная',
-      link: '/'
-    },
-    /* {
-      title: 'О проекте',
-      link: '/about'
-    }, */
-    {
-      title: 'Каталог',
-      link: '/catalog'
-    }, 
-    {
-      title: 'Добавить картину',
-      link: '/add-art'
-    },    
-    {
-      title: 'Добавить стену',
-      link: '/add-wall'
-    },
-  ];
 
   return (
     <div className="menu">
-      <div className="menu-btn" onClick={ () => toggleMenu() }></div>
-      <div className={`top-menu ${showMenu ? 'active':''}`}>
-        {
-          menuItems.map( (item, index) => 
-            <div key={item.link} className="top-menu__item" >
-              <Link href={item.link} onClick={ () => setShowMenu(false) }>{item.title}</Link>
-            </div>
-          )
-        } 
-      </div>
+      <button
+        className={`menu-btn${showMenu ? ' menu-btn--open' : ''}`}
+        onClick={() => setShowMenu(v => !v)}
+        aria-label="Меню"
+      />
+      <nav className={`top-menu${showMenu ? ' active' : ''}`}>
+        {menuItems.map((item) => (
+          <div key={item.link} className="top-menu__item">
+            <Link
+              href={item.link}
+              className={isActive(item.link) ? 'is-active' : ''}
+              onClick={() => setShowMenu(false)}
+            >
+              {item.title}
+            </Link>
+          </div>
+        ))}
+      </nav>
     </div>
   )
 }

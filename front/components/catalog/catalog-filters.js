@@ -169,12 +169,6 @@ export default function CatalogFilters({filtersPreloaded, onChange, hideFilters}
               <div className="catalog-filters__show-all" onClick={ ()=> showAll(key) }>Показать все</div>
             }
             </div>
-            {
-              !filters[key].items.length &&
-              <div className="catalog-filters__preloader">
-                <Preloader></Preloader>
-              </div> 
-            }
           </div>
         )
       }

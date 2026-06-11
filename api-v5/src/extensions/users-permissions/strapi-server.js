@@ -3,6 +3,11 @@ const { sanitize } = require('@strapi/utils');
 const userUid = 'plugin::users-permissions.user';
 
 module.exports = (plugin) => {
+  plugin.contentTypes.user.schema.attributes.isModerator = {
+    type: 'boolean',
+    default: false,
+  };
+
   // Existing relations
   plugin.contentTypes.user.schema.attributes.arts = {
     type: 'relation',

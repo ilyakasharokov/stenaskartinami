@@ -30,7 +30,7 @@ export default function Catalog({ arts, filters, count }) {
 }  */
 
 
-export const getStaticProps = async () => {
+export const getServerSideProps = async () => {
   try {
     const query = {
       _start: 0,
@@ -60,10 +60,7 @@ export const getStaticProps = async () => {
       }
       filters[key] = Array.isArray(json) ? json : []
     }
-    return {
-      props: { arts, filters, count },
-      revalidate: 60,
-    }
+    return { props: { arts, filters, count } }
   } catch {
     return {
       props: {
@@ -71,7 +68,6 @@ export const getStaticProps = async () => {
         filters: { styles: [], mediums: [], subjects: [], walls: [] },
         count: 0,
       },
-      revalidate: 60,
     }
   }
 }

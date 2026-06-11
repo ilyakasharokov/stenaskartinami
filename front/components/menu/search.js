@@ -70,7 +70,7 @@ function SearchFallback() {
   return (
     <div className="top-search-widget">
       <button type="submit"></button>
-      <input placeholder="Найти..." className="ais-SearchBox-input" disabled />
+      <input placeholder="Найти картины, художников..." className="ais-SearchBox-input" disabled />
     </div>
   );
 }
@@ -114,7 +114,7 @@ export default function SearchWidget() {
           <Configure hitsPerPage={10} />
           <button type="submit"></button>
           <SearchBox
-            placeholder="Найти..."
+            placeholder="Найти картины, художников..."
             queryHook={queryHook}
             onReset={() => setQuery('')}
           />

@@ -1,194 +1,691 @@
- .art-page{
-    width: 100%;
-    max-width: 1060px;
-    margin: 0px auto;
-    padding: 0px;
-    &__sent {
-        font-size: 24px;
-        color: #FFF;
-    }
-    &__header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        h1{
-            flex: 1 0;
-        }
-        .favorite-btn {
-            flex: 0 auto;
-        }
-    }
-    &__published-at {
-        margin-top: 30px;
-        text-align: right;
-        font-style: italic;
-        color: #777;
-        margin-right: 1px;
-    }
+// ═══════════════════════════════════════════════════════════
+// Art Page
+// ═══════════════════════════════════════════════════════════
+
+.art-page {
+  max-width: 1140px;
+  margin: 0 auto;
+  padding: 0 0 60px;
 }
 
-.art-page__grid {
-    display: grid;
-    grid-template-columns: auto 430px;
-    gap: 20px;
-    grid-template-areas:
-        "gallery sidepanel";
-    align-items: flex-start;
-    margin: 0 0px 60px;
-}
+// ── Breadcrumbs ──────────────────────────────────────────────
 
-.art-page__info {
-    padding: 15px 15px 0 15px;
-    background: #eee;
-}
+.art-breadcrumbs {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 24px;
+  font-size: 13px;
+  color: #777;
 
-.art-page__wall-block-text {
-    margin-bottom: 10px;
-    
-}
-
-.art-page__info-title {
-    font-size: 28px;
-    line-height: 1.2;
-    margin-bottom: 10px;
-    // font-weight: bold;
-}
-
-.art-page__info-author {
-    font-size: 16px;
+  a {
     color: #777;
-    margin-bottom: 15px;
-    a{
-        text-decoration:none;
-    }
+    text-decoration: none;
+    &:hover { color: #111; }
+  }
+  span:last-child {
+    color: #111;
+    font-weight: 500;
+  }
+  &__sep { color: #bbb; }
 }
 
-.art-page__info-blocks{
-    margin-bottom: 15px;
+// ── Main layout ───────────────────────────────────────────────
+
+.art-layout {
+  display: grid;
+  grid-template-columns: 1fr 430px;
+  gap: 48px;
+  align-items: start;
+  margin-bottom: 56px;
+}
+
+// ── Gallery ───────────────────────────────────────────────────
+
+.art-gallery {
+  &__main {
+    position: relative;
+    border-radius: 16px;
     overflow: hidden;
-    padding-bottom: 15px;
+    background: #f3f4f6;
+    line-height: 0;
+
+    img {
+      width: 100%;
+      max-height: 580px;
+      object-fit: contain;
+      display: block;
+    }
+  }
+
+  &__arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: #fff;
+    border: none;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+    cursor: pointer;
+    font-size: 22px;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #333;
+    z-index: 2;
+    transition: box-shadow 0.15s;
+
+    &:hover { box-shadow: 0 4px 16px rgba(0, 0, 0, 0.22); }
+    &--prev { left: 14px; }
+    &--next { right: 14px; }
+  }
+
+  &__fav {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    z-index: 2;
+
+    .favorite-btn {
+      width: 38px;
+      height: 38px;
+      background-color: white;
+      background-image: url(/images/heart.png);
+      background-size: 200%;
+      background-position: left center;
+      background-repeat: no-repeat;
+      border-radius: 50%;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+
+      &.active { background-position-x: right; }
+    }
+  }
+
+  &__thumbs {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    scrollbar-width: none;
+    &::-webkit-scrollbar { display: none; }
+  }
+
+  &__thumb {
+    flex-shrink: 0;
+    width: 76px;
+    height: 58px;
+    border-radius: 8px;
+    border: 2.5px solid transparent;
+    background-size: cover;
+    background-position: center;
+    cursor: pointer;
+    transition: border-color 0.15s;
+    &:hover { border-color: #ccc; }
+
+    &--active { border-color: #dc3a0f; }
+  }
 }
 
-.art-page__info-size {
-    margin-bottom: 10px;
+// ── Info panel ────────────────────────────────────────────────
+
+.art-section-title {
+  font-size: 15px;
+  font-weight: 700;
+  margin: 0 0 12px;
+  color: #111;
 }
 
-.art-page__info-size {
-    margin-bottom: 10px;
+// Status badge
+.art-status {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  margin-bottom: 12px;
+
+  &--published {
+    background: #e6f4ea;
+    color: #1a7f45;
+  }
+  &--pending {
+    background: #fff4e0;
+    color: #8a6200;
+  }
 }
 
-.art-page__buy-block {
-    padding: 15px 15px 15px 15px;
-    background: #333;
-    margin-right: -15px;
-    margin-bottom: 0;
-    margin-left: -15px;
+// Title + share
+.art-title-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 6px;
 }
 
-.art-page__buy-poster {
-    padding: 15px;
-    margin-bottom: 30px;
-    background: aliceblue;
-    .buy-btn {
-        background: #38d;
-    }
-    .art-page__buy-text {
-        color: #000;
-    }
-    input {
-        background: #fff;
-        border: 1px solid #ccc;
-    }
-    .art-page__price {
-        color: #555;
-    }
-    .art-page__buy-expand.active {
-        max-height: 490px;
-    }
-    .art-page__sent {
-        color: #000;
-    }
+.art-title {
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 1.25;
+  margin: 0;
+  flex: 1;
+  color: #111;
 }
 
-.art-page__buy-expand {
-    &.active{
-        max-height: 290px;
-    }
-    max-height: 0;
+.art-share-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  font-size: 13px;
+  color: #555;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  white-space: nowrap;
+  margin-top: 4px;
+  transition: color 0.15s, background 0.15s;
+
+  &:hover { color: #111; background: #f3f4f6; }
+}
+
+// Meta
+.art-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #888;
+  margin-bottom: 18px;
+
+  &__dot { color: #ccc; }
+}
+
+// Artist row
+.art-artist {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 0;
+  border-top: 1px solid #f0f0f0;
+  border-bottom: 1px solid #f0f0f0;
+  margin-bottom: 22px;
+
+  &__avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: #fde8e3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    font-weight: 700;
+    color: #dc3a0f;
+    flex-shrink: 0;
+  }
+
+  &__body { min-width: 0; }
+
+  &__name-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  &__name {
+    font-size: 15px;
+    font-weight: 600;
+    color: #111;
+    text-decoration: none;
+    &:hover { color: #dc3a0f; }
+  }
+
+  &__all-link {
+    font-size: 13px;
+    color: #dc3a0f;
+    text-decoration: none;
+    white-space: nowrap;
+    &:hover { text-decoration: underline; }
+  }
+
+  &__location {
+    font-size: 13px;
+    color: #888;
+    margin-top: 3px;
+  }
+}
+
+// Purchase block
+.art-purchase {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 14px;
+
+  &__price { flex: 1; }
+  &__btns {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+}
+
+.art-price {
+  font-size: 26px;
+  font-weight: 700;
+  color: #111;
+  &--sold { color: #dc3a0f; }
+}
+
+.art-btn-dark {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #111;
+  color: #fff;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  width: 192px;
+  white-space: nowrap;
+  transition: background 0.15s;
+  text-decoration: none;
+
+  &:hover { background: #333; }
+}
+
+.art-btn-outline {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: transparent;
+  border: 1.5px solid #d0d0d0;
+  color: #333;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+  width: 192px;
+  white-space: nowrap;
+  transition: border-color 0.15s, background 0.15s;
+  text-decoration: none;
+
+  &:hover { border-color: #999; background: #f9f9f9; }
+  &--full { width: 100%; }
+  &--sm   { width: auto; }
+}
+
+// Safe deal
+.art-safe-deal {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 16px;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  margin-bottom: 22px;
+  color: #555;
+
+  &__title {
+    font-size: 13px;
+    font-weight: 600;
+    color: #222;
+    margin-bottom: 2px;
+  }
+  &__sub {
+    font-size: 12px;
+    color: #777;
+  }
+}
+
+// Characteristics
+.art-specs {
+  margin-bottom: 20px;
+
+  &__grid {
+    display: grid;
+    grid-template-columns: 100px 1fr 100px 1fr;
+    gap: 7px 14px;
+  }
+
+  &__item {
+    display: contents;
+  }
+
+  &__label {
+    font-size: 13px;
+    color: #888;
+  }
+
+  &__value {
+    font-size: 13px;
+    color: #111;
+    font-weight: 500;
+  }
+}
+
+// Description
+.art-description {
+  margin-bottom: 20px;
+
+  &__text {
+    font-size: 14px;
+    line-height: 1.65;
+    color: #444;
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
     overflow: hidden;
-    transition: all 0.2s;
-    will-change: max-height;
+
+    &--expanded {
+      display: block;
+      -webkit-line-clamp: unset;
+      overflow: visible;
+    }
+
+    p { margin: 0 0 8px; }
+  }
+
+  &__toggle {
+    background: none;
+    border: none;
+    color: #888;
+    font-size: 13px;
+    cursor: pointer;
+    padding: 4px 0;
+    margin-top: 4px;
+    &:hover { color: #333; }
+  }
 }
 
-.art-page__buy-text {
-    color: #fff;
-    margin-bottom: 15px;
+// Delivery card
+.art-delivery {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 16px 18px;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  color: #555;
+
+  &__title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #222;
+    margin-bottom: 3px;
+  }
+  &__sub {
+    font-size: 13px;
+    color: #666;
+    line-height: 1.5;
+  }
 }
 
-.art-page__buy-block-btns {
+// Buy form
+.art-form {
+  margin-bottom: 22px;
+
+  &__hint {
+    font-size: 13px;
+    color: #666;
+    margin: 0 0 12px;
+    line-height: 1.5;
+  }
+
+  &__input {
+    display: block;
+    width: 100%;
+    padding: 10px 14px;
+    font-size: 14px;
+    border: 1.5px solid #d0d0d0;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    background: #fff;
+    outline: none;
+    font-family: inherit;
+    transition: border-color 0.15s;
+
+    &:focus { border-color: #374151; }
+  }
+
+  &__btns {
+    display: flex;
+    gap: 10px;
+    margin-top: 14px;
+  }
+
+  &--sent {
+    padding: 20px;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    text-align: center;
+
+    p { font-size: 15px; margin: 0 0 16px; }
+  }
+}
+
+// About artist (under gallery in left column)
+.art-about {
+  margin-top: 24px;
+
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 24px;
+
+  &__heading {
+    font-size: 16px;
+    font-weight: 700;
+    margin: 0 0 18px;
+  }
+
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 14px;
+  }
+
+  &__avatar {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: #fde8e3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    font-weight: 700;
+    color: #dc3a0f;
+    flex-shrink: 0;
+  }
+
+  &__name {
+    font-size: 16px;
+    font-weight: 600;
+    color: #111;
+  }
+
+  &__location {
+    font-size: 13px;
+    color: #888;
+    margin-top: 3px;
+  }
+
+  &__bio {
+    font-size: 13px;
+    line-height: 1.6;
+    color: #555;
+    margin: 0 0 18px;
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+
+    p { margin: 0 0 6px; }
+  }
+
+  &__footer {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    gap: 12px;
+    padding-top: 14px;
+    border-top: 1px solid #f0f0f0;
+  }
 }
 
-.art-page__price {
-    color: #fff;
-    font-size: 22px;
-    display: inline-block;
-    vertical-align: middle;
-    white-space: nowrap;
+// Similar works section wrapper
+.art-bottom {
+  margin-top: 48px;
 }
 
-.art-page__info-materials {
-    margin-bottom: 15px;
-}
+// Similar works
+.art-similar {
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
 
-.art-page__description {
-    color: #555;
-}
+    h2 { font-size: 16px; font-weight: 700; margin: 0; }
+  }
 
-.art-page__thumbnails {
-    position: absolute;
-    width: 80px;
-    left: -80px;
-    top:0;
-}
+  &__all-link {
+    font-size: 13px;
+    color: #888;
+    text-decoration: none;
+    &:hover { color: #111; }
+  }
 
-.art-page__gallery {
-    position: relative;
-}
+  &__grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+  }
 
-.art-page__thumbnail {
-    &--active{
-        border: 3px solid #555;
-    }
-    width: 70px;
-    height: 70px;
+  &__item {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+
+    &:hover .art-similar__img img { transform: scale(1.04); }
+  }
+
+  &__img {
+    border-radius: 8px;
     overflow: hidden;
-    border: 1px solid #aaa;
-    background-position: center;
-    background-size: cover;
-    margin-bottom: 10px;
-    cursor: pointer;
+    aspect-ratio: 1;
+    margin-bottom: 6px;
+    background: #f3f4f6;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.25s;
+    }
+  }
+
+  &__title {
+    font-size: 13px;
+    font-weight: 600;
+    color: #111;
+    margin-top: 6px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__size {
+    font-size: 11px;
+    color: #aaa;
+    margin-top: 2px;
+  }
+
+  &__meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 6px;
+    margin-top: 2px;
+  }
+
+  &__artist {
+    font-size: 11px;
+    color: #777;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+  }
+
+  &__price {
+    font-size: 12px;
+    font-weight: 600;
+    color: #111;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
 }
 
+// ── Mobile ────────────────────────────────────────────────────
 
-@media screen and (max-width: 994px) {
-    .art-page__grid {
-        display: block;
-    }
+@media screen and (max-width: 900px) {
+  .art-layout {
+    grid-template-columns: 1fr;
+    gap: 24px;
+    margin-bottom: 40px;
+  }
 
-    .art-page__thumbnails {
-        position: static;
-        width: 100%;
-    }
+  .art-similar__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
 
-    .art-page__thumbnail {
-        display: inline-block;
-        margin-right: 5px;
-    }
+  .art-title { font-size: 22px; }
 
-    .art-page__info-title {
-        font-size: 24px;
+  .art-purchase {
+    flex-direction: column;
+    align-items: flex-start;
+
+    &__btns {
+      width: 100%;
+      flex-direction: row;
+      flex-wrap: wrap;
     }
+  }
+
+  .art-btn-dark, .art-btn-outline { width: auto; flex: 1; }
+
+  .art-specs__grid {
+    grid-template-columns: 90px 1fr;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .art-specs__grid {
+    grid-template-columns: 80px 1fr;
+  }
+  .art-similar__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }

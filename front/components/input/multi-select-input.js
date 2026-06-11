@@ -1,12 +1,13 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { API_HOST } from '@/constants/constants'
 import { fetchStrapi } from '@/utils/strapi'
 
-export default function MultiSelectInput({ endpoint, label, titleField = 'Title', onChange, aiNames = [] }) {
+export default function MultiSelectInput({ endpoint, label, titleField = 'Title', onChange, aiNames = [], initialIds = [], initialDocumentIds = [] }) {
   const [options, setOptions] = useState([])
   const [selected, setSelected] = useState(new Set())
   const [custom, setCustom] = useState([]) // string[]
   const [filter, setFilter] = useState('')
+  const initializedRef = useRef(false)
 
   useEffect(() => {
     fetchStrapi(API_HOST + `/${endpoint}?pagination[limit]=200`).then(json => {
@@ -15,6 +16,23 @@ export default function MultiSelectInput({ endpoint, label, titleField = 'Title'
       setOptions(unique.sort((a, b) => (a[titleField] < b[titleField] ? -1 : 1)))
     })
   }, [endpoint])
+
+  // Pre-select when options load (edit mode) — match by documentId first, then by id
+  useEffect(() => {
+    const hasInit = initialDocumentIds.length > 0 || initialIds.length > 0
+    if (!hasInit || !options.length || initializedRef.current) return
+    initializedRef.current = true
+    let ids
+    if (initialDocumentIds.length > 0) {
+      ids = initialDocumentIds
+        .map(docId => options.find(o => o.documentId === docId)?.id)
+        .filter(Boolean)
+    } else {
+      ids = initialIds.filter(id => options.some(o => o.id === id))
+    }
+    setSelected(new Set(ids))
+    onChange({ ids, custom: [] })
+  }, [options, initialIds, initialDocumentIds])
 
   useEffect(() => {
     if (!aiNames.length || !options.length) return
@@ -106,9 +124,9 @@ export default function MultiSelectInput({ endpoint, label, titleField = 'Title'
           value={filter}
           onChange={e => setFilter(e.target.value)}
           onKeyDown={e => {
-            if ((e.key === 'Enter' || e.key === ',') && canAddCustom) {
+            if (e.key === 'Enter' || e.key === ',') {
               e.preventDefault()
-              addCustom(filter)
+              if (canAddCustom) addCustom(filter)
             }
           }}
         />

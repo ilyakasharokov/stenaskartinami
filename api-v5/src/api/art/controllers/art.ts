@@ -48,6 +48,7 @@ const defaultPopulate = {
   Pictures: true,
   video: true,
   user_uploader: true,
+  interior_photo: true,
 };
 
 const mergePopulate = (populate: any) => {
@@ -69,6 +70,7 @@ export default factories.createCoreController(uid, () => ({
     const sanitizedQuery = await this.sanitizeQuery(ctx);
     const { results, pagination } = await strapi.service(uid).find({
       ...sanitizedQuery,
+      status: 'published',
       populate: mergePopulate(sanitizedQuery.populate),
     });
     const sanitizedResults = await this.sanitizeOutput(results, ctx);
@@ -137,6 +139,78 @@ export default factories.createCoreController(uid, () => ({
     return sanitizeOutput(entities, ctx);
   },
 
+  async findMyOne(ctx) {
+    const userId = ctx.state.user?.id;
+    if (!userId) {
+      ctx.status = 401;
+      ctx.body = { error: { status: 401, message: 'Unauthorized' } };
+      return;
+    }
+    const { documentId } = ctx.params;
+    const results = await strapi.entityService.findMany(uid, {
+      status: 'draft',
+      filters: {
+        documentId: { $eq: documentId },
+        user_uploader: { id: { $eq: userId } },
+      } as any,
+      populate: {
+        Artist: true, styles: true, subjects: true, mediums: true,
+        wall: true, Pictures: true, user_uploader: true,
+      },
+      pagination: { pageSize: 1 },
+    });
+    const entity = Array.isArray(results) ? results[0] : results;
+    if (!entity) {
+      ctx.status = 404;
+      ctx.body = { error: { status: 404, message: 'Not found' } };
+      return;
+    }
+    const sanitized = await this.sanitizeOutput(entity, ctx);
+    return this.transformResponse(sanitized);
+  },
+
+  async findMy(ctx) {
+    const userId = ctx.state.user?.id;
+    if (!userId) {
+      ctx.status = 401;
+      ctx.body = { error: { status: 401, message: 'Unauthorized' } };
+      return;
+    }
+
+    const populate = {
+      Artist: true,
+      styles: true,
+      subjects: true,
+      mediums: true,
+      wall: true,
+      Pictures: true,
+    };
+    const filters = { user_uploader: { id: { $eq: userId } } } as any;
+    const pagination = { pageSize: 200 };
+
+    const [published, drafts] = await Promise.all([
+      strapi.entityService.findMany(uid, { status: 'published', filters, populate, pagination }),
+      strapi.entityService.findMany(uid, { status: 'draft', filters, populate, pagination }),
+    ]);
+
+    const publishedDocIds = new Set(
+      (Array.isArray(published) ? published : []).map((e: any) => e.documentId)
+    );
+    const draftOnly = (Array.isArray(drafts) ? drafts : []).filter(
+      (d: any) => !publishedDocIds.has(d.documentId)
+    );
+
+    const allArts = [
+      ...(Array.isArray(published) ? published : []),
+      ...draftOnly,
+    ].sort((a: any, b: any) =>
+      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
+
+    const sanitizedResults = await this.sanitizeOutput(allArts, ctx);
+    return this.transformResponse(sanitizedResults, { pagination: {} });
+  },
+
   async allArts(ctx) {
     const entities = await strapi.entityService.findMany(uid, {
       status: 'published',
@@ -175,6 +249,7 @@ export default factories.createCoreController(uid, () => ({
       Pictures: true,
       video: true,
       user_uploader: true,
+      interior_photo: true,
     };
     let entity = null;
     if (/^\d+$/.test(id)) {

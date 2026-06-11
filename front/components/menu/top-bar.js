@@ -1,55 +1,98 @@
-import { useSession, signIn, signOut } from "next-auth/react";
-import Link from "next/link";
-import React from "react";
-import dynamic from 'next/dynamic';
+import { useSession, signOut } from 'next-auth/react'
+import Link from 'next/link'
+import { useState, useRef, useEffect } from 'react'
 
-const SearchWidget = dynamic(() => import('../menu/search'), { ssr: false });
+const BellIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+    <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+  </svg>
+)
 
-export default function TopBar(){
+const ChevronIcon = () => (
+  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+    <polyline points="6 9 12 15 18 9"/>
+  </svg>
+)
 
-    const { data: session, status } = useSession()
-    const loading = status === 'loading'
+function UserAvatar({ name, image }) {
+  if (image) {
+    return <img src={image} alt={name} className="nav-user__avatar-img" />
+  }
+  const initials = (name || '?').slice(0, 1).toUpperCase()
+  return <span className="nav-user__avatar-initials">{initials}</span>
+}
 
+export default function NavRight() {
+  const { data: session } = useSession()
+  const [dropdownOpen, setDropdownOpen] = useState(false)
+  const dropdownRef = useRef(null)
+
+  useEffect(() => {
+    if (!dropdownOpen) return
+    const handler = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setDropdownOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [dropdownOpen])
+
+  if (!session) {
     return (
-        <div className="top-bar">
-            <div className="top-bar__left">
-                <SearchWidget></SearchWidget>
-            </div>
-            {
-                true &&
-                <div className="top-bar__right">
-                    <div className="top-bar__login">
-                    {
-                        !session &&
-                        <Link href="/auth/signin" className="top-bar__auth-link">
-                            Войти
-                        </Link>
-                    }
-                    {
-                        session && 
-                        <div className="top-bar__signed">
-                            {
-                                session.info && session.info.arts &&
-                                <Link href="/account/favorite" title="Избранное" className={`favorite-btn ${ session.info.arts.length > 0 ? 'active': ''}`}></Link>
-                            }
-                            {
-                                session.info && 
-                                <Link href="/account/my-arts" className="top-bar__user-name">{ session.user.name }</Link>
-                            }
-                            | 
-                            <Link href="/api/auth/signout" className="top-bar__auth-link"
-                                onClick={(e) => {
-                                    e.preventDefault();
-                                    signOut();
-                                }}
-                            >
-                                Выйти
-                            </Link>
-                        </div>
-                    }
-                    </div>
-                </div>
-            }
-        </div>
+      <div className="nav-right">
+        <Link href="/auth/signin" className="nav-auth-link">Войти</Link>
+      </div>
     )
+  }
+
+  return (
+    <div className="nav-right">
+      <button className="nav-bell" aria-label="Уведомления">
+        <BellIcon />
+        <span className="nav-bell__dot" />
+      </button>
+
+      <div className="nav-user" ref={dropdownRef}>
+        <button
+          className="nav-user__trigger"
+          onClick={() => setDropdownOpen(v => !v)}
+          aria-expanded={dropdownOpen}
+        >
+          <div className="nav-user__avatar">
+            <UserAvatar name={session.user?.name} image={session.user?.image} />
+          </div>
+          <span className="nav-user__name">{session.user?.name}</span>
+          <ChevronIcon />
+        </button>
+
+        {dropdownOpen && (
+          <div className="nav-user__dropdown">
+            <Link
+              href="/account/my-arts"
+              className="nav-user__item"
+              onClick={() => setDropdownOpen(false)}
+            >
+              Мои работы
+            </Link>
+            <Link
+              href="/account/favorite"
+              className="nav-user__item"
+              onClick={() => setDropdownOpen(false)}
+            >
+              Избранное
+            </Link>
+            <div className="nav-user__divider" />
+            <button
+              className="nav-user__item nav-user__item--danger"
+              onClick={() => { setDropdownOpen(false); signOut() }}
+            >
+              Выйти
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  )
 }
