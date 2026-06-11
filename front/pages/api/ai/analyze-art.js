@@ -96,16 +96,18 @@ export default async function handler(req, res) {
 
     if (!response.ok) {
       const errText = await response.text();
-      const err = new Error(`Yandex AI ${response.status}: ${errText}`);
-      Sentry.captureException(err);
+      console.error('[analyze-art] Yandex AI error', response.status, errText.slice(0, 300));
+      Sentry.captureException(new Error(`Yandex AI ${response.status}: ${errText}`));
       return res.status(200).json({ _error: AI_ERROR, remaining });
     }
 
     const data = await response.json();
     const raw = data.choices?.[0]?.message?.content || '';
     const text = raw.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
+    console.log('[analyze-art] raw response:', text.slice(0, 200));
     const jsonMatch = text.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
+      console.error('[analyze-art] no JSON in response. Full raw:', text.slice(0, 500));
       Sentry.captureMessage(`AI returned no JSON. Raw: ${text.slice(0, 500)}`);
       return res.status(200).json({ _error: AI_ERROR, remaining });
     }
@@ -113,6 +115,7 @@ export default async function handler(req, res) {
     const newRemaining = consumeOne(session.id);
     return res.status(200).json({ ...JSON.parse(jsonMatch[0]), _remaining: newRemaining });
   } catch (err) {
+    console.error('[analyze-art] exception:', err.message);
     Sentry.captureException(err);
     return res.status(200).json({ _error: AI_ERROR, remaining });
   }
