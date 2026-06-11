@@ -739,11 +739,24 @@ function DetailsStep({ images, onImagesChange, sessionJwt, userId, initialArtist
     setAnalyzing(true)
     setAiError('')
     try {
+      const aiImageDataUrl = await new Promise((resolve) => {
+        const img = new Image()
+        img.onload = () => {
+          const MAX = 800
+          const scale = Math.min(1, MAX / Math.max(img.width, img.height))
+          const canvas = document.createElement('canvas')
+          canvas.width = Math.round(img.width * scale)
+          canvas.height = Math.round(img.height * scale)
+          canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height)
+          resolve(canvas.toDataURL('image/jpeg', 0.82))
+        }
+        img.src = images[0].data_url
+      })
       const res = await fetch('/api/ai/analyze-art', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          imageDataUrl: images[0].data_url,
+          imageDataUrl: aiImageDataUrl,
           availableStyles: availableOptions.styles,
           availableSubjects: availableOptions.subjects,
           availableMediums: availableOptions.mediums,
