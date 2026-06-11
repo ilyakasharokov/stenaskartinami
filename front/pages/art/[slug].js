@@ -436,7 +436,6 @@ export const getStaticProps = async ({ params: { slug } }) => {
     let json = await fetchStrapi(API_HOST + '/arts/all/' + id + serialize({ populate: 'deep,2' }))
 
     if (!json || !json.id) return { notFound: true }
-    if (!json.wall)        return { notFound: true }
 
     const art = json
 
