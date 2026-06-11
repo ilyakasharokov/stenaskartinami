@@ -153,7 +153,7 @@ Art.getInitialProps = async ({query}) => {
 export async function getStaticPaths() {
   try {
     const json = await fetchStrapi(
-      API_HOST + '/arts' + serialize({ populate: ['Pictures', 'Artist'] })
+      API_HOST + '/arts' + serialize({ populate: ['Pictures', 'Artist'], 'filters[wall][$notNull]': true })
     )
     const arts = Array.isArray(json) ? json : []
     return {
@@ -173,6 +173,10 @@ export const getStaticProps = async ({params: { slug }}) => {
   )
 
   if (!json || !json.id) {
+    return { notFound: true }
+  }
+
+  if (!json.wall) {
     return { notFound: true }
   }
 
@@ -197,7 +201,7 @@ export const getStaticProps = async ({params: { slug }}) => {
   if (style) {
     json = await fetchStrapi(
       API_HOST +
-        `/arts?filters[styles][id][$eq]=${style.id}&populate[0]=Pictures&populate[1]=Artist`
+        `/arts?filters[styles][id][$eq]=${style.id}&filters[wall][$notNull]=true&populate[0]=Pictures&populate[1]=Artist`
     )
     const styleList = Array.isArray(json) ? json : []
     const artistArts = artist?.Arts || []

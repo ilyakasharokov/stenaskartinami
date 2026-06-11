@@ -596,9 +596,19 @@ function DetailsStep({ images, onImagesChange, sessionJwt, userId, initialArtist
 
     const errs = {}
     if (!fields.title.trim()) errs.title = 'Укажите название работы'
+    if (!artist.id && !artist.full_name?.trim()) errs.artist = 'Укажите художника'
     if (!fields.description.trim()) errs.description = 'Добавьте описание'
     if (!fields.materials.trim()) errs.materials = 'Укажите материалы и технику'
-    if (Object.keys(errs).length) { setErrors(errs); return }
+    if (!fields.width) errs.width = 'Укажите ширину'
+    if (!fields.height) errs.height = 'Укажите высоту'
+    if (!fields.price) errs.price = 'Укажите желаемую цену'
+    if (Object.keys(errs).length) {
+      setErrors(errs)
+      setTimeout(() => {
+        document.querySelector('.art-field--error')?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      }, 0)
+      return
+    }
 
     setUploading(true)
 
@@ -647,28 +657,34 @@ function DetailsStep({ images, onImagesChange, sessionJwt, userId, initialArtist
     }
 
     const year = date.getFullYear()
+    const artData = {
+      Title: fields.title,
+      Description: fields.description,
+      Materials: fields.materials,
+      Owners_price: parseInt(fields.price) || 0,
+      width: fields.width || null,
+      height: fields.height || null,
+      Year: `${year}-01-01`,
+      styles: allStyles,
+      subjects: allSubjects,
+      mediums: allMediums,
+      Pictures: imagesUploaded.map(p => p.id),
+    }
+    if (artistId) artData.Artist = artistId
+
     const res = await fetch(API_HOST + '/arts', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${sessionJwt}` },
-      body: JSON.stringify({
-        Title: fields.title,
-        Description: fields.description,
-        Materials: fields.materials,
-        Owners_price: parseInt(fields.price) || 0,
-        width: fields.width,
-        height: fields.height,
-        Year: `${year}-01-01`,
-        Artist: artistId,
-        styles: allStyles,
-        subjects: allSubjects,
-        mediums: allMediums,
-        user_uploader: userId,
-        Pictures: imagesUploaded.map(p => p.id),
-      }),
+      body: JSON.stringify({ data: artData }),
     })
-    const json = normalizeStrapiResponse(await res.json())
+    const resJson = await res.json()
     setUploading(false)
-    onSuccess(json)
+    if (!res.ok || resJson?.error) {
+      const msg = resJson?.error?.message || 'Ошибка сохранения работы'
+      setErrors(er => ({ ...er, upload: msg }))
+      return
+    }
+    onSuccess(normalizeStrapiResponse(resJson))
   }
 
   return (
@@ -783,7 +799,9 @@ function DetailsStep({ images, onImagesChange, sessionJwt, userId, initialArtist
             </Field>
 
             <div className="art-fields-row">
-              <ArtistInput onArtistChange={setArtist} initialValue={initialArtist} />
+              <Field required error={errors.artist}>
+                <ArtistInput onArtistChange={setArtist} initialValue={initialArtist} />
+              </Field>
               <YearInput onChange={setDate} />
             </div>
           </SectionCard>
@@ -801,12 +819,14 @@ function DetailsStep({ images, onImagesChange, sessionJwt, userId, initialArtist
             <div>
               <div className="dimensions-row">
                 <div className="dimensions-row__field">
-                  <span className="dimensions-row__label">Ширина</span>
-                  <input type="number" placeholder="80" value={fields.width} onChange={set('width')} min="0" />
+                  <span className="dimensions-row__label">Ширина *</span>
+                  <input type="number" placeholder="80" value={fields.width} onChange={set('width')} min="0" className={errors.width ? 'input--error' : ''} />
+                  {errors.width && <p className="art-field__error-msg">{errors.width}</p>}
                 </div>
                 <div className="dimensions-row__field">
-                  <span className="dimensions-row__label">Высота</span>
-                  <input type="number" placeholder="100" value={fields.height} onChange={set('height')} min="0" />
+                  <span className="dimensions-row__label">Высота *</span>
+                  <input type="number" placeholder="100" value={fields.height} onChange={set('height')} min="0" className={errors.height ? 'input--error' : ''} />
+                  {errors.height && <p className="art-field__error-msg">{errors.height}</p>}
                 </div>
                 <div className="dimensions-row__field">
                   <span className="dimensions-row__label">
@@ -876,7 +896,7 @@ function DetailsStep({ images, onImagesChange, sessionJwt, userId, initialArtist
           </SectionCard>
 
           <SectionCard title="Цена" icon="💰">
-            <Field label="Желаемая цена, ₽">
+            <Field label="Желаемая цена, ₽" required error={errors.price}>
               <input
                 type="number"
                 placeholder="15000"

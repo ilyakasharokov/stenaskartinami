@@ -163,6 +163,7 @@ export const getServerSideProps = async () => {
       _limit: 8,
       main: true,
       populate: ['Pictures', 'Artist', 'styles', 'subjects', 'mediums', 'wall'],
+      'filters[wall][$notNull]': true,
     };
     json = await fetchStrapi(API_HOST + '/arts' + serialize(query))
     const list = Array.isArray(json) ? json : []

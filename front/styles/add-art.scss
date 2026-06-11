@@ -713,6 +713,11 @@
   }
 }
 
+input.input--error {
+  border-color: var(--c-accent) !important;
+  box-shadow: 0 0 0 3px rgba(220, 58, 15, 0.09) !important;
+}
+
 // ─── Inline row of fields ─────────────────────────────────
 
 .art-fields-row {

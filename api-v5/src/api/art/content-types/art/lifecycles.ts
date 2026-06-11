@@ -1,15 +1,17 @@
 'use strict';
 
-const slugOptions = { lower: true, remove: /[*+~.()'"!:@ь«»\/#,]/g };
+const CYR_TO_LAT: Record<string, string> = {
+  а:'a',б:'b',в:'v',г:'g',д:'d',е:'e',ё:'yo',ж:'zh',з:'z',и:'i',й:'j',
+  к:'k',л:'l',м:'m',н:'n',о:'o',п:'p',р:'r',с:'s',т:'t',у:'u',ф:'f',
+  х:'kh',ц:'ts',ч:'ch',ш:'sh',щ:'sch',ъ:'',ы:'y',ь:'',э:'e',ю:'yu',я:'ya',
+};
 
 const slugifyValue = (value: unknown) => {
   if (!value) return value as string;
-  const lower = slugOptions.lower ? value.toString().toLowerCase() : value.toString();
-  return lower
-    .replace(slugOptions.remove, '')
-    .trim()
-    .replace(/\s+/g, '-')
-    .replace(/-+/g, '-');
+  return value.toString().toLowerCase()
+    .split('').map(c => CYR_TO_LAT[c] ?? c).join('')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
 };
 
 const updateDimensions = (data: any) => {

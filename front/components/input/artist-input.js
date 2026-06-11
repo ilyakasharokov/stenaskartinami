@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { API_HOST } from "@/constants/constants"
 import { fetchStrapi } from "@/utils/strapi"
 import Preloader from "../preloader/preloader";
@@ -12,6 +12,8 @@ export default function ArtistInput({onArtistChange, initialValue}){
     let timerId = null;
     let [ newArtist, setNewArtist ] = useState(initialValue || {id:null, full_name: ""});
     let [ focus, setFocus ] = useState(false);
+    let [ dropdownStyle, setDropdownStyle ] = useState({});
+    const inputRef = useRef(null);
     
     function  debounceFunction(func, delay) {
         // Cancels the setTimeout method execution
@@ -92,6 +94,16 @@ export default function ArtistInput({onArtistChange, initialValue}){
 
     function onFocus(){
         setFocus(true);
+        if (inputRef.current) {
+            const rect = inputRef.current.getBoundingClientRect()
+            setDropdownStyle({
+                position: 'fixed',
+                top: rect.bottom + 2,
+                left: rect.left,
+                width: rect.width,
+                zIndex: 9999,
+            })
+        }
     }
 
     function onBlur(){
@@ -102,9 +114,9 @@ export default function ArtistInput({onArtistChange, initialValue}){
         <div className="form-input">
             <label>Имя художника или псевдоним</label>
             <div className="form-input__options-wrapper">
-                <input type="text" name="Artist" value={value} onChange={(e)=>onChange(e)} onFocus={()=>onFocus()} onBlur={()=>onBlur()} placeholder="Малевич" required/>
+                <input ref={inputRef} type="text" name="Artist" value={value} onChange={(e)=>onChange(e)} onFocus={()=>onFocus()} onBlur={()=>onBlur()} placeholder="Малевич" required/>
                 {
-                    focus && options.length > 0 && <div className="form-input__options">
+                    focus && options.length > 0 && <div className="form-input__options" style={dropdownStyle}>
                     {
                         options.map((option) =>
                             <div className="form-input__option" onClick={()=>clickArtist(option)} key={option.id}>{ option.full_name }</div>

@@ -36,6 +36,7 @@ export const getStaticProps = async () => {
       _start: 0,
       _limit: CATALOG_ITEMS_PER_PAGE,
       populate: ['Pictures', 'Artist', 'styles', 'subjects', 'mediums', 'wall'],
+      'filters[wall][$notNull]': true,
     };
     let json = await fetchStrapi(API_HOST + '/arts' + serialize(query))
     const list = Array.isArray(json) ? json : []
