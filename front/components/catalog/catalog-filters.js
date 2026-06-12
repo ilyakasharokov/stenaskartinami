@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter } from "next/router";
 import Router from 'next/router'
 import Preloader from '../preloader/preloader';
@@ -8,6 +8,25 @@ const FILTER_ITEMS_NUM = 6;
 export default function CatalogFilters({filtersPreloaded, onChange, hideFilters}){
 
   const router = useRouter();
+  const [searchText, setSearchText] = useState(router.query?.q || '');
+  const searchTimerRef = useRef(null);
+
+  useEffect(() => {
+    setSearchText(router.query?.q || '');
+  }, [router.query?.q]);
+
+  function handleSearchChange(e) {
+    const val = e.target.value;
+    setSearchText(val);
+    clearTimeout(searchTimerRef.current);
+    searchTimerRef.current = setTimeout(() => {
+      const newQuery = { ...Router.query, q: val };
+      if (!val) delete newQuery.q;
+      delete newQuery.page;
+      onChange();
+      Router.push({ pathname: Router.pathname, query: newQuery });
+    }, 400);
+  }
 
   const [filters, setFilters] = useState({
     styles:{
@@ -137,6 +156,15 @@ export default function CatalogFilters({filtersPreloaded, onChange, hideFilters}
     <div className="catalog-filters">
       <div className="align-right">
         <div className="close-btn" onClick={() => hideFilters() }></div>
+      </div>
+      <div className="catalog-filters__search">
+        <input
+          type="text"
+          className="catalog-filters__search-input"
+          placeholder="Поиск по названию..."
+          value={searchText}
+          onChange={handleSearchChange}
+        />
       </div>
       <div className="catalog-filters__sections">
       {

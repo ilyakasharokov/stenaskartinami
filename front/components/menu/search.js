@@ -118,7 +118,7 @@ export default function SearchWidget() {
                 <div className="search__section">
                   <div className="search__section-header">
                     <span className="search__section-title">Картины</span>
-                    <Link href="/catalog" className="search__see-all" onClick={handleSelect}>
+                    <Link href={`/catalog?q=${encodeURIComponent(query)}`} className="search__see-all" onClick={handleSelect}>
                       Смотреть все ({arts.totalHits})
                     </Link>
                   </div>
@@ -141,7 +141,7 @@ export default function SearchWidget() {
                 <div className="search__section">
                   <div className="search__section-header">
                     <span className="search__section-title">Художники</span>
-                    <Link href="/catalog" className="search__see-all" onClick={handleSelect}>
+                    <Link href={`/catalog?q=${encodeURIComponent(query)}`} className="search__see-all" onClick={handleSelect}>
                       Смотреть все ({artists.totalHits})
                     </Link>
                   </div>

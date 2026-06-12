@@ -276,19 +276,41 @@ export default function Home({ walls, arts, interiorArts, artists }) {
 
 export const getServerSideProps = async () => {
   try {
-    const wallsJson = await fetchStrapi(
-      API_HOST +
-        '/walls' +
-        serialize({
-          populate: {
-            Images: true,
-            arts: {
-              populate: ['Pictures', 'Artist', 'styles', 'subjects', 'mediums', 'wall'],
+    const [wallsJson, artsJson, intJson, artistsJson] = await Promise.all([
+      fetchStrapi(
+        API_HOST +
+          '/walls' +
+          serialize({
+            populate: {
+              Images: true,
+              arts: {
+                populate: ['Pictures', 'Artist'],
+              },
             },
-          },
-          populateDefaults: [],
-        })
-    );
+            populateDefaults: [],
+          })
+      ),
+      fetchStrapi(
+        API_HOST +
+          '/arts' +
+          serialize({
+            _start: 0,
+            _limit: 8,
+            main: true,
+            populate: ['Pictures', 'Artist', 'styles', 'subjects', 'mediums', 'wall'],
+          })
+      ),
+      fetchStrapi(
+        API_HOST +
+          '/arts?filters[interior_photo][$notNull]=true&pagination[pageSize]=6&populate[0]=interior_photo&populate[1]=Pictures&populate[2]=Artist&sort=publishedAt:desc'
+      ).catch(() => null),
+      fetchStrapi(
+        API_HOST +
+          '/artists' +
+          serialize({ _limit: 8, populate: { photos: true }, populateDefaults: [] })
+      ).catch(() => null),
+    ]);
+
     const walls = Array.isArray(wallsJson) ? wallsJson : [];
     walls.forEach(wall => {
       const wallArts = Array.isArray(wall.arts) ? wall.arts : [];
@@ -299,43 +321,19 @@ export const getServerSideProps = async () => {
       });
     });
 
-    const artsJson = await fetchStrapi(
-      API_HOST +
-        '/arts' +
-        serialize({
-          _start: 0,
-          _limit: 8,
-          main: true,
-          populate: ['Pictures', 'Artist', 'styles', 'subjects', 'mediums', 'wall'],
-        })
-    );
     const arts = (Array.isArray(artsJson) ? artsJson : []).sort((a, b) => {
       const aP = a.publishedAt || a.published_at;
       const bP = b.publishedAt || b.published_at;
       return aP < bP ? 1 : -1;
     });
 
-    let interiorArts = [];
-    try {
-      const intJson = await fetchStrapi(
-        API_HOST +
-          '/arts?filters[interior_photo][$notNull]=true&pagination[pageSize]=6&populate[0]=interior_photo&populate[1]=Pictures&populate[2]=Artist&sort=publishedAt:desc'
-      );
-      interiorArts = Array.isArray(intJson) ? intJson : [];
-    } catch {}
-
-    let artists = [];
-    try {
-      const artistsJson = await fetchStrapi(
-        API_HOST +
-          '/artists' +
-          serialize({ _limit: 8, populate: { photos: true }, populateDefaults: [] })
-      );
-      artists = Array.isArray(artistsJson) ? artistsJson : [];
-    } catch {}
-
     return {
-      props: { walls, arts, interiorArts, artists },
+      props: {
+        walls,
+        arts,
+        interiorArts: Array.isArray(intJson) ? intJson : [],
+        artists: Array.isArray(artistsJson) ? artistsJson : [],
+      },
     };
   } catch {
     return {

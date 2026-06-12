@@ -135,11 +135,24 @@ function serialize(obj = {}) {
     'main',
     'size',
     'populate',
+    'q',
   ]);
   let andIndex = sizeValues.length ? 1 : 0;
 
+  if (obj.q) {
+    const q = encodeURIComponent(String(obj.q));
+    params.push(`filters[$and][${andIndex}][$or][0][Title][$containsi]=${q}`);
+    params.push(`filters[$and][${andIndex}][$or][1][Artist][full_name][$containsi]=${q}`);
+    andIndex++;
+  }
+
   Object.entries(obj).forEach(([key, value]) => {
     if (specialKeys.has(key)) return;
+    // Pass raw Strapi filter strings through directly (e.g. 'filters[wall][$notNull]')
+    if (key.startsWith('filters[')) {
+      params.push(`${key}=${encodeURIComponent(String(value))}`);
+      return;
+    }
     const values = Array.isArray(value) ? value : [value];
 
     values.forEach((val, index) => {
