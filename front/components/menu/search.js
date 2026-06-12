@@ -4,10 +4,26 @@ import imageUrlBuilder from '@/utils/img-url-builder';
 
 const DEBOUNCE_MS = 300;
 
+async function searchIndex(index, query, hitsPerPage) {
+  const res = await fetch('/api/meili-proxy', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ index, params: { query, hitsPerPage } }),
+  });
+  if (!res.ok) return { hits: [], totalHits: 0 };
+  const data = await res.json();
+  return { hits: data.hits || [], totalHits: data.totalHits || 0 };
+}
+
+function initials(name) {
+  return (name || '').split(' ').filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase();
+}
+
 export default function SearchWidget() {
   const [query, setQuery] = React.useState('');
-  const [hits, setHits] = React.useState([]);
-  const [total, setTotal] = React.useState(0);
+  const [arts, setArts] = React.useState({ hits: [], totalHits: 0 });
+  const [artists, setArtists] = React.useState({ hits: [], totalHits: 0 });
+  const [walls, setWalls] = React.useState({ hits: [], totalHits: 0 });
   const [open, setOpen] = React.useState(false);
   const timerRef = React.useRef(null);
   const inputRef = React.useRef(null);
@@ -25,29 +41,46 @@ export default function SearchWidget() {
     const q = e.target.value;
     setQuery(q);
     clearTimeout(timerRef.current);
-    if (!q.trim()) { setHits([]); setTotal(0); setOpen(false); return; }
+    if (!q.trim()) {
+      setArts({ hits: [], totalHits: 0 });
+      setArtists({ hits: [], totalHits: 0 });
+      setWalls({ hits: [], totalHits: 0 });
+      setOpen(false);
+      return;
+    }
     timerRef.current = setTimeout(async () => {
       try {
-        const res = await fetch('/api/meili-proxy', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ index: 'art', params: { query: q.trim(), hitsPerPage: 6 } }),
-        });
-        if (!res.ok) return;
-        const data = await res.json();
-        setHits(data.hits || []);
-        setTotal(data.totalHits || 0);
+        const [a, ar, w] = await Promise.all([
+          searchIndex('art', q.trim(), 6),
+          searchIndex('artist', q.trim(), 4),
+          searchIndex('wall', q.trim(), 3),
+        ]);
+        setArts(a);
+        setArtists(ar);
+        setWalls(w);
         setOpen(true);
-      } catch { setHits([]); }
+      } catch { /* ignore */ }
     }, DEBOUNCE_MS);
   };
 
   const handleClear = () => {
-    setQuery(''); setHits([]); setTotal(0); setOpen(false);
+    setQuery('');
+    setArts({ hits: [], totalHits: 0 });
+    setArtists({ hits: [], totalHits: 0 });
+    setWalls({ hits: [], totalHits: 0 });
+    setOpen(false);
     inputRef.current?.focus();
   };
 
-  const handleSelect = () => { setQuery(''); setHits([]); setTotal(0); setOpen(false); };
+  const handleSelect = () => {
+    setQuery('');
+    setArts({ hits: [], totalHits: 0 });
+    setArtists({ hits: [], totalHits: 0 });
+    setWalls({ hits: [], totalHits: 0 });
+    setOpen(false);
+  };
+
+  const hasResults = arts.hits.length > 0 || artists.hits.length > 0 || walls.hits.length > 0;
 
   return (
     <div className={`top-search-widget${query ? ' filled' : ''}`} ref={wrapRef}>
@@ -57,7 +90,7 @@ export default function SearchWidget() {
         placeholder="Найти картины, художников..."
         value={query}
         onChange={handleChange}
-        onFocus={() => { if (hits.length > 0) setOpen(true); }}
+        onFocus={() => { if (hasResults) setOpen(true); }}
         autoComplete="off"
       />
       {query ? (
@@ -76,36 +109,86 @@ export default function SearchWidget() {
 
       {open && (
         <div className="search__dropdown">
-          {hits.length > 0 ? (
-            <>
-              <div className="search__section-header">
-                <span className="search__section-title">Картины</span>
-                <Link href="/catalog" className="search__see-all" onClick={handleSelect}>
-                  Смотреть все ({total})
-                </Link>
-              </div>
-              <div className="search__cards">
-                {hits.map(hit => (
-                  <Link
-                    key={hit.id}
-                    href={`/art/${hit.slug}--${hit.id}`}
-                    className="search__card"
-                    onClick={handleSelect}
-                  >
-                    <div
-                      className="search__card-img"
-                      style={{ backgroundImage: `url(${imageUrlBuilder(hit.img_thumb || hit.img)})` }}
-                    />
-                    <div className="search__card-body">
-                      <div className="search__card-title">{hit.Title}</div>
-                      <div className="search__card-artist">{hit.Artist_full_name}</div>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            </>
-          ) : (
+          {!hasResults ? (
             <div className="search__nothing-found">Ничего не найдено</div>
+          ) : (
+            <>
+              {/* ── Картины ── */}
+              {arts.hits.length > 0 && (
+                <div className="search__section">
+                  <div className="search__section-header">
+                    <span className="search__section-title">Картины</span>
+                    <Link href="/catalog" className="search__see-all" onClick={handleSelect}>
+                      Смотреть все ({arts.totalHits})
+                    </Link>
+                  </div>
+                  <div className="search__cards">
+                    {arts.hits.map(hit => (
+                      <Link key={hit.id} href={`/art/${hit.slug}--${hit.id}`} className="search__card" onClick={handleSelect}>
+                        <div className="search__card-img" style={{ backgroundImage: `url(${imageUrlBuilder(hit.img_thumb || hit.img)})` }} />
+                        <div className="search__card-body">
+                          <div className="search__card-title">{hit.Title}</div>
+                          <div className="search__card-artist">{hit.Artist_full_name}</div>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* ── Художники ── */}
+              {artists.hits.length > 0 && (
+                <div className="search__section">
+                  <div className="search__section-header">
+                    <span className="search__section-title">Художники</span>
+                    <Link href="/catalog" className="search__see-all" onClick={handleSelect}>
+                      Смотреть все ({artists.totalHits})
+                    </Link>
+                  </div>
+                  <div className="search__artists">
+                    {artists.hits.map(hit => (
+                      <Link key={hit.id} href={`/artists/${hit.slug}--${hit.id}`} className="search__artist" onClick={handleSelect}>
+                        <div className="search__artist-avatar">
+                          {hit.avatar
+                            ? <img src={imageUrlBuilder(hit.avatar)} alt={hit.full_name} />
+                            : <span>{initials(hit.full_name)}</span>
+                          }
+                        </div>
+                        <div className="search__artist-name">{hit.full_name}</div>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* ── Стены ── */}
+              {walls.hits.length > 0 && (
+                <div className="search__section">
+                  <div className="search__section-header">
+                    <span className="search__section-title">Стены</span>
+                    <Link href="/walls" className="search__see-all" onClick={handleSelect}>
+                      Смотреть все ({walls.totalHits})
+                    </Link>
+                  </div>
+                  <div className="search__walls">
+                    {walls.hits.map(hit => (
+                      <Link key={hit.id} href={`/walls/${hit.slug}--${hit.id}`} className="search__wall" onClick={handleSelect}>
+                        <div className="search__wall-icon">
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                            <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+                            <polyline points="9,22 9,12 15,12 15,22"/>
+                          </svg>
+                        </div>
+                        <div className="search__wall-body">
+                          <div className="search__wall-title">{hit.Title}</div>
+                          {hit.Address && <div className="search__wall-address">{hit.Address}</div>}
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </>
           )}
         </div>
       )}
