@@ -1440,7 +1440,7 @@ function SuccessStep({ result, meta, onReset }) {
                 </li>
               ))}
             </ul>
-            <a href="/account" className="art-btn art-btn--secondary" style={{ width: '100%', justifyContent: 'center' }}>
+            <a href="/account/my-arts" className="art-btn art-btn--secondary" style={{ width: '100%', justifyContent: 'center' }}>
               Перейти в профиль
             </a>
           </div>

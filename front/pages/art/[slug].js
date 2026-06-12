@@ -166,7 +166,7 @@ export default function Art({ art, style, styleArts, artist }) {
     </MainLayout>
   )
 
-  const isPublished = !!(art.publishedAt || art.published_at)
+  const isPublished = !!(art.publishedAt || art.published_at) && !!art.wall
   const year = art.Year ? new Date(art.Year).getFullYear() : null
   const orientation = getOrientation(art.width, art.height)
   const artistUrl = art.Artist ? `/artists/${art.Artist.slug}--${art.Artist.id}` : null

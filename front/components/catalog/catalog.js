@@ -39,6 +39,7 @@ export default function CatalogCmp({arts, hideFiltersForce, title, description, 
             _start,
             _limit: CATALOG_ITEMS_PER_PAGE,
             populate: ['Pictures', 'Artist', 'styles', 'subjects', 'mediums', 'wall'],
+            'filters[wall][$notNull]': true,
           }, query);
           delete newQuery.page;
           let json = await fetchStrapi(API_HOST + '/arts' + serialize(newQuery))

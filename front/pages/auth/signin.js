@@ -28,29 +28,74 @@ function GoogleIcon() {
   );
 }
 
+function VKIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M15.684 0H8.316C1.592 0 0 1.592 0 8.316v7.368C0 22.408 1.592 24 8.316 24h7.368C22.408 24 24 22.408 24 15.684V8.316C24 1.592 22.408 0 15.684 0zm3.692 17.123h-1.744c-.66 0-.862-.525-2.049-1.714-1.033-1.01-1.49-.69-1.49.302v1.416c0 .302-.096.48-1.132.48-1.685 0-3.551-.993-4.865-2.847C6.395 12.027 5.5 9.516 5.5 8.316c0-.302.12-.576.575-.576h1.745c.438 0 .602.197.744.633.72 2.079 1.928 3.907 2.42 3.907.192 0 .275-.09.275-.552V9.516c-.053-1.01-.576-1.09-.576-1.45 0-.19.156-.376.42-.376h2.725c.36 0 .49.19.49.594v3.167c0 .37.156.49.276.49.192 0 .348-.12.696-.468 1.086-1.21 1.85-3.072 1.85-3.072.102-.228.3-.456.734-.456h1.744c.522 0 .636.275.522.636-.24.97-2.495 4.272-2.495 4.272-.19.312-.264.456 0 .804.192.264.828.79 1.25 1.272.762.888 1.344 1.632 1.5 2.147.18.516-.102.78-.54.78z"/>
+    </svg>
+  );
+}
+
+// Tabs: 'email' = email OTP, 'phone' = SMS OTP
 export default function SignIn({ authError }) {
-  const smsEnabled = process.env.NEXT_PUBLIC_SMS_ENABLED !== 'false';
-  const [tab, setTab] = useState('email'); // 'email' | 'phone'
+  const smsEnabled = process.env.NEXT_PUBLIC_SMS_ENABLED === 'true';
+  const [tab, setTab] = useState('email');
+
+  // Email OTP state
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [emailCode, setEmailCode] = useState('');
+  const [emailToken, setEmailToken] = useState('');
+  const [emailStep, setEmailStep] = useState('email'); // 'email' | 'code'
+
+  // Phone OTP state
   const [phone, setPhone] = useState('');
-  const [code, setCode] = useState('');
-  const [otpToken, setOtpToken] = useState('');
-  const [otpStep, setOtpStep] = useState('phone'); // 'phone' | 'code'
+  const [phoneCode, setPhoneCode] = useState('');
+  const [phoneToken, setPhoneToken] = useState('');
+  const [phoneStep, setPhoneStep] = useState('phone'); // 'phone' | 'code'
+
   const [error, setError] = useState(authError || '');
   const [loading, setLoading] = useState(false);
 
-  const handleEmailSubmit = async (e) => {
+  // ── Email OTP ──────────────────────────────────────────
+  const handleSendEmailOtp = async (e) => {
     e.preventDefault();
     setError('');
     setLoading(true);
-    const res = await signIn('credentials', { email, password, redirect: false });
+    const res = await fetch('/api/auth/send-email-otp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email }),
+    });
+    const data = await res.json();
     setLoading(false);
-    if (res?.error) { setError('Неверный email или пароль'); return; }
+    if (!res.ok) { setError(data.error); return; }
+    setEmailToken(data.token);
+    setEmailStep('code');
+  };
+
+  const handleVerifyEmailOtp = async (e) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
+    const res = await fetch('/api/auth/verify-email-otp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token: emailToken, code: emailCode }),
+    });
+    const data = await res.json();
+    if (!res.ok) { setLoading(false); setError(data.error); return; }
+    await signIn('email-otp', {
+      strapiJwt: data.jwt,
+      userId: String(data.user.id),
+      userName: data.user.username,
+      userEmail: data.user.email,
+      redirect: false,
+    });
     Router.push('/auth/onboarding');
   };
 
-  const handleSendOtp = async (e) => {
+  // ── Phone OTP ──────────────────────────────────────────
+  const handleSendPhoneOtp = async (e) => {
     e.preventDefault();
     setError('');
     setLoading(true);
@@ -62,18 +107,18 @@ export default function SignIn({ authError }) {
     const data = await res.json();
     setLoading(false);
     if (!res.ok) { setError(data.error); return; }
-    setOtpToken(data.token);
-    setOtpStep('code');
+    setPhoneToken(data.token);
+    setPhoneStep('code');
   };
 
-  const handleVerifyOtp = async (e) => {
+  const handleVerifyPhoneOtp = async (e) => {
     e.preventDefault();
     setError('');
     setLoading(true);
     const res = await fetch('/api/auth/verify-otp', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ token: otpToken, code }),
+      body: JSON.stringify({ token: phoneToken, code: phoneCode }),
     });
     const data = await res.json();
     if (!res.ok) { setLoading(false); setError(data.error); return; }
@@ -87,6 +132,7 @@ export default function SignIn({ authError }) {
     Router.push('/auth/onboarding');
   };
 
+  // ── Telegram ───────────────────────────────────────────
   const handleTelegramAuth = useCallback(async (tgUser) => {
     setError('');
     setLoading(true);
@@ -116,10 +162,18 @@ export default function SignIn({ authError }) {
   const switchTab = (t) => {
     setTab(t);
     setError('');
-    setOtpStep('phone');
-    setCode('');
-    setOtpToken('');
+    setEmailStep('email');
+    setPhoneStep('phone');
+    setEmailCode('');
+    setPhoneCode('');
+    setEmailToken('');
+    setPhoneToken('');
   };
+
+  const tabs = [
+    { key: 'email', label: 'Email' },
+    ...(smsEnabled ? [{ key: 'phone', label: 'Телефон' }] : []),
+  ];
 
   return (
     <>
@@ -133,38 +187,62 @@ export default function SignIn({ authError }) {
 
           <div className="login-page__title">Войти</div>
 
-          {smsEnabled && (
+          {tabs.length > 1 && (
             <div className="login-page__tabs">
-              <button
-                type="button"
-                className={`login-page__tab${tab === 'email' ? ' active' : ''}`}
-                onClick={() => switchTab('email')}
-              >
-                Email
-              </button>
-              <button
-                type="button"
-                className={`login-page__tab${tab === 'phone' ? ' active' : ''}`}
-                onClick={() => switchTab('phone')}
-              >
-                Телефон
-              </button>
+              {tabs.map(t => (
+                <button key={t.key} type="button"
+                  className={`login-page__tab${tab === t.key ? ' active' : ''}`}
+                  onClick={() => switchTab(t.key)}>
+                  {t.label}
+                </button>
+              ))}
             </div>
           )}
 
-          {tab === 'email' && (
-            <form className="login-page__form" onSubmit={handleEmailSubmit}>
-              <input type="email" placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} required />
-              <input type="password" placeholder="Пароль" value={password} onChange={e => setPassword(e.target.value)} required />
+          {/* Email OTP */}
+          {tab === 'email' && emailStep === 'email' && (
+            <form className="login-page__form" onSubmit={handleSendEmailOtp}>
+              <input
+                type="email"
+                placeholder="Ваш email"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                required
+                autoFocus
+              />
               {error && <div className="login-page__error">{error}</div>}
               <button type="submit" className="login-page__btn-primary" disabled={loading}>
-                {loading ? 'Вход...' : 'Войти'}
+                {loading ? 'Отправка…' : 'Получить код'}
               </button>
             </form>
           )}
 
-          {smsEnabled && tab === 'phone' && otpStep === 'phone' && (
-            <form className="login-page__form" onSubmit={handleSendOtp}>
+          {tab === 'email' && emailStep === 'code' && (
+            <form className="login-page__form" onSubmit={handleVerifyEmailOtp}>
+              <div className="login-page__hint">Код отправлен на <b>{email}</b></div>
+              <input
+                type="text"
+                placeholder="Код из письма"
+                value={emailCode}
+                onChange={e => setEmailCode(e.target.value)}
+                required
+                maxLength={4}
+                inputMode="numeric"
+                autoFocus
+              />
+              {error && <div className="login-page__error">{error}</div>}
+              <button type="submit" className="login-page__btn-primary" disabled={loading}>
+                {loading ? 'Проверка…' : 'Войти'}
+              </button>
+              <button type="button" className="login-page__link-btn" onClick={() => { setEmailStep('email'); setError(''); }}>
+                Изменить email
+              </button>
+            </form>
+          )}
+
+          {/* Phone OTP */}
+          {tab === 'phone' && phoneStep === 'phone' && (
+            <form className="login-page__form" onSubmit={handleSendPhoneOtp}>
               <input
                 type="tel"
                 placeholder="+7 900 000 00 00"
@@ -175,19 +253,19 @@ export default function SignIn({ authError }) {
               />
               {error && <div className="login-page__error">{error}</div>}
               <button type="submit" className="login-page__btn-primary" disabled={loading}>
-                {loading ? 'Отправка...' : 'Получить код'}
+                {loading ? 'Отправка…' : 'Получить код'}
               </button>
             </form>
           )}
 
-          {smsEnabled && tab === 'phone' && otpStep === 'code' && (
-            <form className="login-page__form" onSubmit={handleVerifyOtp}>
+          {tab === 'phone' && phoneStep === 'code' && (
+            <form className="login-page__form" onSubmit={handleVerifyPhoneOtp}>
               <div className="login-page__hint">Код отправлен на {phone}</div>
               <input
                 type="text"
                 placeholder="Код из SMS"
-                value={code}
-                onChange={e => setCode(e.target.value)}
+                value={phoneCode}
+                onChange={e => setPhoneCode(e.target.value)}
                 required
                 maxLength={4}
                 inputMode="numeric"
@@ -195,9 +273,9 @@ export default function SignIn({ authError }) {
               />
               {error && <div className="login-page__error">{error}</div>}
               <button type="submit" className="login-page__btn-primary" disabled={loading}>
-                {loading ? 'Проверка...' : 'Войти'}
+                {loading ? 'Проверка…' : 'Войти'}
               </button>
-              <button type="button" className="login-page__link-btn" onClick={() => setOtpStep('phone')}>
+              <button type="button" className="login-page__link-btn" onClick={() => { setPhoneStep('phone'); setError(''); }}>
                 Изменить номер
               </button>
             </form>
@@ -206,14 +284,17 @@ export default function SignIn({ authError }) {
           <div className="login-page__divider">или</div>
 
           <div className="login-page__social">
-            <TelegramLoginButton onAuth={handleTelegramAuth} />
+            <button className="login-page__btn-vk" onClick={() => signIn('vk')}>
+              <VKIcon /> Войти через VK
+            </button>
             <button className="login-page__btn-google" onClick={() => signIn('google')}>
               <GoogleIcon /> Войти через Google
             </button>
+            <TelegramLoginButton onAuth={handleTelegramAuth} />
           </div>
 
           <div className="login-page__signup-link">
-            Нет аккаунта? <Link href="/auth/signup">Зарегистрироваться</Link>
+            Нет аккаунта? <Link href="/auth/signin">Вход создаст его автоматически</Link>
           </div>
         </div>
       </div>

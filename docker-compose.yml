@@ -59,6 +59,7 @@ services:
       - ./front/.env
     environment:
       - STRAPI_SERVER_URL=http://api-v5:1337/api
+      - NEXT_PUBLIC_API_URL=http://localhost:1337/api
       - NEXTAUTH_URL=http://localhost:3000
     ports:
       - "3000:3000"

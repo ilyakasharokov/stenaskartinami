@@ -70,18 +70,25 @@ export default function NavRight() {
         {dropdownOpen && (
           <div className="nav-user__dropdown">
             <Link
-              href="/account/my-arts"
+              href="/account/profile"
               className="nav-user__item"
               onClick={() => setDropdownOpen(false)}
             >
               Мои работы
             </Link>
             <Link
-              href="/account/favorite"
+              href="/account/profile?tab=favorite"
               className="nav-user__item"
               onClick={() => setDropdownOpen(false)}
             >
               Избранное
+            </Link>
+            <Link
+              href="/account/profile?tab=settings"
+              className="nav-user__item"
+              onClick={() => setDropdownOpen(false)}
+            >
+              Настройки
             </Link>
             <div className="nav-user__divider" />
             <button
