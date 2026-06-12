@@ -6,6 +6,7 @@ import imageUrlBuilder from '@/utils/img-url-builder'
 import { useState } from 'react'
 import serialize from '@/utils/serialize'
 import { fetchStrapi } from '@/utils/strapi'
+import { cachedFetch } from '@/utils/server-cache'
 import ProductListItem from '@/components/catalog/product-list-item'
 import AddFavorite from '@/components/art/add-favorite'
 import dynamic from 'next/dynamic'
@@ -276,8 +277,9 @@ export default function Home({ walls, arts, interiorArts, artists }) {
 
 export const getServerSideProps = async () => {
   try {
+    const TTL = 300; // 5 minutes
     const [wallsJson, artsJson, intJson, artistsJson] = await Promise.all([
-      fetchStrapi(
+      cachedFetch('home:walls', TTL, () => fetchStrapi(
         API_HOST +
           '/walls' +
           serialize({
@@ -289,8 +291,8 @@ export const getServerSideProps = async () => {
             },
             populateDefaults: [],
           })
-      ),
-      fetchStrapi(
+      )),
+      cachedFetch('home:arts', TTL, () => fetchStrapi(
         API_HOST +
           '/arts' +
           serialize({
@@ -299,16 +301,16 @@ export const getServerSideProps = async () => {
             main: true,
             populate: ['Pictures', 'Artist', 'styles', 'subjects', 'mediums', 'wall'],
           })
-      ),
-      fetchStrapi(
+      )),
+      cachedFetch('home:interior', TTL, () => fetchStrapi(
         API_HOST +
           '/arts?filters[interior_photo][$notNull]=true&pagination[pageSize]=6&populate[0]=interior_photo&populate[1]=Pictures&populate[2]=Artist&sort=publishedAt:desc'
-      ).catch(() => null),
-      fetchStrapi(
+      ).catch(() => null)),
+      cachedFetch('home:artists', TTL, () => fetchStrapi(
         API_HOST +
           '/artists' +
           serialize({ _limit: 8, populate: { photos: true }, populateDefaults: [] })
-      ).catch(() => null),
+      ).catch(() => null)),
     ]);
 
     const walls = Array.isArray(wallsJson) ? wallsJson : [];

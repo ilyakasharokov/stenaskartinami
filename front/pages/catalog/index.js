@@ -5,6 +5,7 @@ import CatalogCmp from "@/components/catalog/catalog"
 import Head from 'next/head'
 import serialize from '@/utils/serialize'
 import { fetchStrapi } from '@/utils/strapi'
+import { cachedFetch } from '@/utils/server-cache'
 
 export default function Catalog({ arts, filters, count }) {
 
@@ -38,29 +39,35 @@ export const getServerSideProps = async () => {
       populate: ['Pictures', 'Artist', 'styles', 'subjects', 'mediums', 'wall'],
       'filters[wall][$notNull]': true,
     };
-    let json = await fetchStrapi(API_HOST + '/arts' + serialize(query))
-    const list = Array.isArray(json) ? json : []
-    const arts = list.sort((a, b) => {
+
+    const [artsData, countData, styles, mediums, subjects, walls] = await Promise.all([
+      cachedFetch('catalog:arts', 120, () => fetchStrapi(API_HOST + '/arts' + serialize(query))),
+      cachedFetch('catalog:count', 120, () => fetchStrapi(API_HOST + '/arts/count' + serialize(query))),
+      cachedFetch('catalog:styles', 600, () => fetchStrapi(API_HOST + '/styles/')),
+      cachedFetch('catalog:mediums', 600, () => fetchStrapi(API_HOST + '/mediums/')),
+      cachedFetch('catalog:subjects', 600, () => fetchStrapi(API_HOST + '/subjects/')),
+      cachedFetch('catalog:walls', 600, () => fetchStrapi(API_HOST + '/walls/')),
+    ]);
+
+    const arts = (Array.isArray(artsData) ? artsData : []).sort((a, b) => {
       const aPublished = a.publishedAt || a.published_at;
       const bPublished = b.publishedAt || b.published_at;
       return aPublished < bPublished ? 1 : -1;
-    })
-    const countResponse = await fetchStrapi(API_HOST + '/arts/count' + serialize(query))
-    const count = countResponse?.count ?? countResponse?.meta?.pagination?.total ?? 0
-    const filters = {
-      styles: [],
-      mediums: [],
-      subjects: [],
-      walls: []
-    }
-    for( let key in filters){
-      json = await fetchStrapi(API_HOST + '/' + key + '/')
-      if(key === 'walls'){
-        key = 'wall'
-      }
-      filters[key] = Array.isArray(json) ? json : []
-    }
-    return { props: { arts, filters, count } }
+    });
+    const count = countData?.count ?? countData?.meta?.pagination?.total ?? 0;
+
+    return {
+      props: {
+        arts,
+        count,
+        filters: {
+          styles: Array.isArray(styles) ? styles : [],
+          mediums: Array.isArray(mediums) ? mediums : [],
+          subjects: Array.isArray(subjects) ? subjects : [],
+          wall: Array.isArray(walls) ? walls : [],
+        },
+      },
+    };
   } catch {
     return {
       props: {
