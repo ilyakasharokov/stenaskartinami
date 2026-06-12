@@ -37,6 +37,10 @@ services:
       dockerfile: dockerfile
       args:
         NEXT_PUBLIC_API_URL: https://api.stenaskartinami.com/api
+        NEXT_PUBLIC_TELEGRAM_BOT_NAME: stenaskartinami_bot
+        NEXT_PUBLIC_SMS_ENABLED: "false"
+        NEXT_PUBLIC_MEILISEARCH_HOST: https://meili.stenaskartinami.com
+        NEXT_PUBLIC_MEILISEARCH_KEY: ""
     container_name: stenaskartinami-front
     restart: unless-stopped
     env_file:
