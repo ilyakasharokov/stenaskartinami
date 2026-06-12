@@ -1,150 +1,100 @@
 import React from 'react';
 import Link from 'next/link';
-import { InstantSearch, SearchBox, Hits, Configure, useInstantSearch } from 'react-instantsearch';
 import imageUrlBuilder from '@/utils/img-url-builder';
 
-function makeSearchClient() {
-  return {
-    async search(requests) {
-      const emptyResult = requests.map(r => ({
-        hits: [],
-        nbHits: 0,
-        page: 0,
-        nbPages: 0,
-        hitsPerPage: r?.params?.hitsPerPage || 10,
-        exhaustiveNbHits: true,
-        processingTimeMS: 0,
-        query: r?.params?.query || '',
-        params: '',
-      }));
+const DEBOUNCE_MS = 300;
 
-      const hasQuery = requests.some(r => r.params?.query?.trim());
-      if (!hasQuery) return { results: emptyResult };
-
-      try {
-        const results = await Promise.all(
-          requests.map(async (r, i) => {
-            try {
-              const res = await fetch('/api/meili-proxy', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ index: r.indexName, params: r.params }),
-              });
-              if (!res.ok) return emptyResult[i];
-              const data = await res.json();
-              return {
-                hits: data.hits || [],
-                nbHits: data.estimatedTotalHits || 0,
-                page: 0,
-                nbPages: 1,
-                hitsPerPage: r.params?.hitsPerPage || 10,
-                exhaustiveNbHits: false,
-                processingTimeMS: data.processingTimeMs || 0,
-                query: r.params?.query || '',
-                params: '',
-                index: r.indexName,
-              };
-            } catch {
-              return emptyResult[i];
-            }
-          })
-        );
-        return { results };
-      } catch {
-        return { results: emptyResult };
-      }
-    },
-  };
+async function searchMeili(query, hitsPerPage = 10) {
+  const res = await fetch('/api/meili-proxy', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ index: 'art', params: { query, hitsPerPage } }),
+  });
+  if (!res.ok) return [];
+  const data = await res.json();
+  return data.hits || [];
 }
-
-const searchClient = makeSearchClient();
-
-function Hit({ hit, onSelect }) {
-  return (
-    <div className="search-item" onClick={onSelect}>
-      <Link href={'/art/' + hit.slug + '--' + hit.id}>
-        <div className="search-item__image" style={{ backgroundImage: 'url(' + imageUrlBuilder(hit.img) + ')' }}></div>
-        <div className="search-item__text">
-          <div className="search-item__title">{hit.Title}</div>
-          <div className="search-item__artist">{hit.Artist_full_name}</div>
-        </div>
-      </Link>
-    </div>
-  );
-}
-
-function Results({ onSelect, userQuery }) {
-  const { results, status } = useInstantSearch();
-  if (!userQuery) return null;
-  if (status === 'loading' || status === 'stalled') return null;
-  if (results?.hits?.length) {
-    return (
-      <div className="search__results">
-        <Hits hitComponent={({ hit }) => <Hit hit={hit} onSelect={onSelect} />} />
-      </div>
-    );
-  }
-  return (
-    <div className="search__results">
-      <div className="search__nothing-found">Ничего не найдено</div>
-    </div>
-  );
-}
-
-function SearchFallback() {
-  return (
-    <div className="top-search-widget">
-      <button type="submit"></button>
-      <input placeholder="Найти картины, художников..." className="ais-SearchBox-input" disabled />
-    </div>
-  );
-}
-
-class SearchErrorBoundary extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = { hasError: false };
-  }
-  static getDerivedStateFromError() {
-    return { hasError: true };
-  }
-  render() {
-    if (this.state.hasError) return <SearchFallback />;
-    return this.props.children;
-  }
-}
-
-const DEBOUNCE_MS = 250;
 
 export default function SearchWidget() {
   const [query, setQuery] = React.useState('');
+  const [hits, setHits] = React.useState([]);
+  const [open, setOpen] = React.useState(false);
   const timerRef = React.useRef(null);
+  const inputRef = React.useRef(null);
 
-  const queryHook = React.useCallback((q, search) => {
+  const handleChange = (e) => {
+    const q = e.target.value;
     setQuery(q);
     clearTimeout(timerRef.current);
     if (!q.trim()) {
-      search('');
+      setHits([]);
+      setOpen(false);
       return;
     }
-    timerRef.current = setTimeout(() => search(q), DEBOUNCE_MS);
-  }, []);
+    timerRef.current = setTimeout(async () => {
+      try {
+        const results = await searchMeili(q.trim());
+        setHits(results);
+        setOpen(true);
+      } catch {
+        setHits([]);
+      }
+    }, DEBOUNCE_MS);
+  };
 
+  const handleClear = () => {
+    setQuery('');
+    setHits([]);
+    setOpen(false);
+    inputRef.current?.focus();
+  };
+
+  const handleSelect = () => {
+    setQuery('');
+    setHits([]);
+    setOpen(false);
+  };
 
   return (
-    <SearchErrorBoundary>
-      <div className={`top-search-widget ${query.length ? 'filled' : ''}`}>
-        <InstantSearch indexName="art" searchClient={searchClient}>
-          <Configure hitsPerPage={10} />
-          <button type="submit"></button>
-          <SearchBox
-            placeholder="Найти картины, художников..."
-            queryHook={queryHook}
-            onReset={() => setQuery('')}
-          />
-          <Results onSelect={() => setQuery('')} userQuery={query} />
-        </InstantSearch>
-      </div>
-    </SearchErrorBoundary>
+    <div className={`top-search-widget${query ? ' filled' : ''}`}>
+      <button type="submit" />
+      <input
+        ref={inputRef}
+        className="ais-SearchBox-input"
+        placeholder="Найти картины, художников..."
+        value={query}
+        onChange={handleChange}
+      />
+      {query && (
+        <button type="reset" className="ais-SearchBox-reset" onClick={handleClear}>
+          <svg viewBox="0 0 10 10" width="10" height="10">
+            <line x1="0" y1="0" x2="10" y2="10" stroke="currentColor" strokeWidth="2" />
+            <line x1="10" y1="0" x2="0" y2="10" stroke="currentColor" strokeWidth="2" />
+          </svg>
+        </button>
+      )}
+      {open && query && (
+        <div className="search__results">
+          {hits.length === 0 ? (
+            <div className="search__nothing-found">Ничего не найдено</div>
+          ) : (
+            hits.map(hit => (
+              <div key={hit.id} className="search-item" onClick={handleSelect}>
+                <Link href={`/art/${hit.slug}--${hit.id}`}>
+                  <div
+                    className="search-item__image"
+                    style={{ backgroundImage: `url(${imageUrlBuilder(hit.img)})` }}
+                  />
+                  <div className="search-item__text">
+                    <div className="search-item__title">{hit.Title}</div>
+                    <div className="search-item__artist">{hit.Artist_full_name}</div>
+                  </div>
+                </Link>
+              </div>
+            ))
+          )}
+        </div>
+      )}
+    </div>
   );
 }
