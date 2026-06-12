@@ -1,5 +1,6 @@
-const STRAPI = 'http://localhost:1337/api';
-const MEILI = 'http://localhost:7700';
+const STRAPI = process.env.STRAPI_URL || 'http://localhost:1337/api';
+const MEILI = process.env.MEILI_HOST || 'http://localhost:7700';
+const MEILI_KEY = process.env.MEILI_KEY || '';
 const PAGE_SIZE = 100;
 
 async function fetchAll() {
@@ -31,9 +32,11 @@ function transform(e) {
 }
 
 async function meili(method, path, body) {
+  const headers = { 'Content-Type': 'application/json' };
+  if (MEILI_KEY) headers['Authorization'] = `Bearer ${MEILI_KEY}`;
   const res = await fetch(`${MEILI}${path}`, {
     method,
-    headers: { 'Content-Type': 'application/json' },
+    headers,
     body: body ? JSON.stringify(body) : undefined,
   });
   return res.json();
