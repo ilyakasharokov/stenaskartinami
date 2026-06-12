@@ -83,7 +83,7 @@ export default function SearchWidget() {
                 <Link href={`/art/${hit.slug}--${hit.id}`}>
                   <div
                     className="search-item__image"
-                    style={{ backgroundImage: `url(${imageUrlBuilder(hit.img)})` }}
+                    style={{ backgroundImage: `url(${imageUrlBuilder(hit.img_thumb || hit.img)})` }}
                   />
                   <div className="search-item__text">
                     <div className="search-item__title">{hit.Title}</div>

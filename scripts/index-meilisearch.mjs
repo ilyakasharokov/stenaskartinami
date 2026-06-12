@@ -27,6 +27,7 @@ function transform(e) {
     Title: e.Title || '',
     slug: e.slug || '',
     img: pic?.url || null,
+    img_thumb: pic?.formats?.thumbnail?.url || pic?.formats?.small?.url || pic?.url || null,
     Artist_full_name: e.Artist?.full_name || '',
   };
 }
@@ -49,7 +50,7 @@ async function main() {
 
   await meili('PATCH', '/indexes/art/settings', {
     searchableAttributes: ['Title', 'Artist_full_name'],
-    displayedAttributes: ['id', 'Title', 'slug', 'img', 'Artist_full_name'],
+    displayedAttributes: ['id', 'Title', 'slug', 'img', 'img_thumb', 'Artist_full_name'],
   });
 
   const docs = arts.map(transform);
