@@ -178,15 +178,21 @@
             white-space: nowrap;
         }
         &__img{
-            max-width:100%;
+            width: 100%;
+            height: auto;
+            display: block;
         }
         &__btns {
             position: absolute;
             right: 15px;
             top: 15px;
-            transition: all 0.3s;
+            transition: opacity 0.2s;
             opacity: 0;
             z-index: 9;
+
+            &:has(.favorite-btn.active) {
+                opacity: 1;
+            }
         }
     }
     

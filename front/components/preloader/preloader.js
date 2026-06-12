@@ -1,9 +1,8 @@
-export default function Preloader({text, children}){
-
+export default function Preloader({ children }) {
   return (
-    <div className="lds-circle2 preloader">
-      <div className="preloader__children">{children}</div>
-      <div className="preloader__circle"></div>
+    <div className="preloader">
+      {children && <div className="preloader__children">{children}</div>}
+      <div className="preloader__spinner" />
     </div>
-  )
+  );
 }

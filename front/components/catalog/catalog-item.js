@@ -17,24 +17,31 @@ const getPictureUrl = (art) => {
 };
 
 export default function CatalogItem({art, imageOnLoad}){
+    const pic = Array.isArray(art?.Pictures) ? art.Pictures[0] : null;
+    const picUrl = getPictureUrl(art);
+    const imgW = pic?.width;
+    const imgH = pic?.height;
+
     return (
         <div className="catalog-item">
             <div className="catalog-item__wrapper">
                 {
-                    getPictureUrl(art) &&
+                    picUrl &&
                     <div className="catalog-item__img-wrap">
                         {
                             (art.publishedAt || art.published_at) &&
                             <div className="catalog-item__btns">
-                                <AddFavorite art={art}></AddFavorite>    
+                                <AddFavorite art={art}></AddFavorite>
                             </div>
                         }
                         <div className="overlay"></div>
                         <Link href={ '/art/' + art.slug + '--' + art.id} className="catalog-item__img-link" title={art.Title}>
                             <img
                               className="catalog-item__img"
-                              src={imageUrlBuilder(getPictureUrl(art))}
+                              src={imageUrlBuilder(picUrl)}
                               alt={art.Title}
+                              width={imgW || undefined}
+                              height={imgH || undefined}
                               onLoad={()=> {imageOnLoad()}}
                             />
                         </Link>
