@@ -42,8 +42,11 @@ services:
     env_file:
       - ./front/.env
     environment:
-      # So getServerSideProps in the container can reach the API
       - STRAPI_SERVER_URL=http://api-v5:1337/api
+      # Reach the host's native Meilisearch from inside the container
+      - MEILISEARCH_INTERNAL_HOST=http://host.docker.internal:7700
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     ports:
       - "3000:3000"
     depends_on:

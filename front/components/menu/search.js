@@ -1,35 +1,60 @@
 import React from 'react';
 import Link from 'next/link';
 import { InstantSearch, SearchBox, Hits, Configure, useInstantSearch } from 'react-instantsearch';
-import { instantMeiliSearch } from '@meilisearch/instant-meilisearch';
 import imageUrlBuilder from '@/utils/img-url-builder';
 
 function makeSearchClient() {
-  try {
-    const host = process.env.NEXT_PUBLIC_MEILISEARCH_HOST || "https://meili.stenaskartinami.com/";
-    const key = process.env.NEXT_PUBLIC_MEILISEARCH_KEY || "";
-    const { searchClient: client } = instantMeiliSearch(host, key);
-    return {
-      search(requests) {
-        const emptyResult = requests.map(r => ({
-          hits: [],
-          nbHits: 0,
-          page: 0,
-          nbPages: 0,
-          hitsPerPage: r?.params?.hitsPerPage || 10,
-          exhaustiveNbHits: true,
-          processingTimeMS: 0,
-          query: r?.params?.query || '',
-          params: '',
-        }));
-        const hasQuery = requests.some(r => r.params?.query?.trim());
-        if (!hasQuery) return Promise.resolve({ results: emptyResult });
-        return client.search(requests).catch(() => ({ results: emptyResult }));
-      },
-    };
-  } catch {
-    return null;
-  }
+  return {
+    async search(requests) {
+      const emptyResult = requests.map(r => ({
+        hits: [],
+        nbHits: 0,
+        page: 0,
+        nbPages: 0,
+        hitsPerPage: r?.params?.hitsPerPage || 10,
+        exhaustiveNbHits: true,
+        processingTimeMS: 0,
+        query: r?.params?.query || '',
+        params: '',
+      }));
+
+      const hasQuery = requests.some(r => r.params?.query?.trim());
+      if (!hasQuery) return { results: emptyResult };
+
+      try {
+        const results = await Promise.all(
+          requests.map(async (r, i) => {
+            try {
+              const res = await fetch('/api/meili-proxy', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ index: r.indexName, params: r.params }),
+              });
+              if (!res.ok) return emptyResult[i];
+              const data = await res.json();
+              return {
+                hits: data.hits || [],
+                nbHits: data.estimatedTotalHits || 0,
+                page: 0,
+                nbPages: 1,
+                hitsPerPage: r.params?.hitsPerPage || 10,
+                exhaustiveNbHits: false,
+                processingTimeMS: data.processingTimeMs || 0,
+                query: r.params?.query || '',
+                params: '',
+                index: r.indexName,
+              };
+            } catch {
+              return emptyResult[i];
+            }
+          })
+        );
+        return { results };
+      } catch {
+        return { results: emptyResult };
+      }
+    },
+  };
 }
 
 const searchClient = makeSearchClient();
@@ -105,7 +130,6 @@ export default function SearchWidget() {
     timerRef.current = setTimeout(() => search(q), DEBOUNCE_MS);
   }, []);
 
-  if (!searchClient) return <SearchFallback />;
 
   return (
     <SearchErrorBoundary>
