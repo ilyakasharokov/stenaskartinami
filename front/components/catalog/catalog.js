@@ -23,11 +23,19 @@ export default function CatalogCmp({arts, hideFiltersForce, title, description, 
 
   const resizeThrottled = throttle(resizeAllGridItems.bind(this, 'catalog-item',  'catalog-grid', '.catalog-item__wrapper'), 100)
 
+  // Run resize after React commits new arts to DOM (requestAnimationFrame = after paint)
+  useEffect(() => {
+    if (!state.arts?.length) return;
+    const frame = requestAnimationFrame(() => {
+      resizeAllGridItems('catalog-item', 'catalog-grid', '.catalog-item__wrapper');
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [state.arts]);
+
   useEffect(() => {
     async function loadArts(){
       window.addEventListener('resize', resizeThrottled)
       window.addEventListener('load', resizeThrottled)
-      resizeThrottled()
 
       let selectedSortValue = (Router && Router.query || {})._sort;
 

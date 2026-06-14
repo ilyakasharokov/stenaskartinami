@@ -27,7 +27,7 @@ export default function CatalogItem({art, imageOnLoad}){
             <div className="catalog-item__wrapper">
                 {
                     picUrl &&
-                    <div className="catalog-item__img-wrap">
+                    <div className="catalog-item__img-wrap" style={imgW && imgH ? { aspectRatio: `${imgW} / ${imgH}` } : undefined}>
                         {
                             (art.publishedAt || art.published_at) &&
                             <div className="catalog-item__btns">
