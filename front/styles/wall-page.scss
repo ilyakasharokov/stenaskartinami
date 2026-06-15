@@ -1,0 +1,563 @@
+$orange: #f15a24;
+
+// ─── Hero ──────────────────────────────────────────────────────────────────────
+.wp-hero {
+  position: relative;
+  width: 100%;
+  height: 420px;
+  border-radius: 16px;
+  overflow: hidden;
+  margin-bottom: 0;
+  flex-shrink: 0;
+
+  &__img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  &__placeholder {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, #e8d8c8 0%, #c8a888 100%);
+  }
+
+  &__overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(0,0,0,.72) 0%, rgba(0,0,0,.18) 55%, rgba(0,0,0,.08) 100%);
+  }
+
+  &__top-actions {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    display: flex;
+    gap: 8px;
+    z-index: 2;
+  }
+
+  &__top-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    background: rgba(255,255,255,0.92);
+    border: none;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #111;
+    cursor: pointer;
+    transition: background 0.15s;
+    backdrop-filter: blur(8px);
+    &:hover { background: #fff; }
+    &--icon {
+      padding: 8px 10px;
+    }
+  }
+
+  &__content {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 24px 28px;
+    z-index: 2;
+  }
+
+  &__badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    background: #16a34a;
+    color: #fff;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 10px;
+  }
+
+  &__title {
+    font-size: 32px;
+    font-weight: 800;
+    color: #fff;
+    line-height: 1.15;
+    margin: 0 0 8px;
+    text-shadow: 0 1px 8px rgba(0,0,0,.3);
+  }
+
+  &__addr {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 14px;
+    color: rgba(255,255,255,.85);
+    margin-bottom: 16px;
+  }
+
+  &__bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  &__stats {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+
+  &__stat {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 14px;
+    color: rgba(255,255,255,.9);
+    font-weight: 500;
+  }
+
+  &__actions {
+    display: flex;
+    gap: 8px;
+  }
+
+  &__btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 10px 18px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-decoration: none;
+    white-space: nowrap;
+
+    &--outline {
+      background: rgba(255,255,255,.12);
+      border: 1.5px solid rgba(255,255,255,.5);
+      color: #fff;
+      backdrop-filter: blur(6px);
+      &:hover { background: rgba(255,255,255,.22); }
+    }
+
+    &--dark {
+      background: rgba(0,0,0,.55);
+      border: 1.5px solid rgba(255,255,255,.2);
+      color: #fff;
+      backdrop-filter: blur(6px);
+      &:hover { background: rgba(0,0,0,.72); }
+    }
+
+    &--orange {
+      background: $orange;
+      border: none;
+      color: #fff;
+      &:hover { background: #d94e1e; }
+    }
+  }
+}
+
+// ─── Page layout ──────────────────────────────────────────────────────────────
+.wp {
+  max-width: 1140px;
+  margin: 0 auto;
+  padding: 0 0 80px;
+}
+
+// ─── Tabs ─────────────────────────────────────────────────────────────────────
+.wp-tabs {
+  display: flex;
+  border-bottom: 2px solid #eee;
+  margin: 24px 0 32px;
+  gap: 0;
+  overflow-x: auto;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  &::-webkit-scrollbar { display: none; }
+}
+
+.wp-tab {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 11px 20px;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  font-size: 14px;
+  color: #888;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 0.15s, border-color 0.15s;
+  font-weight: 400;
+
+  &.is-active {
+    color: $orange;
+    border-bottom-color: $orange;
+    font-weight: 600;
+  }
+  &:hover:not(.is-active) { color: #333; }
+
+  &__count {
+    font-size: 12px;
+    color: #aaa;
+    font-weight: 400;
+  }
+  &.is-active &__count { color: $orange; }
+}
+
+// ─── Body layout ──────────────────────────────────────────────────────────────
+.wp-body {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: 32px;
+  align-items: start;
+
+  @media (max-width: 900px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+// ─── Section ──────────────────────────────────────────────────────────────────
+.wp-section {
+  margin-bottom: 36px;
+
+  &__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+
+  &__title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #111;
+  }
+
+  &__more {
+    font-size: 13px;
+    color: $orange;
+    text-decoration: none;
+    font-weight: 500;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    &:hover { text-decoration: underline; }
+  }
+}
+
+// ─── Description ─────────────────────────────────────────────────────────────
+.wp-desc {
+  font-size: 15px;
+  color: #444;
+  line-height: 1.65;
+  margin-bottom: 24px;
+}
+
+// ─── Info grid ────────────────────────────────────────────────────────────────
+.wp-info-grid {
+  display: flex;
+  gap: 0;
+  border: 1px solid #eee;
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 32px;
+  flex-wrap: wrap;
+}
+
+.wp-info-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 20px;
+  flex: 1;
+  min-width: 160px;
+  border-right: 1px solid #eee;
+  &:last-child { border-right: none; }
+
+  @media (max-width: 700px) {
+    border-right: none;
+    border-bottom: 1px solid #eee;
+    &:last-child { border-bottom: none; }
+  }
+
+  &__icon {
+    color: #bbb;
+    flex-shrink: 0;
+  }
+
+  &__label {
+    font-size: 11px;
+    color: #aaa;
+    margin-bottom: 2px;
+  }
+
+  &__value {
+    font-size: 14px;
+    font-weight: 600;
+    color: #111;
+  }
+}
+
+// ─── Arts grid ────────────────────────────────────────────────────────────────
+.wp-arts-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+
+  @media (max-width: 900px) { grid-template-columns: repeat(3, 1fr); }
+  @media (max-width: 600px) { grid-template-columns: repeat(2, 1fr); }
+}
+
+.wp-art-card {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+
+  &__img-wrap {
+    aspect-ratio: 3/4;
+    overflow: hidden;
+    border-radius: 10px;
+    background: #f5f5f5;
+    margin-bottom: 10px;
+  }
+
+  &__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.3s ease;
+  }
+
+  &:hover &__img { transform: scale(1.04); }
+
+  &__title {
+    font-size: 13px;
+    font-weight: 600;
+    color: #111;
+    margin-bottom: 3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__artist {
+    font-size: 12px;
+    color: #888;
+    margin-bottom: 2px;
+  }
+
+  &__meta {
+    font-size: 11px;
+    color: #bbb;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+// ─── Gallery ──────────────────────────────────────────────────────────────────
+.wp-gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+
+  @media (max-width: 700px) { grid-template-columns: repeat(2, 1fr); }
+}
+
+.wp-gallery-thumb {
+  aspect-ratio: 4/3;
+  overflow: hidden;
+  border-radius: 10px;
+  background: #f5f5f5;
+  cursor: pointer;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.3s ease;
+  }
+  &:hover img { transform: scale(1.06); }
+}
+
+// ─── Map ──────────────────────────────────────────────────────────────────────
+.wp-map {
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid #eee;
+  margin-bottom: 36px;
+}
+
+// ─── Sidebar cards ────────────────────────────────────────────────────────────
+.wp-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.wp-card {
+  background: #fff;
+  border: 1px solid #eee;
+  border-radius: 14px;
+  padding: 20px;
+
+  &__title {
+    font-size: 15px;
+    font-weight: 700;
+    color: #111;
+    margin-bottom: 16px;
+  }
+}
+
+.wp-contact-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+  text-decoration: none;
+  color: inherit;
+
+  &:last-of-type { margin-bottom: 0; }
+
+  &__icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: #f5f5f5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #666;
+    flex-shrink: 0;
+  }
+
+  &__text {
+    font-size: 14px;
+    color: #333;
+  }
+
+  &:hover &__text { color: $orange; }
+}
+
+.wp-sidebar-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 11px 16px;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 10px;
+  background: #fff;
+  font-size: 14px;
+  color: #333;
+  font-weight: 500;
+  cursor: pointer;
+  margin-top: 14px;
+  text-decoration: none;
+  transition: border-color 0.15s, color 0.15s;
+  &:hover { border-color: #aaa; color: #111; }
+
+  &--orange {
+    background: $orange;
+    border-color: $orange;
+    color: #fff;
+    &:hover { background: #d94e1e; border-color: #d94e1e; color: #fff; }
+  }
+}
+
+.wp-hours-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  margin-bottom: 8px;
+  &:last-child { margin-bottom: 0; }
+
+  &__day { color: #777; }
+  &__time { color: #111; font-weight: 500; }
+}
+
+// ─── Owner card ──────────────────────────────────────────────────────────────
+.wp-owner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+
+  &__avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    object-fit: cover;
+    background: #f15a24;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 18px;
+    font-weight: 700;
+    flex-shrink: 0;
+    overflow: hidden;
+  }
+
+  &__name {
+    font-size: 15px;
+    font-weight: 700;
+    color: #111;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  &__verified {
+    color: $orange;
+  }
+
+  &__role {
+    font-size: 12px;
+    color: #999;
+    margin-top: 2px;
+  }
+}
+
+.wp-owner-bio {
+  font-size: 13px;
+  color: #666;
+  line-height: 1.55;
+  margin-bottom: 0;
+}
+
+// ─── Empty ────────────────────────────────────────────────────────────────────
+.wp-empty {
+  padding: 32px 0;
+  text-align: center;
+  color: #aaa;
+  font-size: 14px;
+}
+
+@media (max-width: 700px) {
+  .wp-hero {
+    height: 280px;
+    border-radius: 0;
+    &__title { font-size: 22px; }
+    &__actions { display: none; }
+  }
+  .wp-arts-grid { grid-template-columns: repeat(2, 1fr); }
+  .wp-gallery-grid { grid-template-columns: repeat(2, 1fr); }
+}

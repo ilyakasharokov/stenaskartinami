@@ -1,10 +1,11 @@
 // ─── Add Wall Wizard ─────────────────────────────────────────────────────────
 
+@use 'sass:color';
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
-$orange: #e8721a;
-$orange-light: #fff3ea;
-$orange-border: #f0a060;
+$orange: #f15a24;
+$orange-light: #fff0ea;
+$orange-border: #f4a07a;
 $text: #1a1a1a;
 $text-muted: #666;
 $text-hint: #999;
@@ -228,14 +229,9 @@ $radius: 10px;
 // ─── Wall type grid ───────────────────────────────────────────────────────────
 
 .aw-types-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  display: flex;
+  flex-wrap: wrap;
   gap: 8px;
-
-  // "Другое" — последний элемент, span full if odd
-  .aw-toggle:last-child:nth-child(3n+1) {
-    grid-column: 1 / -1;
-  }
 }
 
 // ─── Toggle buttons ───────────────────────────────────────────────────────────
@@ -244,8 +240,7 @@ $radius: 10px;
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  &--col  { flex-direction: column; }
-  &--wrap { flex-wrap: wrap; }
+  align-items: flex-start;
 }
 
 .aw-toggle {
@@ -836,100 +831,87 @@ $radius: 10px;
 }
 
 .aw-footer__left {
-  display: flex;
-  align-items: center;
-  gap: 12px;
+  flex-shrink: 0;
 }
 
-.aw-footer__cancel {
-  background: none;
-  border: none;
-  font-size: 14px;
-  color: $text-muted;
-  cursor: pointer;
-  padding: 8px 0;
-  font-family: 'Inter', sans-serif;
-  &:hover { color: $text; }
-}
-
-.aw-footer__draft {
-  background: none;
-  border: 1.5px solid $border;
-  border-radius: 8px;
-  padding: 8px 16px;
-  font-size: 13px;
-  color: #555;
+.aw-footer__back {
+  background: $white;
+  border: 1.5px solid #ddd;
+  border-radius: 12px;
+  padding: 13px 28px;
+  font-size: 15px;
+  font-weight: 500;
+  color: $text;
   cursor: pointer;
   font-family: 'Inter', sans-serif;
-  &:hover { border-color: #999; color: $text; }
-  &:disabled { opacity: .5; cursor: not-allowed; }
+  white-space: nowrap;
+  &:hover { border-color: #aaa; }
 }
 
 .aw-footer__nav {
   display: flex;
   align-items: center;
-  gap: 10px;
-}
-
-.aw-footer__back {
-  background: none;
-  border: 1.5px solid $border;
-  border-radius: 8px;
-  padding: 9px 20px;
-  font-size: 14px;
-  color: $text-muted;
-  cursor: pointer;
-  font-family: 'Inter', sans-serif;
-  &:hover { border-color: #999; color: $text; }
+  gap: 16px;
 }
 
 .aw-footer__next {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 10px 24px;
-  font-size: 14px;
+  justify-content: center;
+  gap: 10px;
+  padding: 14px 36px;
+  font-size: 15px;
+  font-weight: 600;
   font-family: 'Inter', sans-serif;
   background: $orange;
   border: none;
-  border-radius: 8px;
+  border-radius: 12px;
   color: $white;
-  font-weight: 600;
   cursor: pointer;
-  &:hover { background: darken($orange, 6%); }
+  white-space: nowrap;
+  &:hover { background: color.adjust($orange, $lightness: -6%); }
 }
 
 .aw-footer__finish-wrap {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 20px;
 }
 
 .aw-footer__skip {
   background: none;
   border: none;
-  font-size: 12px;
+  font-size: 13px;
   color: $text-muted;
   cursor: pointer;
   text-align: right;
-  line-height: 1.4;
+  line-height: 1.5;
   padding: 0;
   font-family: 'Inter', sans-serif;
+  white-space: nowrap;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
   span { font-size: 11px; color: $text-hint; }
-  &:hover { color: #555; }
+  &:hover { color: $text; }
+  &:disabled { opacity: .5; cursor: not-allowed; }
 }
 
 .aw-footer__finish {
-  padding: 10px 24px;
-  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 28px;
+  font-size: 15px;
   white-space: nowrap;
   background: $orange;
   border: none;
-  border-radius: 8px;
+  border-radius: 12px;
   color: $white;
   font-weight: 600;
   cursor: pointer;
   font-family: 'Inter', sans-serif;
-  &:hover   { background: darken($orange, 6%); }
+  &:hover   { background: color.adjust($orange, $lightness: -6%); }
   &:disabled { opacity: .6; cursor: not-allowed; }
 }

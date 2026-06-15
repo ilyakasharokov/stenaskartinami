@@ -1,3 +1,40 @@
-import { factories } from '@strapi/strapi';
-
-export default factories.createCoreRouter('api::wall.wall');
+export default {
+  routes: [
+    {
+      method: 'GET',
+      path: '/walls/my',
+      handler: 'wall.findMy',
+      config: { policies: [] },
+    },
+    {
+      method: 'GET',
+      path: '/walls',
+      handler: 'wall.find',
+      config: { policies: [] },
+    },
+    {
+      method: 'GET',
+      path: '/walls/:id',
+      handler: 'wall.findOne',
+      config: { policies: [] },
+    },
+    {
+      method: 'POST',
+      path: '/walls',
+      handler: 'wall.create',
+      config: { policies: [] },
+    },
+    {
+      method: 'PUT',
+      path: '/walls/:id',
+      handler: 'wall.update',
+      config: { policies: [] },
+    },
+    {
+      method: 'DELETE',
+      path: '/walls/:id',
+      handler: 'wall.delete',
+      config: { policies: [] },
+    },
+  ],
+};

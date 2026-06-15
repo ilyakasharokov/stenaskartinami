@@ -123,6 +123,10 @@ export default function ProfilePage() {
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
   const [arts, setArts] = useState([])
   const [artsLoading, setArtsLoading] = useState(true)
+  const [walls, setWalls] = useState([])
+  const [wallsLoading, setWallsLoading] = useState(true)
+  const [wallTab, setWallTab] = useState('published')
+  const [wallSearch, setWallSearch] = useState('')
   const [favoriteArts, setFavoriteArts] = useState([])
   const [favoritesLoading, setFavoritesLoading] = useState(false)
   const [deleteDialog, setDeleteDialog] = useState({ open: false, documentId: null, deleting: false })
@@ -168,6 +172,16 @@ export default function ProfilePage() {
     }).then(data => setArts(Array.isArray(data) ? data : []))
       .catch(() => {})
       .finally(() => setArtsLoading(false))
+  }, [session, status])
+
+  useEffect(() => {
+    if (status === 'loading' || !session?.jwt) return
+    fetchStrapi(
+      `${process.env.NEXT_PUBLIC_API_URL}/walls/my`,
+      { headers: { Authorization: `Bearer ${session.jwt}` } }
+    ).then(data => setWalls(Array.isArray(data) ? data : []))
+      .catch(() => {})
+      .finally(() => setWallsLoading(false))
   }, [session, status])
 
   useEffect(() => {
@@ -287,6 +301,16 @@ export default function ProfilePage() {
     sold:      arts.filter(a => !!a.sold).length,
     moderation: arts.filter(a => getArtStatus(a) === 'moderation').length,
   }
+
+  const publishedWalls = walls.filter(w => w.wallStatus === 'published')
+  const draftWalls = walls.filter(w => w.wallStatus === 'draft')
+  const activeWallList = wallTab === 'published' ? publishedWalls : draftWalls
+  const filteredWalls = wallSearch
+    ? activeWallList.filter(w => {
+        const q = wallSearch.toLowerCase()
+        return (w.Title || '').toLowerCase().includes(q) || (w.Address || '').toLowerCase().includes(q)
+      })
+    : activeWallList
 
   const handleDelete = useCallback((documentId) => {
     setDeleteDialog({ open: true, documentId, deleting: false })
@@ -597,16 +621,110 @@ export default function ProfilePage() {
 
         {/* ── СТЕНЫ ── */}
         {activeTab === 'walls' && (
-          <div>
-            <div className="profile-arts-toolbar">
-              <div />
-              <Link href="/add-wall" className="profile-add-btn">+ Добавить стену</Link>
+          <div className="mw">
+            {/* header */}
+            <div className="mw__head">
+              <div>
+                <h1 className="mw__title">Мои стены</h1>
+                <p className="mw__subtitle">Управляйте своими пространствами и находите художников для размещения картин</p>
+              </div>
+              <Link href="/add-wall" className="mw__add-btn">Добавить стену</Link>
             </div>
-            <div className="my-arts-empty">
-              <div className="my-arts-empty__title">У вас пока нет добавленных стен</div>
-              <div className="my-arts-empty__text">Добавьте место, где могут размещаться картины — кафе, офис, галерею или другое пространство</div>
-              <Link href="/add-wall" className="my-arts-empty__btn">+ Добавить стену</Link>
+
+            {/* filter + search row */}
+            <div className="mw__bar">
+              <div className="mw__tabs">
+                {[
+                  { key: 'published', label: 'Опубликованные', count: publishedWalls.length },
+                  { key: 'draft', label: 'Черновики', count: draftWalls.length },
+                ].map(({ key, label, count }) => (
+                  <button
+                    key={key}
+                    className={`mw__tab${wallTab === key ? ' is-active' : ''}`}
+                    onClick={() => setWallTab(key)}
+                  >
+                    {label}
+                    {count > 0 && <span className="mw__tab-count">{count}</span>}
+                  </button>
+                ))}
+              </div>
+              <div className="mw__toolbar">
+                <div className="mw__search">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#aaa" strokeWidth="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                  <input
+                    className="mw__search-input"
+                    placeholder="Поиск по стенам…"
+                    value={wallSearch}
+                    onChange={e => setWallSearch(e.target.value)}
+                  />
+                </div>
+              </div>
             </div>
+
+            {/* content */}
+            {wallsLoading ? (
+              <div className="my-arts-loading"><Preloader /></div>
+            ) : filteredWalls.length > 0 ? (
+              <div className="mw__grid">
+                {filteredWalls.map(w => {
+                  const imgs = Array.isArray(w.Images) ? w.Images : []
+                  const thumb = imgs[0]
+                    ? imageUrlBuilder(imgs[0].formats?.medium?.url || imgs[0].formats?.small?.url || imgs[0].url)
+                    : null
+                  const addr = [w.city_name, w.Address].filter(Boolean).join(', ')
+                  const isPub = w.wallStatus === 'published'
+                  return (
+                    <div key={w.documentId} className="mwc">
+                      <div className="mwc__img-wrap">
+                        {thumb
+                          ? <img src={thumb} alt={w.Title} className="mwc__img" />
+                          : <div className="mwc__img-placeholder" />
+                        }
+                        <span className={`mwc__badge mwc__badge--${w.wallStatus}`}>
+                          {isPub ? 'Опубликовано' : 'Черновик'}
+                        </span>
+                      </div>
+                      <div className="mwc__body">
+                        <Link href={w.slug ? `/walls/${w.slug}--${w.id}` : `/walls/${w.documentId}`} className="mwc__title">{w.Title || 'Без названия'}</Link>
+                        {addr && (
+                          <div className="mwc__addr">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+                            {addr}
+                          </div>
+                        )}
+                        <div className="mwc__actions">
+                          {isPub ? (
+                            <>
+                              <Link href={`/edit-wall/${w.documentId}`} className="mwc__btn mwc__btn--outline">Редактировать</Link>
+                              <button className="mwc__icon-btn" title="Статистика">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                              </button>
+                            </>
+                          ) : (
+                            <>
+                              <Link href="/add-wall" className="mwc__btn mwc__btn--orange">Продолжить</Link>
+                              <button className="mwc__icon-btn mwc__icon-btn--danger" title="Удалить">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6M10 11v6M14 11v6M9 6V4h6v2"/></svg>
+                              </button>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            ) : walls.length === 0 ? (
+              <div className="my-arts-empty">
+                <div className="my-arts-empty__title">У вас пока нет добавленных стен</div>
+                <div className="my-arts-empty__text">Добавьте место, где могут размещаться картины — кафе, офис, галерею или другое пространство</div>
+                <Link href="/add-wall" className="my-arts-empty__btn">+ Добавить стену</Link>
+              </div>
+            ) : (
+              <div className="my-arts-empty">
+                <div className="my-arts-empty__title">Ничего не найдено</div>
+              </div>
+            )}
           </div>
         )}
 
@@ -631,6 +749,7 @@ export default function ProfilePage() {
         {activeTab === 'settings' && (
           <div className="prof-settings">
             <form className="prof-settings-form" onSubmit={saveProfile}>
+              <div className="prof-settings-cols">
               <div className="prof-settings-card">
                 <div className="prof-settings-card__title">Основная информация</div>
                 {saveSuccess && <div className="prof-alert prof-alert--success">Профиль сохранён</div>}
@@ -759,6 +878,7 @@ export default function ProfilePage() {
                   </div>
                 </div>
               </div>
+              </div>{/* prof-settings-cols */}
 
               <div className="prof-settings-actions">
                 <button type="submit" className="prof-btn prof-btn--primary" disabled={saving}>

@@ -72,6 +72,8 @@ export default {
         'plugin::users-permissions.user.claimartist',
         'api::art.art.findmy',
         'api::art.art.findmyone',
+        'api::wall.wall.findmy',
+        'api::wall.wall.findMy',
         'api::wall.wall.create',
         'api::wall.wall.update',
       ];
