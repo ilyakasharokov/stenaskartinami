@@ -11,30 +11,14 @@
     "draftAndPublish": true
   },
   "attributes": {
-    "Title": {
-      "type": "string"
-    },
-    "Description": {
-      "type": "richtext"
-    },
-    "slug": {
-      "type": "string"
-    },
-    "Address": {
-      "type": "string"
-    },
-    "Coordinates": {
-      "type": "json"
-    },
-    "Website": {
-      "type": "string"
-    },
-    "Schedule": {
-      "type": "richtext"
-    },
-    "Phone": {
-      "type": "string"
-    },
+    "Title": { "type": "string" },
+    "Description": { "type": "richtext" },
+    "slug": { "type": "string" },
+    "Address": { "type": "string" },
+    "Coordinates": { "type": "json" },
+    "Website": { "type": "string" },
+    "Schedule": { "type": "richtext" },
+    "Phone": { "type": "string" },
     "Images": {
       "type": "media",
       "multiple": true,
@@ -52,6 +36,30 @@
       "relation": "oneToMany",
       "target": "api::art.art",
       "mappedBy": "wall"
+    },
+    "wall_type": { "type": "string" },
+    "contact_person": { "type": "string" },
+    "email": { "type": "string" },
+    "city_name": { "type": "string" },
+    "additional_landmarks": { "type": "string" },
+    "zone_width": { "type": "integer" },
+    "zone_height": { "type": "integer" },
+    "spots_count": { "type": "string" },
+    "spots_comment": { "type": "string" },
+    "mounting_type": { "type": "json" },
+    "lighting": { "type": "json" },
+    "wall_color": { "type": "json" },
+    "placement_terms": { "type": "string" },
+    "placement_duration": { "type": "string" },
+    "renewability": { "type": "string" },
+    "safety": { "type": "json" },
+    "additional_info": { "type": "text" },
+    "amenities": { "type": "json" },
+    "styles_themes": { "type": "json" },
+    "user_uploader": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "plugin::users-permissions.user"
     }
   }
 }

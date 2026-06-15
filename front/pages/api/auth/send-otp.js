@@ -3,7 +3,8 @@ import jwt from 'jsonwebtoken';
 
 const SECRET = process.env.NEXTAUTH_SECRET;
 const SMSRU_API_KEY = process.env.SMSRU_API_KEY;
-const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
+const MTS_EXOLVE_KEY = process.env.MTS_EXOLVE_KEY;
+const MTS_EXOLVE_FROM = process.env.MTS_EXOLVE_FROM || 'StenaKartin';
 
 function cleanPhone(phone) {
   const digits = phone.replace(/\D/g, '');
@@ -11,21 +12,29 @@ function cleanPhone(phone) {
   return digits;
 }
 
-async function hasTelegram(phone) {
-  if (!TELEGRAM_BOT_TOKEN) return false;
-  try {
-    const res = await fetch(
-      `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`,
-      { method: 'GET' }
-    );
-    // We can't look up user by phone via Telegram Bot API — always use SMS
-    return false;
-  } catch {
-    return false;
+async function sendSmsExolve(phone, code) {
+  const res = await fetch('https://api.exolve.ru/messaging/v1/SendSMS', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${MTS_EXOLVE_KEY}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      number: MTS_EXOLVE_FROM,
+      destination: phone,
+      text: `Ваш код подтверждения: ${code}`,
+    }),
+  });
+  if (!res.ok) {
+    const text = await res.text().catch(() => String(res.status));
+    throw new Error(`MTS Exolve ${res.status}: ${text}`);
   }
+  const data = await res.json().catch(() => ({}));
+  if (data.error) throw new Error(data.error);
+  return data;
 }
 
-async function sendSms(phone, code) {
+async function sendSmsSmsRu(phone, code) {
   if (!SMSRU_API_KEY) throw new Error('SMS.ru API key not configured');
   const msg = encodeURIComponent(`Ваш код подтверждения: ${code}`);
   const url = `https://sms.ru/sms/send?api_id=${SMSRU_API_KEY}&to=${phone}&msg=${msg}&json=1`;
@@ -33,6 +42,11 @@ async function sendSms(phone, code) {
   const data = await res.json();
   if (data.status !== 'OK') throw new Error(data.status_text || 'SMS error');
   return data;
+}
+
+async function sendSms(phone, code) {
+  if (MTS_EXOLVE_KEY) return sendSmsExolve(phone, code);
+  return sendSmsSmsRu(phone, code);
 }
 
 export default async function handler(req, res) {
@@ -52,6 +66,7 @@ export default async function handler(req, res) {
   try {
     await sendSms(cleanedPhone, code);
   } catch (err) {
+    console.error('[send-otp]', err.message);
     return res.status(500).json({ error: err.message });
   }
 

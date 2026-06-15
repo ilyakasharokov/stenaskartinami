@@ -15,6 +15,7 @@ import InteriorPhotoBlock from "@/components/input/interior-photo-block"
 const MIN_WIDTH = 800
 const MIN_HEIGHT = 600
 const DESC_MAX = 2000
+const ART_DRAFT_KEY = 'add-art-draft'
 
 function getImageDimensions(dataUrl) {
   return new Promise(resolve => {
@@ -301,7 +302,14 @@ function Field({ label, required, error, hint, children }) {
 
 // ── Photo Tips Sidebar ─────────────────────────────────────
 
+const EXAMPLE_IMAGES = [
+  '/images/photo-tips-example-1.jpg',
+  '/images/photo-tips-example-2.jpg',
+  '/images/photo-tips-example-3.jpg',
+]
+
 function PhotoTipsSidebar() {
+  const [slide, setSlide] = useState(0)
   const tips = [
     {
       icon: (
@@ -366,6 +374,25 @@ function PhotoTipsSidebar() {
               </div>
             </div>
           ))}
+        </div>
+        <div className="photo-tips__example">
+          <p className="photo-tips__example-label">Пример хорошего фото</p>
+          <img
+            src={EXAMPLE_IMAGES[slide]}
+            alt="Пример качественной фотографии картины"
+            className="photo-tips__example-img"
+          />
+          <div className="photo-tips__example-dots">
+            {EXAMPLE_IMAGES.map((_, i) => (
+              <button
+                key={i}
+                type="button"
+                className={`photo-tips__example-dot${i === slide ? ' photo-tips__example-dot--active' : ''}`}
+                onClick={() => setSlide(i)}
+                aria-label={`Пример ${i + 1}`}
+              />
+            ))}
+          </div>
         </div>
       </div>
     </div>
@@ -610,8 +637,11 @@ function UploadStep({ onNext }) {
             <button
               type="button"
               className="art-btn art-btn--secondary"
-              disabled
-              title="Функция сохранения черновика — скоро"
+              onClick={() => {
+                if (images.length) onNext(finalImages)
+              }}
+              disabled={images.length === 0}
+              title="Перейти к заполнению деталей"
             >
               <BookmarkIcon /> Сохранить черновик
             </button>
@@ -624,22 +654,32 @@ function UploadStep({ onNext }) {
               <PictureIcon /> Продолжить →
             </button>
           </div>
+          <TrustBar />
         </div>
         <PhotoTipsSidebar />
       </div>
-      <TrustBar />
     </>
   )
 }
 
 // ── Step 2: Details ────────────────────────────────────────
 
+function loadArtDraft() {
+  try {
+    const s = localStorage.getItem(ART_DRAFT_KEY)
+    return s ? JSON.parse(s) : null
+  } catch { return null }
+}
+
 function DetailsStep({ images, onImagesChange, sessionJwt, userId, initialArtist, isModerator, onBack, onSuccess }) {
-  const [fields, setFields] = useState({
+  const savedDraft = typeof window !== 'undefined' ? loadArtDraft() : null
+
+  const [fields, setFields] = useState(savedDraft?.fields || {
     title: '', description: '', materials: '', price: '', width: '', height: '', depth: '',
   })
-  const [unit, setUnit] = useState('см')
-  const [artist, setArtist] = useState(initialArtist || { id: null, full_name: '' })
+  const [unit, setUnit] = useState(savedDraft?.unit || 'см')
+  const [artist, setArtist] = useState(savedDraft?.artist || initialArtist || { id: null, full_name: '' })
+  const [draftSaved, setDraftSaved] = useState(false)
   const [styles, setStyles] = useState({ ids: [], custom: [] })
   const [subjects, setSubjects] = useState({ ids: [], custom: [] })
   const [mediums, setMediums] = useState({ ids: [], custom: [] })
@@ -658,7 +698,10 @@ function DetailsStep({ images, onImagesChange, sessionJwt, userId, initialArtist
       })
     }).catch(() => {})
   }, [])
-  const [date, setDate] = useState(new Date())
+  const [date, setDate] = useState(() => {
+    if (savedDraft?.year) return new Date(savedDraft.year, 0, 1)
+    return new Date()
+  })
   const [aiUsed, setAiUsed] = useState(false)
   const [analyzing, setAnalyzing] = useState(false)
   const [aiError, setAiError] = useState('')
@@ -681,6 +724,22 @@ function DetailsStep({ images, onImagesChange, sessionJwt, userId, initialArtist
       .then(d => { if (d?.remaining !== undefined) setInteriorRemaining(d.remaining) })
       .catch(() => {})
   }, [])
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(ART_DRAFT_KEY, JSON.stringify({
+        fields,
+        unit,
+        artist,
+        year: date.getFullYear(),
+      }))
+    } catch {}
+  }, [fields, unit, artist, date])
+
+  const saveDraftManually = () => {
+    setDraftSaved(true)
+    setTimeout(() => setDraftSaved(false), 2000)
+  }
 
   const [uploading, setUploading] = useState(false)
   const [imageLoadingProcess, setImageLoadingProcess] = useState(null)
@@ -951,6 +1010,7 @@ function DetailsStep({ images, onImagesChange, sessionJwt, userId, initialArtist
       setErrors(er => ({ ...er, upload: msg }))
       return
     }
+    try { localStorage.removeItem(ART_DRAFT_KEY) } catch {}
     onSuccess(normalizeStrapiResponse(resJson), {
       imageDataUrl: images[0]?.data_url,
       artist,
@@ -1217,10 +1277,9 @@ function DetailsStep({ images, onImagesChange, sessionJwt, userId, initialArtist
             <button
               type="button"
               className="art-btn art-btn--secondary"
-              disabled
-              title="Функция сохранения черновика — скоро"
+              onClick={saveDraftManually}
             >
-              Сохранить черновик
+              {draftSaved ? '✓ Сохранено' : 'Сохранить черновик'}
             </button>
           </div>
           <div className="art-action-bar__primary">

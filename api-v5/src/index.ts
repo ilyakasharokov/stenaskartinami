@@ -70,6 +70,10 @@ export default {
         'plugin::users-permissions.user.setphone',
         'plugin::users-permissions.user.setrealemail',
         'plugin::users-permissions.user.claimartist',
+        'api::art.art.findmy',
+        'api::art.art.findmyone',
+        'api::wall.wall.create',
+        'api::wall.wall.update',
       ];
 
       const existing = await strapi.db

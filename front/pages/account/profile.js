@@ -6,6 +6,7 @@ import { useSession, signOut } from 'next-auth/react'
 import MainLayout from '@/components/layouts/MainLayout'
 import Preloader from '@/components/preloader/preloader'
 import Dialog from '@/components/ui/Dialog'
+import { CityInput } from '@/components/ui/AddressInput'
 import MyArtItem, { getArtStatus } from '@/components/my-arts/MyArtItem'
 import CatalogCmp from '@/components/catalog/catalog'
 import { fetchStrapi } from '@/utils/strapi'
@@ -20,7 +21,7 @@ const ART_FILTERS = [
   { key: 'drafts',    label: 'Черновики' },
 ]
 const PAGE_SIZE = 8
-const VALID_TABS = ['overview', 'arts', 'favorite', 'settings']
+const VALID_TABS = ['overview', 'arts', 'walls', 'favorite', 'settings']
 
 const Icon = ({ d, size = 16 }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -144,6 +145,14 @@ export default function ProfilePage() {
   const [saving, setSaving]         = useState(false)
   const [saveError, setSaveError]   = useState('')
   const [saveSuccess, setSaveSuccess] = useState(false)
+
+  // email verification flow
+  const [emailInput, setEmailInput]   = useState('')
+  const [emailStep, setEmailStep]     = useState('idle') // idle | sent | done
+  const [emailToken, setEmailToken]   = useState('')
+  const [emailCode, setEmailCode]     = useState('')
+  const [emailError, setEmailError]   = useState('')
+  const [emailBusy, setEmailBusy]     = useState(false)
 
   const info = session?.info
 
@@ -340,6 +349,18 @@ export default function ProfilePage() {
     )
   }
 
+  if (session.error === 'SessionExpired') {
+    return (
+      <MainLayout>
+        <Head><title>Профиль | Стена с картинами</title></Head>
+        <div style={{ padding: '60px 0', textAlign: 'center' }}>
+          <p style={{ marginBottom: 16, color: '#888' }}>Сессия устарела. Пожалуйста, войдите снова.</p>
+          <button className="btn" onClick={() => signOut({ callbackUrl: '/auth/signin' })}>Войти снова</button>
+        </div>
+      </MainLayout>
+    )
+  }
+
   const displayName = info?.username || session.user?.name || '—'
   const joinedDate = info?.createdAt
     ? new Date(info.createdAt).toLocaleDateString('ru-RU', { year: 'numeric', month: 'long' })
@@ -349,6 +370,7 @@ export default function ProfilePage() {
   const TABS = [
     { key: 'overview',  label: 'Обзор' },
     { key: 'arts',      label: 'Работы' },
+    { key: 'walls',     label: 'Стены' },
     { key: 'favorite',  label: 'Избранное' },
     { key: 'settings',  label: 'Настройки' },
   ]
@@ -573,6 +595,21 @@ export default function ProfilePage() {
           </div>
         )}
 
+        {/* ── СТЕНЫ ── */}
+        {activeTab === 'walls' && (
+          <div>
+            <div className="profile-arts-toolbar">
+              <div />
+              <Link href="/add-wall" className="profile-add-btn">+ Добавить стену</Link>
+            </div>
+            <div className="my-arts-empty">
+              <div className="my-arts-empty__title">У вас пока нет добавленных стен</div>
+              <div className="my-arts-empty__text">Добавьте место, где могут размещаться картины — кафе, офис, галерею или другое пространство</div>
+              <Link href="/add-wall" className="my-arts-empty__btn">+ Добавить стену</Link>
+            </div>
+          </div>
+        )}
+
         {/* ── ИЗБРАННОЕ ── */}
         {activeTab === 'favorite' && (
           <div>
@@ -605,7 +642,91 @@ export default function ProfilePage() {
                 </div>
                 <div className="prof-field">
                   <label className="prof-field__label">Email</label>
-                  <input className="prof-input" value={session.user?.email || ''} disabled />
+                  {session.user?.email ? (
+                    <input className="prof-input" value={session.user.email} disabled />
+                  ) : emailStep === 'done' ? (
+                    <div className="prof-email-done">
+                      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="8" fill="#e8f5e9"/><path d="M4.5 8l2.5 2.5 4.5-4.5" stroke="#2e7d32" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                      {emailInput} — сохранён
+                    </div>
+                  ) : emailStep === 'sent' ? (
+                    <div className="prof-email-verify">
+                      <p className="prof-email-verify__hint">Код отправлен на <strong>{emailInput}</strong></p>
+                      <div className="prof-email-verify__row">
+                        <input
+                          className="prof-input prof-email-verify__code"
+                          value={emailCode}
+                          onChange={e => { setEmailCode(e.target.value.replace(/\D/g, '').slice(0, 4)); setEmailError('') }}
+                          placeholder="0000"
+                          maxLength={4}
+                          inputMode="numeric"
+                          autoFocus
+                        />
+                        <button type="button" className="prof-btn prof-btn--primary"
+                          disabled={emailBusy || emailCode.length < 4}
+                          onClick={async () => {
+                            setEmailBusy(true); setEmailError('')
+                            try {
+                              const r = await fetch('/api/auth/check-email-code', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ token: emailToken, code: emailCode }),
+                              })
+                              const d = await r.json()
+                              if (!r.ok) { setEmailError(d.error || 'Ошибка'); return }
+                              await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/me/set-email`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.jwt}` },
+                                body: JSON.stringify({ email: d.email }),
+                              })
+                              setEmailStep('done')
+                            } catch { setEmailError('Ошибка сети') }
+                            finally { setEmailBusy(false) }
+                          }}
+                        >
+                          {emailBusy ? 'Проверка…' : 'Подтвердить'}
+                        </button>
+                      </div>
+                      {emailError && <div className="prof-email-verify__err">{emailError}</div>}
+                      <button type="button" className="prof-email-verify__resend"
+                        onClick={() => { setEmailStep('idle'); setEmailCode(''); setEmailError('') }}>
+                        Изменить адрес или отправить снова
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="prof-email-add">
+                      <div className="prof-email-add__row">
+                        <input
+                          className="prof-input"
+                          type="email"
+                          value={emailInput}
+                          onChange={e => { setEmailInput(e.target.value); setEmailError('') }}
+                          placeholder="example@mail.ru"
+                        />
+                        <button type="button" className="prof-btn prof-btn--secondary"
+                          disabled={emailBusy || !/^[^@]+@[^@]+\.[^@]+$/.test(emailInput)}
+                          onClick={async () => {
+                            setEmailBusy(true); setEmailError('')
+                            try {
+                              const r = await fetch('/api/auth/send-email-otp', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ email: emailInput }),
+                              })
+                              const d = await r.json()
+                              if (!r.ok) { setEmailError(d.error || 'Ошибка'); return }
+                              setEmailToken(d.token)
+                              setEmailStep('sent')
+                            } catch { setEmailError('Ошибка сети') }
+                            finally { setEmailBusy(false) }
+                          }}
+                        >
+                          {emailBusy ? 'Отправка…' : 'Отправить код'}
+                        </button>
+                      </div>
+                      {emailError && <div className="prof-email-verify__err">{emailError}</div>}
+                    </div>
+                  )}
                 </div>
                 <div className="prof-field">
                   <label className="prof-field__label">О себе</label>
@@ -613,7 +734,7 @@ export default function ProfilePage() {
                 </div>
                 <div className="prof-field">
                   <label className="prof-field__label">Местоположение</label>
-                  <input className="prof-input" value={location} onChange={e => setLocation(e.target.value)} maxLength={100} placeholder="Москва, Россия" />
+                  <CityInput value={location} onChange={setLocation} placeholder="Москва, Россия" />
                 </div>
               </div>
 

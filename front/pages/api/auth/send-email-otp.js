@@ -1,21 +1,26 @@
 import crypto from 'crypto';
 import jwt from 'jsonwebtoken';
 import nodemailer from 'nodemailer';
+import { otpEmailHtml } from '@/utils/email-template';
 
 const SECRET = process.env.NEXTAUTH_SECRET;
 
-function createTransport() {
+// Singleton — one persistent connection pool for the lifetime of the process
+let _transport = null;
+function getTransport() {
+  if (_transport) return _transport;
   const host = process.env.SMTP_HOST;
   if (!host) return null;
-  return nodemailer.createTransport({
+  _transport = nodemailer.createTransport({
     host,
     port: Number(process.env.SMTP_PORT) || 587,
     secure: process.env.SMTP_SECURE === 'true',
-    auth: {
-      user: process.env.SMTP_USER,
-      pass: process.env.SMTP_PASS,
-    },
+    auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
+    pool: true,       // keep connections alive, reuse them
+    maxConnections: 3,
+    socketTimeout: 10000,
   });
+  return _transport;
 }
 
 export default async function handler(req, res) {
@@ -31,32 +36,23 @@ export default async function handler(req, res) {
   const codeHash = crypto.createHmac('sha256', SECRET).update(code).digest('hex');
   const token = jwt.sign({ email: normalizedEmail, codeHash }, SECRET, { expiresIn: '10m' });
 
-  const transport = createTransport();
+  const transport = getTransport();
 
   if (transport) {
-    try {
-      await transport.sendMail({
-        from: process.env.SMTP_FROM || process.env.SMTP_USER,
-        to: normalizedEmail,
-        subject: 'Код подтверждения — Стена с картинами',
-        text: `Ваш код подтверждения: ${code}\n\nКод действителен 10 минут.`,
-        html: `
-          <div style="font-family:sans-serif;max-width:420px;margin:0 auto">
-            <h2 style="color:#dc3a0f;margin-bottom:8px">Стена с картинами</h2>
-            <p style="color:#555;margin-bottom:24px">Код для входа:</p>
-            <div style="font-size:36px;font-weight:700;letter-spacing:12px;color:#111;padding:20px;background:#f5f5f3;border-radius:10px;text-align:center">${code}</div>
-            <p style="color:#999;font-size:13px;margin-top:20px">Код действителен 10 минут. Если вы не запрашивали код — просто проигнорируйте это письмо.</p>
-          </div>
-        `,
-      });
-    } catch (err) {
-      console.error('Email send error:', err.message);
-      return res.status(500).json({ error: 'Не удалось отправить письмо. Проверьте адрес почты.' });
-    }
-  } else {
-    // Dev mode: log code to console
-    console.log(`[DEV] Email OTP for ${normalizedEmail}: ${code}`);
-  }
+    // Respond immediately — send email in background so client doesn't wait
+    res.json({ token });
 
-  return res.json({ token });
+    transport.sendMail({
+      from: process.env.SMTP_FROM || process.env.SMTP_USER,
+      to: normalizedEmail,
+      subject: 'Код подтверждения — Стена с картинами',
+      text: `Ваш код подтверждения: ${code}\n\nКод действителен 10 минут.`,
+      html: otpEmailHtml(code),
+    }).catch(err => {
+      console.error('[email-otp] send error:', err.message);
+    });
+  } else {
+    console.log(`[DEV] Email OTP for ${normalizedEmail}: ${code}`);
+    res.json({ token });
+  }
 }

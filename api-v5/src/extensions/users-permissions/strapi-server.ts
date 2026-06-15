@@ -176,7 +176,9 @@ export default (plugin: any) => {
 
     for (const action of CUSTOM_ACTIONS) {
       const fullAction = `plugin::users-permissions.user.${action}`;
-      const existing = await s.db.query('plugin::users-permissions.permission').findOne({ where: { action: fullAction } });
+      const existing = await s.db.query('plugin::users-permissions.permission').findOne({
+        where: { action: fullAction, role: authRole.id },
+      });
       if (!existing) {
         await s.db.query('plugin::users-permissions.permission').create({
           data: { action: fullAction, role: authRole.id },

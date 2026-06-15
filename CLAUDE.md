@@ -6,20 +6,20 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Monorepo with two independent apps:
 
-- **`front/`** — Next.js 12 / React 17 frontend
+- **`front/`** — Next.js 15 / React 18 frontend
 - **`api-v5/`** — Strapi 5 CMS backend (Node ≥20)
 - **`api/`** — legacy Strapi version, no longer actively used
 
-Infrastructure: Docker Compose runs Postgres 16 locally. Production uses Docker Compose with nginx reverse proxy and AWS S3 for file uploads.
+Infrastructure: Docker Compose runs Postgres 16 + Meilisearch locally. Production uses Docker Compose with nginx reverse proxy and AWS S3 for file uploads.
 
 ## Development
 
 ### Prerequisites
 
-Start Postgres first (required by `api-v5`):
+Start Postgres and Meilisearch first:
 
 ```bash
-docker compose up -d postgres
+docker compose up -d postgres meilisearch
 ```
 
 ### API (Strapi)
@@ -31,7 +31,7 @@ npm run dev        # starts on port 1337
 npm run build      # build admin panel
 ```
 
-Requires `api-v5/.env.local` — see `.env.local` in the repo root for the local template. Key vars: `DATABASE_HOST=postgres`, `DATABASE_CLIENT=postgres`.
+Requires `api-v5/.env.local`. Key vars: `DATABASE_HOST=postgres`, `DATABASE_CLIENT=postgres`, `MEILISEARCH_HOST=http://localhost:7700`.
 
 ### Frontend (Next.js)
 
@@ -45,6 +45,8 @@ npm start
 
 Requires `front/.env`. For local dev: `NEXT_PUBLIC_API_URL=http://localhost:1337/api`.
 
+**Dev auto-login**: Set `DEV_AUTO_EMAIL`, `DEV_AUTO_PASSWORD`, and `NEXT_PUBLIC_DEV_AUTO_LOGIN=true` in `front/.env` to bypass OAuth and auto-authenticate against Strapi on every page load.
+
 ## Key patterns
 
 ### Strapi API responses
@@ -55,6 +57,14 @@ Strapi 5 returns `{ data: { id, attributes: {...} } }`. All API calls go through
 - `normalizeStrapiResponse(payload)` — flattens `{ id, attributes }` into plain objects
 
 Always use these helpers when fetching from Strapi; don't manually unwrap `.data.attributes`.
+
+### Query string builder
+
+`front/utils/serialize.js` exports `serialize(obj)` which builds Strapi v5-compatible query strings. It handles pagination (`_start`/`_limit` → `pagination[page]`/`pagination[pageSize]`), filters, sorting, populate, and the `q` text-search param. Pass it directly to `API_HOST + '/arts' + serialize({...})`.
+
+### Server-side cache
+
+`front/utils/server-cache.js` exports `cachedFetch(key, ttlSeconds, fetcher)` — an in-process TTL cache for SSR. Use it in `getServerSideProps` to avoid hammering Strapi on every request. Cache keys follow the convention `page:resource` (e.g. `'home:arts'`, `'catalog:styles'`).
 
 ### Image URLs
 
@@ -74,9 +84,27 @@ When adding new `getServerSideProps` calls, use `API_HOST` from constants — do
 
 Strapi content types in `api-v5/src/api/`: `art`, `artist`, `city`, `form`, `marquee`, `medium`, `slide`, `style`, `subject`, `wall`.
 
+### URL pattern
+
+Art pages use slug + id: `/art/{slug}--{id}`. Artist pages follow the same pattern: `/artists/{slug}--{id}`.
+
 ### Auth
 
-`next-auth` v3 with OAuth providers (Google, Facebook, VK, Instagram). Wrapped via `<Provider>` in `front/pages/_app.js`. OAuth credentials come from `front/.env`.
+`next-auth` v4 with multiple providers configured in `front/lib/authOptions.js`:
+- **Credentials**: phone OTP, email OTP, Telegram, email+password (legacy)
+- **OAuth**: Google, VK (custom provider — registers/logs in to Strapi on first sign-in)
+
+Auth callback stores the Strapi JWT in the next-auth session token. For server-side auth in API routes, use `getSession` from `front/lib/getSession.js` (not `getServerSession` directly) — it also handles the dev auto-login bypass.
+
+### Meilisearch
+
+Meilisearch (port 7700) is indexed by the `strapi-plugin-meilisearch` plugin. The frontend never calls Meilisearch directly — it goes through the Next.js proxy at `front/pages/api/meili-proxy.js`, which forwards search requests and injects the server-side API key. Set `MEILISEARCH_INTERNAL_HOST` for server-to-server calls and `NEXT_PUBLIC_MEILISEARCH_HOST` for the public endpoint.
+
+### AI features
+
+`front/pages/api/ai/analyze-art.js` — analyzes an artwork image using Yandex Cloud AI (Qwen model via `YC_API_KEY` + `YC_FOLDER_ID`) and returns suggested styles, subjects, mediums, and description. Rate-limited to 5 calls per user per day via in-process map.
+
+`front/pages/api/ai/generate-interior.js` — generates an interior visualization. Same rate limit pattern.
 
 ## Production deployment
 
@@ -88,5 +116,7 @@ Production runs via `docker-compose.prod.yml`. Deploy with:
 ```
 
 File uploads use `@strapi/provider-upload-aws-s3`. Required env vars in `api-v5/.env`: `AWS_REGION`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_S3_BUCKET`.
+
+`NEXT_PUBLIC_*` vars must be passed as Docker build args (not just runtime env) because Next.js bakes them at build time. See `docker-compose.prod.yml` for the `args:` section.
 
 See `DEPLOY.md` for the full production setup guide including nginx SSL configuration.

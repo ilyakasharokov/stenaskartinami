@@ -322,6 +322,56 @@
     flex-direction: column;
     gap: 18px;
   }
+
+  &__example {
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid var(--c-border);
+  }
+
+  &__example-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--c-text);
+    margin-bottom: 10px;
+    letter-spacing: 0;
+    text-transform: none;
+  }
+
+  &__example-img {
+    width: 100%;
+    border-radius: 8px;
+    display: block;
+    object-fit: cover;
+  }
+
+  &__example-dots {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 10px;
+  }
+
+  &__example-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--c-border-strong);
+    display: inline-block;
+    transition: background 0.2s;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    flex-shrink: 0;
+
+    &--active {
+      background: var(--c-accent);
+    }
+
+    &:hover:not(&--active) {
+      background: var(--c-text-muted);
+    }
+  }
 }
 
 .photo-tip {
@@ -367,6 +417,7 @@
   border: 1px solid var(--c-border);
   border-radius: var(--radius);
   overflow: hidden;
+  grid-column: 1 / -1;
 
   @media (max-width: 700px) {
     flex-direction: column;
@@ -417,7 +468,7 @@
 }
 
 .upload-zone {
-  border: 2px dashed rgba(220, 58, 15, 0.3);
+  border: 2px dashed rgba(220, 58, 15, 0.5);
   border-radius: var(--radius);
   background: var(--c-bg-subtle);
   padding: 56px 40px;

@@ -16,7 +16,28 @@ const mergePopulate = (populate: any) => {
   return populate;
 };
 
-export default factories.createCoreController(uid, () => ({
+export default factories.createCoreController(uid, ({ strapi }) => ({
+  async create(ctx) {
+    // Strip any client-supplied user_uploader to prevent spoofing
+    if (ctx.request.body?.data) {
+      delete ctx.request.body.data.user_uploader
+    }
+
+    const response = await super.create(ctx)
+
+    // Attach the authenticated user after creation
+    const userId = ctx.state.user?.id
+    const documentId = response?.data?.documentId
+    if (userId && documentId) {
+      await strapi.documents(uid).update({
+        documentId,
+        data: { user_uploader: userId } as any,
+      })
+    }
+
+    return response
+  },
+
   async find(ctx) {
     await this.validateQuery(ctx);
     const sanitizedQuery = await this.sanitizeQuery(ctx);

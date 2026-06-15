@@ -246,7 +246,11 @@ export const authOptions = {
           const res = await fetch(API_HOST + '/users/me/profile', {
             headers: { Authorization: `Bearer ${token.jwt}` },
           });
-          if (res.ok) session.info = await res.json();
+          if (res.ok) {
+            session.info = await res.json();
+          } else if (res.status === 401) {
+            session.error = 'SessionExpired';
+          }
         } catch {}
       }
       return session;

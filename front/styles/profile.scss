@@ -720,3 +720,59 @@ textarea.prof-input {
   .prof-stat__val { font-size: 18px; }
   .prof-tabs__btn { padding: 10px 14px; font-size: 13px; }
 }
+
+.prof-btn--secondary {
+  background: #fff;
+  border: 1.5px solid #e0dbd4;
+  color: #444;
+  &:hover:not(:disabled) { border-color: #999; color: #111; }
+  &:disabled { opacity: 0.5; cursor: default; }
+}
+
+.prof-email-add {
+  &__row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    .prof-input { flex: 1; }
+  }
+}
+
+.prof-email-verify {
+  &__hint { font-size: 13px; color: #555; margin: 0 0 10px; }
+  &__row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  &__code {
+    width: 90px !important;
+    flex: none !important;
+    text-align: center;
+    font-size: 20px !important;
+    font-weight: 700;
+    letter-spacing: 6px;
+  }
+  &__err { font-size: 12px; color: #e53935; margin-top: 6px; }
+  &__resend {
+    background: none;
+    border: none;
+    color: #999;
+    font-size: 12px;
+    cursor: pointer;
+    padding: 0;
+    margin-top: 8px;
+    display: block;
+    &:hover { color: #555; text-decoration: underline; }
+  }
+}
+
+.prof-email-done {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  color: #2e7d32;
+  font-weight: 500;
+  padding: 8px 0;
+}
