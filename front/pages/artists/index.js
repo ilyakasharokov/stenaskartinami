@@ -248,7 +248,7 @@ export default function ArtistsCatalog({ artists, filterOptions, totalCount }) {
 
 export const getServerSideProps = async () => {
   try {
-    const query = '?populate[0]=avatar&populate[1]=cover&filters[publishedAt][$notNull]=true&sort=full_name:asc&pagination[pageSize]=500'
+    const query = '?populate[0]=avatar&populate[1]=cover&filters[publishedAt][$notNull]=true&filters[works_count][$gt]=0&sort=full_name:asc&pagination[pageSize]=500'
 
     const artists = await cachedFetch('artists:catalog', 300, () =>
       fetchStrapi(API_HOST + '/artists' + query)

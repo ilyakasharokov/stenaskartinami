@@ -309,7 +309,7 @@ export const getServerSideProps = async () => {
       cachedFetch('home:artists', TTL, () => fetchStrapi(
         API_HOST +
           '/artists' +
-          serialize({ _limit: 8, populate: { photos: true }, populateDefaults: [] })
+          serialize({ _limit: 8, populate: { photos: true }, populateDefaults: [], filters: { works_count: { $gt: 0 } } })
       ).catch(() => null)),
     ]);
 
