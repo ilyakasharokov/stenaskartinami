@@ -6,7 +6,8 @@ declare const strapi: any;
 
 const userUid = 'plugin::users-permissions.user';
 
-const CUSTOM_ACTIONS = ['me', 'setphone', 'setrealemail', 'claimartist', 'toggleart', 'myprofile', 'updateprofile'];
+const CUSTOM_ACTIONS = ['me', 'setphone', 'setrealemail', 'claimartist', 'toggleart', 'myprofile', 'updateprofile', 'notifications', 'readnotifications'];
+const NOTIF_UID = 'api::notification.notification';
 
 export default (plugin: any) => {
   plugin.contentTypes.user.schema.attributes.isModerator = {
@@ -146,6 +147,58 @@ export default (plugin: any) => {
       }
       const nextIds = isFavorite ? existingIds.filter(id => id !== numericId) : [...existingIds, numericId];
       ctx.send({ arts: nextIds, isFavorite: !isFavorite });
+
+      // Notify artist owner when their art is liked (non-blocking)
+      if (!isFavorite) {
+        setImmediate(async () => {
+          try {
+            const art = await s.db.query('api::art.art').findOne({
+              where: { id: numericId },
+              populate: ['Artist', 'Pictures'],
+            });
+            if (!art?.Artist?.id) return;
+            const artist = await s.db.query('api::artist.artist').findOne({
+              where: { id: art.Artist.id },
+              populate: ['user_uploader'],
+            });
+            if (!artist?.user_uploader?.id || artist.user_uploader.id === user.id) return;
+            const imgUrl = (art as any).Pictures?.[0]?.formats?.thumbnail?.url || (art as any).Pictures?.[0]?.url;
+            await s.db.query(NOTIF_UID).create({
+              data: {
+                type: 'new_like',
+                recipient_id: artist.user_uploader.id,
+                actor_name: user.name || user.username || 'Пользователь',
+                body: `добавил в избранное «${(art as any).Title}»`,
+                link: `/art/${(art as any).slug}--${art.id}`,
+                image_url: imgUrl ? imgUrl : null,
+                read: false,
+              },
+            });
+          } catch (e) { /* non-critical */ }
+        });
+      }
+    };
+
+    instance.notifications = async (ctx) => {
+      const user = ctx.state.user;
+      if (!user) return ctx.unauthorized();
+      const notifs = await s.db.query(NOTIF_UID).findMany({
+        where: { recipient_id: user.id },
+        orderBy: { createdAt: 'desc' },
+        limit: 30,
+      });
+      const unreadCount = notifs.filter((n: any) => !n.read).length;
+      ctx.body = { notifications: notifs, unreadCount };
+    };
+
+    instance.readnotifications = async (ctx) => {
+      const user = ctx.state.user;
+      if (!user) return ctx.unauthorized();
+      await s.db.query(NOTIF_UID).updateMany({
+        where: { recipient_id: user.id, read: false },
+        data: { read: true },
+      });
+      ctx.body = { ok: true };
     };
 
     return instance;
@@ -164,6 +217,8 @@ export default (plugin: any) => {
     { method: 'POST', path: '/users/me/set-phone',      handler: 'user.setphone',       config: { prefix: '', policies: [] } },
     { method: 'POST', path: '/users/me/set-email',      handler: 'user.setrealemail',   config: { prefix: '', policies: [] } },
     { method: 'POST', path: '/users/me/claim-artist',   handler: 'user.claimartist',    config: { prefix: '', policies: [] } },
+    { method: 'GET',  path: '/users/me/notifications',  handler: 'user.notifications',  config: { prefix: '', policies: [] } },
+    { method: 'POST', path: '/users/me/notifications/read-all', handler: 'user.readnotifications', config: { prefix: '', policies: [] } },
   );
 
   // Ensure custom permissions exist after syncPermissions runs.

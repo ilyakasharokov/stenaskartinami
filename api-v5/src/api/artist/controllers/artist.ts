@@ -185,6 +185,30 @@ export default factories.createCoreController(uid, () => ({
 
     const stats = await computeStats(artist, userId);
     ctx.body = { followersCount: stats.followersCount, isFollowing: true };
+
+    // Notify artist owner (non-blocking)
+    setImmediate(async () => {
+      try {
+        const fullArtist = await strapi.db.query(uid).findOne({
+          where: { id: artist.id },
+          populate: ['user_uploader'],
+        });
+        if (!fullArtist?.user_uploader?.id || fullArtist.user_uploader.id === userId) return;
+        const follower = await strapi.entityService.findOne(userUid, userId, { fields: ['username', 'name'] as any } as any);
+        const actorName = (follower as any)?.name || (follower as any)?.username || 'Пользователь';
+        await strapi.db.query('api::notification.notification').create({
+          data: {
+            type: 'new_follower',
+            recipient_id: fullArtist.user_uploader.id,
+            actor_name: actorName,
+            body: 'подписался на вас',
+            link: `/artists/${artist.slug || artist.documentId}--${artist.id}`,
+            image_url: null,
+            read: false,
+          },
+        });
+      } catch (e) { /* non-critical */ }
+    });
   },
 
   async unfollow(ctx) {

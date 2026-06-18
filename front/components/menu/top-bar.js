@@ -1,6 +1,6 @@
 import { useSession, signOut } from 'next-auth/react'
 import Link from 'next/link'
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 
 const BellIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
@@ -15,6 +15,20 @@ const ChevronIcon = () => (
   </svg>
 )
 
+const NOTIF_ICONS = {
+  new_art:      '🖼',
+  new_like:     '❤️',
+  new_follower: '👤',
+}
+
+function timeAgo(dateStr) {
+  const diff = Math.floor((Date.now() - new Date(dateStr)) / 1000)
+  if (diff < 60) return 'только что'
+  if (diff < 3600) return `${Math.floor(diff / 60)} мин назад`
+  if (diff < 86400) return `${Math.floor(diff / 3600)} ч назад`
+  return `${Math.floor(diff / 86400)} д назад`
+}
+
 function UserAvatar({ name, image }) {
   if (image) {
     return <img src={image} alt={name} className="nav-user__avatar-img" />
@@ -28,6 +42,42 @@ export default function NavRight() {
   const [dropdownOpen, setDropdownOpen] = useState(false)
   const dropdownRef = useRef(null)
 
+  const [bellOpen, setBellOpen] = useState(false)
+  const [notifications, setNotifications] = useState([])
+  const [unreadCount, setUnreadCount] = useState(0)
+  const bellRef = useRef(null)
+
+  const fetchNotifications = useCallback(async () => {
+    if (!session?.user) return
+    try {
+      const res = await fetch('/api/notifications')
+      if (!res.ok) return
+      const data = await res.json()
+      setNotifications(data.notifications || [])
+      setUnreadCount(data.unreadCount || 0)
+    } catch {}
+  }, [session?.user])
+
+  // Poll every 60 seconds while authenticated
+  useEffect(() => {
+    if (!session?.user) return
+    fetchNotifications()
+    const id = setInterval(fetchNotifications, 60_000)
+    return () => clearInterval(id)
+  }, [fetchNotifications, session?.user])
+
+  const openBell = async () => {
+    setBellOpen(v => !v)
+    if (!bellOpen && unreadCount > 0) {
+      setUnreadCount(0)
+      try {
+        await fetch('/api/notifications/read-all', { method: 'POST' })
+        setNotifications(prev => prev.map(n => ({ ...n, read: true })))
+      } catch {}
+    }
+  }
+
+  // Close user dropdown on outside click
   useEffect(() => {
     if (!dropdownOpen) return
     const handler = (e) => {
@@ -39,6 +89,18 @@ export default function NavRight() {
     return () => document.removeEventListener('mousedown', handler)
   }, [dropdownOpen])
 
+  // Close bell dropdown on outside click
+  useEffect(() => {
+    if (!bellOpen) return
+    const handler = (e) => {
+      if (bellRef.current && !bellRef.current.contains(e.target)) {
+        setBellOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [bellOpen])
+
   if (!session) {
     return (
       <div className="nav-right">
@@ -49,10 +111,39 @@ export default function NavRight() {
 
   return (
     <div className="nav-right">
-      <button className="nav-bell" aria-label="Уведомления">
-        <BellIcon />
-        <span className="nav-bell__dot" />
-      </button>
+      <div className="nav-bell-wrap" ref={bellRef}>
+        <button className="nav-bell" aria-label="Уведомления" onClick={openBell}>
+          <BellIcon />
+          {unreadCount > 0 && (
+            <span className="nav-bell__badge">{unreadCount > 9 ? '9+' : unreadCount}</span>
+          )}
+        </button>
+
+        {bellOpen && (
+          <div className="nav-notif__dropdown">
+            <div className="nav-notif__header">Уведомления</div>
+            {notifications.length === 0 ? (
+              <div className="nav-notif__empty">Нет уведомлений</div>
+            ) : (
+              <ul className="nav-notif__list">
+                {notifications.map(n => (
+                  <li key={n.id} className={`nav-notif__item${n.read ? '' : ' nav-notif__item--unread'}`}>
+                    {n.link ? (
+                      <Link href={n.link} className="nav-notif__inner" onClick={() => setBellOpen(false)}>
+                        <NotifContent n={n} />
+                      </Link>
+                    ) : (
+                      <div className="nav-notif__inner">
+                        <NotifContent n={n} />
+                      </div>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        )}
+      </div>
 
       <div className="nav-user" ref={dropdownRef}>
         <button
@@ -101,5 +192,22 @@ export default function NavRight() {
         )}
       </div>
     </div>
+  )
+}
+
+function NotifContent({ n }) {
+  return (
+    <>
+      <span className="nav-notif__icon">{NOTIF_ICONS[n.type] || '🔔'}</span>
+      <div className="nav-notif__body">
+        <span className="nav-notif__actor">{n.actor_name}</span>
+        {' '}
+        <span className="nav-notif__text">{n.body}</span>
+        <span className="nav-notif__time">{timeAgo(n.createdAt)}</span>
+      </div>
+      {n.image_url && (
+        <img src={n.image_url} alt="" className="nav-notif__thumb" />
+      )}
+    </>
   )
 }

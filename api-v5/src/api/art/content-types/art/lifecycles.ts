@@ -21,6 +21,43 @@ const updateDimensions = (data: any) => {
   }
 };
 
+async function notifyArtistFollowers(artId: number) {
+  try {
+    const art = await strapi.entityService.findOne('api::art.art', artId, {
+      populate: { Artist: true, Pictures: true } as any,
+      status: 'published',
+    } as any);
+    if (!art || !(art as any).Artist?.id) return;
+    const artist = (art as any).Artist;
+
+    const followers = await (strapi.db as any).connection('artists_followers_lnk')
+      .where('artist_id', artist.id)
+      .select('user_id')
+      .limit(200);
+    if (!followers.length) return;
+
+    const imgUrl = (art as any).Pictures?.[0]?.formats?.thumbnail?.url || (art as any).Pictures?.[0]?.url || null;
+    const artSlug = `${(art as any).slug || ''}--${art.id}`;
+    const artistSlug = `${artist.slug || artist.documentId}--${artist.id}`;
+
+    for (const row of followers) {
+      await strapi.db.query('api::notification.notification').create({
+        data: {
+          type: 'new_art',
+          recipient_id: row.user_id,
+          actor_name: artist.full_name,
+          body: `опубликовал новую работу «${(art as any).Title}»`,
+          link: `/art/${artSlug}`,
+          image_url: imgUrl,
+          read: false,
+        },
+      });
+    }
+  } catch (e) {
+    strapi.log.warn('[notification] notifyArtistFollowers failed:', e);
+  }
+}
+
 async function syncArtistTags(artId: number) {
   try {
     const art = await strapi.entityService.findOne('api::art.art', artId, {
@@ -86,7 +123,12 @@ export default {
   },
 
   async afterCreate(event: any) {
-    if (event.result?.id) await syncArtistTags(event.result.id);
+    if (!event.result?.id) return;
+    await syncArtistTags(event.result.id);
+    // Notify followers only when the published version is created
+    if (event.result.publishedAt) {
+      setImmediate(() => notifyArtistFollowers(event.result.id));
+    }
   },
 
   async afterUpdate(event: any) {
