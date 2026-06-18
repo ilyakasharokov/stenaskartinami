@@ -7,7 +7,6 @@ import { useState } from 'react'
 import serialize from '@/utils/serialize'
 import { fetchStrapi } from '@/utils/strapi'
 import { cachedFetch } from '@/utils/server-cache'
-import ProductListItem from '@/components/catalog/product-list-item'
 import AddFavorite from '@/components/art/add-favorite'
 import dynamic from 'next/dynamic'
 
@@ -171,17 +170,43 @@ export default function Home({ walls, arts, interiorArts, artists }) {
           </div>
         </section>
 
-        {/* ── Featured Arts ── */}
+        {/* ── Featured Arts (masonry) ── */}
         {featuredArts.length > 0 && (
           <section className="index-section">
             <div className="index-section__header">
               <h2>Избранные работы</h2>
               <Link href="/catalog" className="index-section__more">Смотреть все работы →</Link>
             </div>
-            <div className="product-list index-featured-arts">
-              {featuredArts.map(art => (
-                <ProductListItem art={art} key={art.id} />
-              ))}
+            <div className="index-masonry">
+              {featuredArts.map(art => {
+                const pic = art.Pictures?.[0]
+                const imgUrl = pic?.formats?.medium?.url || pic?.formats?.small?.url || pic?.url
+                return (
+                  <div className="index-masonry__item" key={art.id}>
+                    <div className="index-masonry__fav">
+                      <AddFavorite art={art} />
+                    </div>
+                    <Link href={'/art/' + art.slug + '--' + art.id} className="index-masonry__img-link">
+                      {imgUrl && (
+                        <img src={imageUrlBuilder(imgUrl)} alt={art.Title} loading="lazy" />
+                      )}
+                    </Link>
+                    <div className="index-masonry__info">
+                      <Link href={'/art/' + art.slug + '--' + art.id} className="index-masonry__title">
+                        {art.Title}
+                      </Link>
+                      <div className="index-masonry__meta">
+                        {art.Artist && (
+                          <Link href={'/artists/' + art.Artist.slug + '--' + art.Artist.id} className="index-masonry__artist">
+                            {art.Artist.full_name}
+                          </Link>
+                        )}
+                        {art.Price > 0 && <span className="index-masonry__price">{art.Price.toLocaleString('ru-RU')} ₽</span>}
+                      </div>
+                    </div>
+                  </div>
+                )
+              })}
             </div>
           </section>
         )}
@@ -319,8 +344,7 @@ export const getServerSideProps = async () => {
       ).catch(() => null)),
       cachedFetch('home:artists', TTL, () => fetchStrapi(
         API_HOST +
-          '/artists' +
-          serialize({ _limit: 8, populate: { photos: true }, populateDefaults: [], filters: { works_count: { $gt: 0 } } })
+          '/artists?filters[works_count][$gt]=0&pagination[pageSize]=8&populate[0]=photos&sort=publishedAt:desc'
       ).catch(() => null)),
     ]);
 
