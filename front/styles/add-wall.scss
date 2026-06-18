@@ -6,13 +6,17 @@
 $orange: #f15a24;
 $orange-light: #fff0ea;
 $orange-border: #f4a07a;
-$text: #1a1a1a;
-$text-muted: #666;
-$text-hint: #999;
-$border: #e0dbd4;
-$bg: #f7f6f4;
+$text: #111827;
+$text-muted: #6b7280;
+$text-hint: #9ca3af;
+$border: #e5e7eb;
+$border-strong: #d1d5db;
+$bg: #f9fafb;
 $white: #fff;
 $radius: 10px;
+$radius-sm: 6px;
+$shadow-sm: 0 1px 2px rgba(0,0,0,.06);
+$shadow-md: 0 4px 6px rgba(0,0,0,.06), 0 1px 3px rgba(0,0,0,.08);
 
 .aw {
   min-height: 100vh;
@@ -50,6 +54,7 @@ $radius: 10px;
   background: $white;
   border-radius: $radius;
   border: 1px solid $border;
+  box-shadow: $shadow-sm;
   overflow: hidden;
   margin-bottom: 12px;
 }
@@ -165,6 +170,7 @@ $radius: 10px;
   background: $white;
   border: 1px solid $border;
   border-radius: $radius;
+  box-shadow: $shadow-sm;
   padding: 28px 28px 24px;
   margin-bottom: 8px;
 }
@@ -173,6 +179,7 @@ $radius: 10px;
   background: $white;
   border: 1px solid $border;
   border-radius: $radius;
+  box-shadow: $shadow-sm;
   padding: 24px 28px;
   margin-bottom: 8px;
 }
@@ -285,13 +292,15 @@ $radius: 10px;
 }
 
 .aw-label {
-  font-size: 13px;
+  font-size: 11px;
   font-weight: 600;
-  color: $text;
+  color: $text-muted;
   margin-bottom: 6px;
   display: flex;
   align-items: center;
   gap: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .aw-req { color: $orange; }
@@ -301,25 +310,29 @@ $radius: 10px;
 .aw-input {
   height: 40px;
   border: 1.5px solid $border;
-  border-radius: 8px;
-  padding: 0 12px;
+  border-radius: $radius-sm;
+  padding: 0 14px;
   font-size: 14px;
   color: $text;
   background: $white;
-  transition: border-color .15s;
+  transition: border-color .15s, box-shadow .15s;
   width: 100%;
   box-sizing: border-box;
   font-family: 'Inter', sans-serif;
 
-  &:focus { outline: none; border-color: $orange; }
-  &--err  { border-color: #e53935; }
-  &::placeholder { color: #bbb; }
+  &:focus {
+    outline: none;
+    border-color: $text;
+    box-shadow: 0 0 0 3px rgba(17,24,39,.07);
+  }
+  &--err  { border-color: #dc3a0f; }
+  &::placeholder { color: $text-hint; }
 }
 
 .aw-textarea {
   border: 1.5px solid $border;
-  border-radius: 8px;
-  padding: 10px 12px;
+  border-radius: $radius-sm;
+  padding: 10px 14px;
   font-size: 14px;
   color: $text;
   resize: vertical;
@@ -327,18 +340,23 @@ $radius: 10px;
   line-height: 1.55;
   width: 100%;
   box-sizing: border-box;
+  transition: border-color .15s, box-shadow .15s;
 
-  &:focus { outline: none; border-color: $orange; }
-  &--err  { border-color: #e53935; }
+  &:focus {
+    outline: none;
+    border-color: $text;
+    box-shadow: 0 0 0 3px rgba(17,24,39,.07);
+  }
+  &--err  { border-color: #dc3a0f; }
   &--sm   { font-size: 13px; }
-  &::placeholder { color: #bbb; }
+  &::placeholder { color: $text-hint; }
 }
 
 .aw-select {
   height: 40px;
   border: 1.5px solid $border;
-  border-radius: 8px;
-  padding: 0 36px 0 12px;
+  border-radius: $radius-sm;
+  padding: 0 36px 0 14px;
   font-size: 14px;
   color: $text;
   background: $white;
@@ -346,25 +364,32 @@ $radius: 10px;
   cursor: pointer;
   appearance: none;
   font-family: 'Inter', sans-serif;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23999' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%239ca3af' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 12px center;
+  transition: border-color .15s, box-shadow .15s;
 
-  &:focus { outline: none; border-color: $orange; }
+  &:focus {
+    outline: none;
+    border-color: $text;
+    box-shadow: 0 0 0 3px rgba(17,24,39,.07);
+  }
 }
 
-.aw-err    { font-size: 12px; color: #e53935; margin-top: 4px; }
+.aw-err    { font-size: 12px; color: #dc3a0f; margin-top: 4px; font-weight: 600; }
 .aw-counter { font-size: 11px; color: $text-hint; margin-top: 4px; }
 .aw-counter--right { text-align: right; }
 .aw-hint-text { font-size: 11px; color: $text-hint; margin-top: 4px; }
 
 .aw-section-title {
-  font-size: 15px;
+  font-size: 11px;
   font-weight: 700;
   color: $text;
   margin: 4px 0 16px;
   padding-bottom: 10px;
-  border-bottom: 1px solid #f0ece6;
+  border-bottom: 1px solid $border;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
 }
 
 .aw-contacts-section {
@@ -836,16 +861,17 @@ $radius: 10px;
 
 .aw-footer__back {
   background: $white;
-  border: 1.5px solid #ddd;
-  border-radius: 12px;
-  padding: 13px 28px;
-  font-size: 15px;
+  border: 1.5px solid $border-strong;
+  border-radius: 8px;
+  padding: 11px 24px;
+  font-size: 14px;
   font-weight: 500;
-  color: $text;
+  color: $text-muted;
   cursor: pointer;
   font-family: 'Inter', sans-serif;
   white-space: nowrap;
-  &:hover { border-color: #aaa; }
+  transition: border-color .15s, color .15s;
+  &:hover { border-color: $text; color: $text; }
 }
 
 .aw-footer__nav {
@@ -859,17 +885,18 @@ $radius: 10px;
   align-items: center;
   justify-content: center;
   gap: 10px;
-  padding: 14px 36px;
-  font-size: 15px;
+  padding: 11px 28px;
+  font-size: 14px;
   font-weight: 600;
   font-family: 'Inter', sans-serif;
   background: $orange;
   border: none;
-  border-radius: 12px;
+  border-radius: 8px;
   color: $white;
   cursor: pointer;
   white-space: nowrap;
-  &:hover { background: color.adjust($orange, $lightness: -6%); }
+  transition: opacity .15s;
+  &:hover { opacity: .88; }
 }
 
 .aw-footer__finish-wrap {
@@ -902,16 +929,17 @@ $radius: 10px;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  padding: 14px 28px;
-  font-size: 15px;
+  padding: 11px 28px;
+  font-size: 14px;
   white-space: nowrap;
   background: $orange;
   border: none;
-  border-radius: 12px;
+  border-radius: 8px;
   color: $white;
   font-weight: 600;
   cursor: pointer;
   font-family: 'Inter', sans-serif;
-  &:hover   { background: color.adjust($orange, $lightness: -6%); }
-  &:disabled { opacity: .6; cursor: not-allowed; }
+  transition: opacity .15s;
+  &:hover   { opacity: .88; }
+  &:disabled { opacity: .5; cursor: not-allowed; }
 }

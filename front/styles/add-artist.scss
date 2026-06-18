@@ -1,0 +1,581 @@
+// ─── Add Artist Wizard (extends .aw-* from add-wall.scss) ─────────────────────
+
+$aa-orange: #f15a24;
+$aa-border: #e5e7eb;
+$aa-border-strong: #d1d5db;
+$aa-text-hint: #9ca3af;
+
+// ─── Artist-specific layout overrides ───────────────────────────────────────
+
+.aw--artist {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  background: #f7f5f2;
+}
+
+.aw-artist-header {
+  padding: 20px 24px 0;
+  max-width: 1140px;
+  width: 100%;
+  margin: 0 auto;
+
+  @media (max-width: 768px) { padding: 16px 16px 0; }
+}
+
+.aw-back-link {
+  background: none;
+  border: none;
+  color: #888;
+  font-size: 13px;
+  cursor: pointer;
+  padding: 0;
+  font-family: inherit;
+  margin-bottom: 12px;
+  display: block;
+
+  &:hover { color: #333; }
+}
+
+.aw-artist-title {
+  font-size: 26px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0 0 20px;
+}
+
+.aw-artist-layout {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: 24px;
+  width: 100%;
+  max-width: 1140px;
+  margin: 0 auto;
+  padding: 0 24px 40px;
+  align-items: start;
+
+  @media (max-width: 900px) { grid-template-columns: 1fr; padding: 0 16px 40px; }
+}
+
+// ─── Horizontal step indicator ───────────────────────────────────────────────
+
+.aw-hstep {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 24px;
+}
+
+.aw-hstep__item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  position: relative;
+}
+
+.aw-hstep__line {
+  position: absolute;
+  left: calc(-50% + 18px);
+  right: calc(50% + 18px);
+  top: 15px;
+  height: 1.5px;
+  background: #ddd;
+  z-index: 0;
+}
+
+.aw-hstep__item--done .aw-hstep__line { background: $aa-orange; }
+
+.aw-hstep__circle {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 2px solid #ddd;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: #aaa;
+  z-index: 1;
+  position: relative;
+  transition: border-color .2s, background .2s, color .2s;
+}
+
+.aw-hstep__item--active .aw-hstep__circle,
+.aw-hstep__item--done .aw-hstep__circle {
+  border-color: $aa-orange;
+  background: $aa-orange;
+  color: #fff;
+}
+
+.aw-hstep__label {
+  font-size: 11px;
+  text-align: center;
+  color: #aaa;
+  line-height: 1.3;
+  padding: 0 4px;
+}
+
+.aw-hstep__item--active .aw-hstep__label { color: #1a1a1a; font-weight: 600; }
+.aw-hstep__item--done .aw-hstep__label { color: $aa-orange; }
+
+// ─── CSS vars needed by shared ms-* multiselect styles
+.aw {
+  --c-border: #e5e7eb;
+  --c-border-strong: #d1d5db;
+  --c-border-focus: #374151;
+  --c-text: #111827;
+  --c-text-sec: #6b7280;
+  --c-text-muted: #9ca3af;
+}
+
+// ─── Existing artist banner ─────────────────────────────────────────────────
+
+.aw-existing-artist-banner {
+  background: #fff8f0;
+  border: 1.5px solid $aa-orange;
+  border-radius: 8px;
+  padding: 10px 16px;
+  font-size: 13px;
+  color: #7a3a00;
+  margin-bottom: 16px;
+
+  a { color: $aa-orange; font-weight: 600; text-decoration: none; &:hover { text-decoration: underline; } }
+}
+
+// ─── Hint text ──────────────────────────────────────────────────────────────
+
+.aw-hint {
+  font-size: 11px;
+  color: $aa-text-hint;
+  margin-top: 4px;
+}
+
+// ─── "ЭТО Я" button ─────────────────────────────────────────────────────────
+
+.aw-me-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  margin-bottom: 20px;
+  background: #fff8f0;
+  border: 1.5px solid $aa-orange;
+  border-radius: 8px;
+  color: $aa-orange;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .15s, color .15s;
+
+  &:hover { background: $aa-orange; color: #fff; }
+}
+
+// ─── Step 1 top layout: photo left + fields right ───────────────────────────
+
+.aw-step1-top {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: 24px;
+  margin-bottom: 24px;
+  align-items: start;
+
+  @media (max-width: 600px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.aw-step1-photo {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.aw-step1-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+
+  .aw-field { margin-bottom: 12px; &:last-child { margin-bottom: 0; } }
+}
+
+// ─── Rectangle avatar upload (step 1) ───────────────────────────────────────
+
+.aa-avatar-rect {
+  width: 100%;
+  height: 220px;
+  border-radius: 10px;
+  border: 2px dashed $aa-border;
+  background: #faf9f7;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  overflow: hidden;
+  transition: border-color .15s, background .15s;
+
+  img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  &:hover { border-color: $aa-orange; background: #fff0ea; }
+  &--err { border-color: #e53935; }
+}
+
+.aa-avatar-rect__label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #555;
+}
+
+.aa-avatar-rect__hint {
+  font-size: 11px;
+  color: $aa-text-hint;
+  text-align: center;
+  padding: 0 8px;
+}
+
+// ─── Avatar upload (small circle, still used in step 4 if needed) ───────────
+
+.aa-avatar-upload {
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  border: 2px dashed $aa-border;
+  background: #faf9f7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  overflow: hidden;
+  transition: border-color .15s, background .15s;
+
+  img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+  &:hover { border-color: $aa-orange; background: #fff0ea; }
+
+  &--err { border-color: #e53935; }
+}
+
+// ─── Cover upload ───────────────────────────────────────────────────────────
+
+.aa-cover-upload {
+  width: 100%;
+  height: 160px;
+  border-radius: 10px;
+  border: 2px dashed $aa-border;
+  background: #faf9f7;
+  cursor: pointer;
+  overflow: hidden;
+  margin-top: 8px;
+  transition: border-color .15s, background .15s;
+
+  img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+  &:hover { border-color: $aa-orange; background: #fff0ea; }
+}
+
+.aa-cover-upload__placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: $aa-text-hint;
+  font-size: 13px;
+}
+
+// ─── Exhibitions repeatable cards ────────────────────────────────────────────
+
+.aa-exh-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.aa-exh-card {
+  border: 1.5px solid $aa-border;
+  border-radius: 10px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: #faf9f7;
+}
+
+.aa-exh-card__row1 {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.aa-exh-card__title { flex: 1; }
+
+.aa-exh-card__row2 {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+  align-items: center;
+  @media (max-width: 600px) { grid-template-columns: 1fr; }
+}
+
+.aa-exh-period {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.aa-exh-period__field {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.aa-exh-period__lbl {
+  font-size: 11px;
+  color: #999;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.aa-exh-period__date { width: 150px; }
+.aa-exh-period__dash { color: #aaa; font-size: 14px; padding-bottom: 10px; flex-shrink: 0; }
+
+.aa-exh-card__wall { width: 100%; }
+
+.aa-exh-row__remove {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: 1.5px solid $aa-border;
+  background: #fff;
+  color: #999;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  &:hover { border-color: #e53935; color: #e53935; }
+}
+
+.aa-add-btn {
+  background: none;
+  border: none;
+  color: $aa-orange;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 0;
+  font-family: inherit;
+  &:hover { text-decoration: underline; }
+}
+
+// ─── Step 1 sidebar sections ────────────────────────────────────────────────
+
+.aw-sb-section {
+  background: #fff;
+  border: 1px solid $aa-border;
+  border-radius: 10px;
+  padding: 16px;
+}
+
+.aw-sb-section__title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin-bottom: 4px;
+}
+
+.aw-sb-section__sub {
+  font-size: 12px;
+  color: $aa-text-hint;
+  margin-bottom: 12px;
+}
+
+// ─── Sidebar live preview ──────────────────────────────────────────────────
+
+.aw-sb-preview {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  padding-top: 4px;
+}
+
+.aw-sb-preview__avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: #f0ede8;
+  border: 2px solid #fff;
+  box-shadow: 0 0 0 1.5px $aa-border;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  margin-bottom: 8px;
+
+  img { width: 100%; height: 100%; object-fit: cover; display: block; }
+}
+
+.aw-sb-preview__name {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+.aw-sb-preview__loc {
+  font-size: 12px;
+  color: #888;
+}
+
+.aw-sb-preview__dir {
+  font-size: 12px;
+  color: #555;
+  margin-top: 6px;
+
+  &--hint { color: $aa-text-hint; }
+}
+
+.aw-sb-preview__bio-hint {
+  font-size: 12px;
+  color: $aa-text-hint;
+  font-style: italic;
+  margin-top: 4px;
+}
+
+.aw-sb-preview__stats {
+  display: flex;
+  gap: 16px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid $aa-border;
+  width: 100%;
+
+  > div {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1px;
+
+    strong { font-size: 16px; font-weight: 700; color: #1a1a1a; }
+    span { font-size: 11px; color: $aa-text-hint; }
+  }
+}
+
+// ─── Profile type cards in sidebar ─────────────────────────────────────────
+
+.aw-ptype-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.aw-ptype-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1.5px solid $aa-border;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: border-color .15s, background .15s;
+
+  input[type="radio"] {
+    margin-top: 2px;
+    accent-color: $aa-orange;
+    flex-shrink: 0;
+  }
+
+  &--active {
+    border-color: $aa-orange;
+    background: #fff8f0;
+  }
+
+  &:hover:not(.aw-ptype-card--active) { border-color: #c0b8b0; }
+}
+
+.aw-ptype-card__body { flex: 1; }
+
+.aw-ptype-card__name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin-bottom: 2px;
+}
+
+.aw-ptype-card__desc {
+  font-size: 11px;
+  color: #666;
+  line-height: 1.4;
+}
+
+.aw-ptype-note {
+  font-size: 11px;
+  color: $aa-text-hint;
+  margin-top: 10px;
+}
+
+// ─── Live preview card (step 4 sidebar) ────────────────────────────────────
+
+.aa-preview {
+  background: #fff;
+  border: 1px solid $aa-border;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.aa-preview__cover {
+  position: relative;
+  height: 70px;
+  background: #f0ede8;
+
+  img { width: 100%; height: 100%; object-fit: cover; display: block; }
+}
+
+.aa-preview__cover-empty { width: 100%; height: 100%; background: linear-gradient(135deg, #f5f3f0, #ece7e0); }
+
+.aa-preview__avatar {
+  position: absolute;
+  bottom: -22px;
+  left: 16px;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 3px solid #fff;
+  background: $aa-orange;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 16px;
+  overflow: hidden;
+
+  img { width: 100%; height: 100%; object-fit: cover; display: block; }
+}
+
+.aa-preview__body {
+  padding: 30px 16px 16px;
+}
+
+.aa-preview__name { font-size: 14px; font-weight: 700; color: #1a1a1a; margin-bottom: 4px; }
+.aa-preview__loc { font-size: 12px; color: #888; margin-bottom: 8px; }
+
+.aa-preview__tags { display: flex; flex-wrap: wrap; gap: 6px; }
+
+.aa-preview__tag {
+  font-size: 11px;
+  color: $aa-orange;
+  background: #fff0ea;
+  border-radius: 20px;
+  padding: 3px 9px;
+}

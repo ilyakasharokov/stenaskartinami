@@ -7,6 +7,7 @@ import AddressInput from '@/components/ui/AddressInput'
 import { getSession } from '@/lib/getSession'
 import { API_HOST } from '@/constants/constants'
 import imageUrlBuilder from '@/utils/img-url-builder'
+import { useToast } from '@/components/ui/Toast'
 
 const WALL_TYPE_ICONS = {
   cafe: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M17 8h1a4 4 0 0 1 0 8h-1"/><path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V8z"/><path d="M6 2v2M10 2v2M14 2v2"/></svg>,
@@ -153,6 +154,7 @@ function ZonePreview({ width, height }) {
 export default function EditWall({ wall }) {
   const router = useRouter()
   const { data: session } = useSession()
+  const showToast = useToast()
   const [step, setStep] = useState(1)
   const [form, setForm] = useState(() => ({
     title:                wall.Title || '',
@@ -295,7 +297,7 @@ export default function EditWall({ wall }) {
       if (!res.ok) throw new Error(`HTTP ${res.status}`)
       router.push('/account/profile?tab=walls')
     } catch (err) {
-      alert('Ошибка при сохранении: ' + err.message)
+      showToast('Ошибка при сохранении: ' + err.message, 'error')
     } finally {
       setSubmitting(false)
     }

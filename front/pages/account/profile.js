@@ -21,7 +21,7 @@ const ART_FILTERS = [
   { key: 'drafts',    label: 'Черновики' },
 ]
 const PAGE_SIZE = 8
-const VALID_TABS = ['overview', 'arts', 'walls', 'favorite', 'settings']
+const VALID_TABS = ['arts', 'walls', 'favorite', 'settings']
 
 const Icon = ({ d, size = 16 }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -35,80 +35,6 @@ function UserAvatar({ name, image, size = 120 }) {
   return <div className="prof-avatar__initials" style={{ width: size, height: size, fontSize: size * 0.33 }}>{initials}</div>
 }
 
-function StatusBadge({ art }) {
-  if (art.sold) return <span className="art-status-badge art-status-badge--sold">Продано</span>
-  const s = getArtStatus(art)
-  if (s === 'published') return <span className="art-status-badge art-status-badge--pub">Опубликовано</span>
-  return <span className="art-status-badge art-status-badge--mod">На модерации</span>
-}
-
-function OverviewArtCard({ art, imageOnLoad }) {
-  const getPic = (a) => {
-    if (!Array.isArray(a?.Pictures) || !a.Pictures[0]) return null
-    const p = a.Pictures[0]
-    return imageUrlBuilder(p.formats?.medium?.url || p.formats?.small?.url || p.formats?.thumbnail?.url || p.url || null)
-  }
-  const pic = getPic(art)
-  const href = `/art/${art.slug}--${art.id}`
-  return (
-    <div className="catalog-item">
-      <div className="catalog-item__wrapper">
-        {pic && (
-          <div className="catalog-item__img-wrap">
-            <div className="catalog-item__btns">
-              <StatusBadge art={art} />
-            </div>
-            <div className="overlay" />
-            <Link href={href} className="catalog-item__img-link" title={art.Title}>
-              <img className="catalog-item__img" src={pic} alt={art.Title} onLoad={imageOnLoad} />
-            </Link>
-          </div>
-        )}
-        <Link href={href}>
-          <div className="catalog-item__title">{art.Title}</div>
-        </Link>
-        {art.width && art.height && <div className="catalog-item__size">{art.width} x {art.height}</div>}
-        <div className="catalog-item__artist-price">
-          <div className="catalog-item__price">
-            {art.sold ? 'ПРОДАНО' : art.Price ? art.Price + ' ₽' : ''}
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-function ProfileCompletion({ info, session }) {
-  const steps = [
-    { label: 'Фото профиля',   done: !!(info?.profile_image || session?.user?.image) },
-    { label: 'Имя пользователя', done: !!(info?.username) },
-    { label: 'О себе',         done: !!(info?.bio) },
-    { label: 'Местоположение', done: !!(info?.location) },
-  ]
-  const pct = Math.round((steps.filter(s => s.done).length / steps.length) * 100)
-  const r = 22, circ = 2 * Math.PI * r
-  const dash = circ * (1 - pct / 100)
-  return (
-    <div className="prof-completion">
-      <div className="prof-completion__head">
-        <svg viewBox="0 0 52 52" className="prof-completion__ring" width="52" height="52">
-          <circle cx="26" cy="26" r={r} fill="none" stroke="#f0f0f0" strokeWidth="4" />
-          <circle cx="26" cy="26" r={r} fill="none" stroke="#dc3a0f" strokeWidth="4"
-            strokeDasharray={circ} strokeDashoffset={dash}
-            strokeLinecap="round" transform="rotate(-90 26 26)" />
-        </svg>
-        <div>
-          <div className="prof-completion__pct">{pct}%</div>
-          <div className="prof-completion__label">Профиль заполнен</div>
-        </div>
-      </div>
-      <div className="prof-completion__bar">
-        <div className="prof-completion__bar-fill" style={{ width: pct + '%' }} />
-      </div>
-      <div className="prof-completion__hint">Заполните профиль, чтобы привлечь больше покупателей</div>
-    </div>
-  )
-}
 
 export default function ProfilePage() {
   const { data: session, status, update } = useSession()
@@ -116,7 +42,7 @@ export default function ProfilePage() {
 
   const [activeTab, setActiveTab] = useState(() => {
     const t = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('tab') : null
-    return VALID_TABS.includes(t) ? t : 'overview'
+    return VALID_TABS.includes(t) ? t : 'arts'
   })
 
   const [artFilter, setArtFilter] = useState('all')
@@ -288,13 +214,11 @@ export default function ProfilePage() {
     const s = getArtStatus(a)
     if (artFilter === 'published') return s === 'published' && !a.sold
     if (artFilter === 'sold')      return !!a.sold
-    if (artFilter === 'drafts')    return s === 'moderation'
+    if (artFilter === 'drafts')    return s === 'draft'
     return true
   })
   const visibleArts = filteredArts.slice(0, visibleCount)
   const hasMore = filteredArts.length > visibleCount
-  const recentArts = [...arts].slice(0, 4)
-
   const stats = {
     total:     arts.length,
     sale:      arts.filter(a => getArtStatus(a) === 'published' && !a.sold).length,
@@ -392,7 +316,6 @@ export default function ProfilePage() {
   const avatarImage = avatarSrc || session.user?.image || null
 
   const TABS = [
-    { key: 'overview',  label: 'Обзор' },
     { key: 'arts',      label: 'Работы' },
     { key: 'walls',     label: 'Стены' },
     { key: 'favorite',  label: 'Избранное' },
@@ -518,57 +441,6 @@ export default function ProfilePage() {
             </button>
           ))}
         </div>
-
-        {/* ── ОБЗОР ── */}
-        {activeTab === 'overview' && (
-          <div className="prof-overview">
-            <div className="prof-overview__main">
-              <div className="prof-section">
-                <div className="prof-section__head">
-                  <div className="prof-section__title">Последние работы</div>
-                  {arts.length > 4 && (
-                    <button className="prof-section__more" onClick={() => setActiveTab('arts')}>
-                      Смотреть все работы →
-                    </button>
-                  )}
-                </div>
-                {artsLoading ? (
-                  <div className="my-arts-loading"><Preloader /></div>
-                ) : recentArts.length > 0 ? (
-                  <div className="catalog-grid">
-                    {recentArts.map(art => (
-                      <OverviewArtCard key={art.id} art={art} imageOnLoad={resizeThrottled} />
-                    ))}
-                  </div>
-                ) : (
-                  <div className="prof-empty">
-                    <div className="prof-empty__text">Работ пока нет</div>
-                    <Link href="/account/add-art" className="prof-empty__btn">+ Добавить работу</Link>
-                  </div>
-                )}
-                {!artsLoading && (
-                  <div className="prof-section__add">
-                    <Link href="/account/add-art" className="prof-add-btn">+ Добавить работу</Link>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <div className="prof-sidebar">
-              <div className="prof-sidebar-card">
-                <div className="prof-sidebar-card__head">
-                  <span>О себе</span>
-                  <button className="prof-sidebar-card__edit" onClick={() => setActiveTab('settings')}>Редактировать</button>
-                </div>
-                {info?.bio
-                  ? <p className="prof-sidebar-card__bio">{info.bio}</p>
-                  : <p className="prof-sidebar-card__bio prof-sidebar-card__bio--empty">Расскажите о себе и своём творчестве</p>
-                }
-              </div>
-              <ProfileCompletion info={info} session={session} />
-            </div>
-          </div>
-        )}
 
         {/* ── РАБОТЫ ── */}
         {activeTab === 'arts' && (

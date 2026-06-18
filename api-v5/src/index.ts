@@ -76,6 +76,13 @@ export default {
         'api::wall.wall.findMy',
         'api::wall.wall.create',
         'api::wall.wall.update',
+        'api::art.art.createDraft',
+        'api::artist.artist.find',
+        'api::artist.artist.findOne',
+        'api::artist.artist.create',
+        'api::artist.artist.follow',
+        'api::artist.artist.unfollow',
+        'plugin::upload.content-api.upload',
       ];
 
       const existing = await strapi.db

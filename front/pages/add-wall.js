@@ -6,6 +6,7 @@ import Link from 'next/link'
 import MainLayout from '@/components/layouts/MainLayout'
 import AddressInput from '@/components/ui/AddressInput'
 import { getSession } from '@/lib/getSession'
+import { useToast } from '@/components/ui/Toast'
 
 const WALL_TYPE_ICONS = {
   cafe: (
@@ -221,6 +222,7 @@ function ZonePreview({ width, height }) {
 export default function AddWall() {
   const router = useRouter()
   const { data: session } = useSession()
+  const showToast = useToast()
   const [step, setStep] = useState(1)
   const [form, setForm] = useState(initState)
   const [errors, setErrors] = useState({})
@@ -360,7 +362,7 @@ export default function AddWall() {
       localStorage.removeItem(STORAGE_KEY)
       router.push('/account/profile?tab=walls')
     } catch (err) {
-      alert('Ошибка при сохранении: ' + err.message)
+      showToast('Ошибка при сохранении: ' + err.message, 'error')
     } finally {
       setSubmitting(false)
     }

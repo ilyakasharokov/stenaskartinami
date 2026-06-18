@@ -56,6 +56,12 @@ export default {
     },
     {
       method: 'POST',
+      path: '/arts/save-draft',
+      handler: 'art.createDraft',
+      config: { policies: [] },
+    },
+    {
+      method: 'POST',
       path: '/artsd',
       handler: 'art.createD',
       config: { policies: [] },

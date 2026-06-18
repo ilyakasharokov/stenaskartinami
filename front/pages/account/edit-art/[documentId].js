@@ -2,6 +2,7 @@ import MainLayout from '@/components/layouts/MainLayout'
 import { API_HOST } from '@/constants/constants'
 import Head from 'next/head'
 import { useState, useRef, useCallback, useEffect } from 'react'
+import { useToast } from '@/components/ui/Toast'
 import Link from 'next/link'
 import ArtistInput from '@/components/input/artist-input'
 import YearInput from '@/components/input/year-input'
@@ -57,6 +58,7 @@ function ExistingImageThumb({ picture, onRemove }) {
 // ── Main page ──────────────────────────────────────────────────────────────
 
 export default function EditArt({ art, sessionJwt, documentId, isModerator }) {
+  const showToast = useToast()
 
   // Images
   const [existingPictures, setExistingPictures] = useState(art?.Pictures || [])
@@ -135,13 +137,13 @@ export default function EditArt({ art, sessionJwt, documentId, isModerator }) {
       })
       const data = await res.json()
       if (data._limitExceeded) { setInteriorRemaining(0); return }
-      if (data._error) { alert(data._error); return }
+      if (data._error) { showToast(data._error, 'error'); return }
       if (data.image) {
         setInteriorDataUrl(`data:image/jpeg;base64,${data.image}`)
         if (data.remaining !== undefined) setInteriorRemaining(data.remaining)
       }
     } catch {
-      alert('Ошибка генерации, попробуйте ещё раз')
+      showToast('Ошибка генерации, попробуйте ещё раз', 'error')
     } finally {
       setInteriorLoading(false)
     }

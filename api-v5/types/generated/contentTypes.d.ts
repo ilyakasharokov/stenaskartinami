@@ -449,6 +449,7 @@ export interface ApiArtArt extends Struct.CollectionTypeSchema {
       Schema.Attribute.Private;
     Description: Schema.Attribute.RichText;
     height: Schema.Attribute.Decimal;
+    interior_photo: Schema.Attribute.Media<'images'>;
     isSquare: Schema.Attribute.Boolean;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<'oneToMany', 'api::art.art'> &
@@ -501,11 +502,24 @@ export interface ApiArtistArtist extends Struct.CollectionTypeSchema {
   };
   attributes: {
     Arts: Schema.Attribute.Relation<'oneToMany', 'api::art.art'>;
+    avatar: Schema.Attribute.Media<'images'>;
+    birth_year: Schema.Attribute.Integer;
+    career_start_year: Schema.Attribute.Integer;
+    city_name: Schema.Attribute.String;
+    country: Schema.Attribute.String;
+    cover: Schema.Attribute.Media<'images'>;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
     description: Schema.Attribute.RichText;
+    directions: Schema.Attribute.JSON;
+    education: Schema.Attribute.String;
     email: Schema.Attribute.Email;
+    exhibitions: Schema.Attribute.JSON;
+    followers: Schema.Attribute.Relation<
+      'manyToMany',
+      'plugin::users-permissions.user'
+    >;
     full_name: Schema.Attribute.String & Schema.Attribute.Required;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<
@@ -513,13 +527,26 @@ export interface ApiArtistArtist extends Struct.CollectionTypeSchema {
       'api::artist.artist'
     > &
       Schema.Attribute.Private;
+    messenger_type: Schema.Attribute.String;
+    nickname: Schema.Attribute.String;
     Phone: Schema.Attribute.String;
     photos: Schema.Attribute.Media<'images' | 'files' | 'videos', true>;
+    profile_type: Schema.Attribute.Enumeration<['real_user', 'organization']> &
+      Schema.Attribute.DefaultTo<'real_user'>;
     publishedAt: Schema.Attribute.DateTime;
     slug: Schema.Attribute.String;
+    social_links: Schema.Attribute.JSON;
+    studio_location: Schema.Attribute.String;
+    subjects: Schema.Attribute.JSON;
+    techniques: Schema.Attribute.JSON;
+    timezone: Schema.Attribute.String;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
+    user_uploader: Schema.Attribute.Relation<
+      'manyToOne',
+      'plugin::users-permissions.user'
+    >;
   };
 }
 
@@ -747,27 +774,50 @@ export interface ApiWallWall extends Struct.CollectionTypeSchema {
     draftAndPublish: true;
   };
   attributes: {
+    additional_info: Schema.Attribute.Text;
+    additional_landmarks: Schema.Attribute.String;
     Address: Schema.Attribute.String;
+    amenities: Schema.Attribute.JSON;
     arts: Schema.Attribute.Relation<'oneToMany', 'api::art.art'>;
     city: Schema.Attribute.Relation<'manyToOne', 'api::city.city'>;
+    city_name: Schema.Attribute.String;
+    contact_person: Schema.Attribute.String;
     Coordinates: Schema.Attribute.JSON;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
     Description: Schema.Attribute.RichText;
+    email: Schema.Attribute.String;
     Images: Schema.Attribute.Media<'images' | 'files' | 'videos', true>;
+    lighting: Schema.Attribute.JSON;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<'oneToMany', 'api::wall.wall'> &
       Schema.Attribute.Private;
+    mounting_type: Schema.Attribute.JSON;
     Phone: Schema.Attribute.String;
+    placement_duration: Schema.Attribute.String;
+    placement_terms: Schema.Attribute.String;
     publishedAt: Schema.Attribute.DateTime;
+    renewability: Schema.Attribute.String;
+    safety: Schema.Attribute.JSON;
     Schedule: Schema.Attribute.RichText;
     slug: Schema.Attribute.String;
+    spots_comment: Schema.Attribute.String;
+    spots_count: Schema.Attribute.String;
+    styles_themes: Schema.Attribute.JSON;
     Title: Schema.Attribute.String;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
+    user_uploader: Schema.Attribute.Relation<
+      'manyToOne',
+      'plugin::users-permissions.user'
+    >;
+    wall_color: Schema.Attribute.JSON;
+    wall_type: Schema.Attribute.String;
     Website: Schema.Attribute.String;
+    zone_height: Schema.Attribute.Integer;
+    zone_width: Schema.Attribute.Integer;
   };
 }
 
@@ -1229,9 +1279,15 @@ export interface PluginUsersPermissionsUser
     timestamps: true;
   };
   attributes: {
+    artist_confirmed: Schema.Attribute.Boolean &
+      Schema.Attribute.DefaultTo<false>;
+    arts: Schema.Attribute.Relation<'manyToMany', 'api::art.art'>;
+    bio: Schema.Attribute.Text;
     blocked: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
     confirmationToken: Schema.Attribute.String & Schema.Attribute.Private;
     confirmed: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
+    cover_image: Schema.Attribute.Media<'images'>;
+    created_arts: Schema.Attribute.Relation<'oneToMany', 'api::art.art'>;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -1240,24 +1296,35 @@ export interface PluginUsersPermissionsUser
       Schema.Attribute.SetMinMaxLength<{
         minLength: 6;
       }>;
+    instagram: Schema.Attribute.String;
+    isModerator: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<
       'oneToMany',
       'plugin::users-permissions.user'
     > &
       Schema.Attribute.Private;
+    location: Schema.Attribute.String;
     password: Schema.Attribute.Password &
       Schema.Attribute.Private &
       Schema.Attribute.SetMinMaxLength<{
         minLength: 6;
       }>;
+    pending_artist: Schema.Attribute.Relation<
+      'manyToOne',
+      'api::artist.artist'
+    >;
+    phone: Schema.Attribute.String & Schema.Attribute.Unique;
+    profile_image: Schema.Attribute.Media<'images'>;
     provider: Schema.Attribute.String;
     publishedAt: Schema.Attribute.DateTime;
+    real_email: Schema.Attribute.String;
     resetPasswordToken: Schema.Attribute.String & Schema.Attribute.Private;
     role: Schema.Attribute.Relation<
       'manyToOne',
       'plugin::users-permissions.role'
     >;
+    telegram_handle: Schema.Attribute.String;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -1267,6 +1334,7 @@ export interface PluginUsersPermissionsUser
       Schema.Attribute.SetMinMaxLength<{
         minLength: 3;
       }>;
+    website: Schema.Attribute.String;
   };
 }
 

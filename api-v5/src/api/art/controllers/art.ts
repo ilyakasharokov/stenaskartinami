@@ -309,6 +309,30 @@ export default factories.createCoreController(uid, () => ({
     return response;
   },
 
+  async createDraft(ctx) {
+    const userId = ctx.state.user?.id;
+    if (!userId) {
+      ctx.status = 401;
+      ctx.body = { error: { status: 401, message: 'Unauthorized' } };
+      return;
+    }
+    const body = ctx.request.body || {};
+    const data = body.data || body;
+
+    const entity = await strapi.entityService.create(uid, {
+      data: { ...data, publishedAt: null } as any,
+    });
+
+    if (entity?.id) {
+      await strapi.entityService.update(uid, entity.id, {
+        data: { user_uploader: userId } as any,
+      });
+    }
+
+    const sanitized = await this.sanitizeOutput(entity, ctx);
+    return this.transformResponse(sanitized);
+  },
+
   async createD(ctx) {
     const body = ctx.request.body || {};
     const data = body.data || body;

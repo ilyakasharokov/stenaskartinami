@@ -1,3 +1,4 @@
+import { useRef, useCallback } from 'react'
 import imageUrlBuilder from '@/utils/img-url-builder'
 import Link from 'next/link'
 import AddFavorite from '../art/add-favorite'
@@ -16,11 +17,37 @@ const getPictureUrl = (art) => {
   return picture.url || null;
 };
 
+const markLoaded = (img) => {
+  img.classList.add('catalog-item__img--loaded');
+  img.closest('.catalog-item__img-wrap')?.classList.add('catalog-item__img-wrap--loaded');
+};
+
 export default function CatalogItem({art, imageOnLoad}){
     const pic = Array.isArray(art?.Pictures) ? art.Pictures[0] : null;
     const picUrl = getPictureUrl(art);
     const imgW = pic?.width;
     const imgH = pic?.height;
+    const imageOnLoadRef = useRef(imageOnLoad);
+    imageOnLoadRef.current = imageOnLoad;
+
+    const imgRefCallback = useCallback(node => {
+        if (!node) return;
+        if (node.complete) {
+            markLoaded(node);
+            if (node.naturalWidth > 0) imageOnLoadRef.current?.();
+            return;
+        }
+        const onDone = (ok) => {
+            markLoaded(node);
+            if (ok) imageOnLoadRef.current?.();
+            node.removeEventListener('load', onSuccess);
+            node.removeEventListener('error', onFailure);
+        };
+        const onSuccess = () => onDone(true);
+        const onFailure = () => onDone(false);
+        node.addEventListener('load', onSuccess);
+        node.addEventListener('error', onFailure);
+    }, []);
 
     return (
         <div className="catalog-item">
@@ -37,12 +64,12 @@ export default function CatalogItem({art, imageOnLoad}){
                         <div className="overlay"></div>
                         <Link href={ '/art/' + art.slug + '--' + art.id} className="catalog-item__img-link" title={art.Title}>
                             <img
+                              ref={imgRefCallback}
                               className="catalog-item__img"
                               src={imageUrlBuilder(picUrl)}
                               alt={art.Title}
                               width={imgW || undefined}
                               height={imgH || undefined}
-                              onLoad={()=> {imageOnLoad()}}
                             />
                         </Link>
                     </div>
@@ -50,16 +77,16 @@ export default function CatalogItem({art, imageOnLoad}){
                 <Link href={ '/art/' + art.slug + '--' + art.id}>
                     <div className="catalog-item__title">{art.Title}</div>
                 </Link>
-                { 
+                {
                     art.width && art.height &&
                     <div className="catalog-item__size">{art.width} x {art.height}</div>
                 }
                 <div className="catalog-item__artist-price">
-                    { 
-                    art.Artist && 
+                    {
+                    art.Artist &&
                     <div className="catalog-item__artist">
                         {
-                        art.Artist.full_name && 
+                        art.Artist.full_name &&
                         <Link href={ '/artists/' + art.Artist.slug + '--' + art.Artist.id} title={art.Artist.full_name}>{art.Artist.full_name}</Link>
                         }
                         {
@@ -67,13 +94,13 @@ export default function CatalogItem({art, imageOnLoad}){
                         <span>, </span>
                         }
                         {
-                        art.Year && 
+                        art.Year &&
                         <span>{ (new Date(art.Year)).getFullYear()}</span>
                         }
                     </div>
                     }
                     <div className="catalog-item__price">
-                    { art.sold ? 'ПРОДАНО' : art.Price ? art.Price  + ' P' : ''} 
+                    { art.sold ? 'ПРОДАНО' : art.Price ? art.Price  + ' P' : ''}
                     </div>
                 </div>
             </div>

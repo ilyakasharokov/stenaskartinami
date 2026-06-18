@@ -7,6 +7,7 @@ const menuItems = [
   { title: 'Каталог',          link: '/catalog' },
   { title: 'Добавить картину', link: '/account/add-art' },
   { title: 'Добавить стену',   link: '/add-wall' },
+  { title: 'Добавить художника', link: '/add-artist' },
 ]
 
 export default function Menu() {

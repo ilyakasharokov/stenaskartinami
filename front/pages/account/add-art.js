@@ -2,6 +2,7 @@ import MainLayout from "@/components/layouts/MainLayout"
 import { API_HOST } from "@/constants/constants"
 import Head from 'next/head'
 import { useState, useCallback, useMemo, useRef, useEffect, Fragment } from "react"
+import { useToast } from '@/components/ui/Toast'
 import ImageUploading from "react-images-uploading"
 import ReactCrop from "react-image-crop"
 import ArtistInput from "@/components/input/artist-input"
@@ -82,7 +83,7 @@ function usePriceSuggestion(width, height, materials) {
 // ── Icons ──────────────────────────────────────────────────
 
 const CloudUploadIcon = () => (
-  <svg className="upload-zone__icon-svg" width="52" height="42" viewBox="0 0 52 42" fill="none" aria-hidden="true">
+  <svg className="upload-zone__icon-svg" width="52" height="46" viewBox="-2 -2 56 46" fill="none" aria-hidden="true">
     <path d="M37 28h3.5a10.5 10.5 0 000-21 10.3 10.3 0 00-10-8c-5.2 0-9.6 3.8-10.3 8.8A8 8 0 006.5 16a8 8 0 008 8H17" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
     <path d="M35 19.5L26 10.5 17 19.5" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
     <line x1="26" y1="10.5" x2="26" y2="38" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"/>
@@ -636,17 +637,6 @@ function UploadStep({ onNext }) {
           <div className="upload-card__actions">
             <button
               type="button"
-              className="art-btn art-btn--secondary"
-              onClick={() => {
-                if (images.length) onNext(finalImages)
-              }}
-              disabled={images.length === 0}
-              title="Перейти к заполнению деталей"
-            >
-              <BookmarkIcon /> Сохранить черновик
-            </button>
-            <button
-              type="button"
               className="art-btn art-btn--primary"
               disabled={images.length === 0}
               onClick={() => onNext(finalImages)}
@@ -672,6 +662,7 @@ function loadArtDraft() {
 }
 
 function DetailsStep({ images, onImagesChange, sessionJwt, userId, initialArtist, isModerator, onBack, onSuccess }) {
+  const showToast = useToast()
   const savedDraft = typeof window !== 'undefined' ? loadArtDraft() : null
 
   const [fields, setFields] = useState(savedDraft?.fields || {
@@ -736,10 +727,59 @@ function DetailsStep({ images, onImagesChange, sessionJwt, userId, initialArtist
     } catch {}
   }, [fields, unit, artist, date])
 
-  const saveDraftManually = () => {
-    setDraftSaved(true)
-    setTimeout(() => setDraftSaved(false), 2000)
+  const saveDraftManually = async () => {
+    if (draftBusy || uploading) return
+    if (!images.length) return
+    setDraftBusy(true)
+    try {
+      let picIds = uploadedPictureIds
+      if (!picIds) {
+        const uploaded = await uploadImages()
+        picIds = uploaded.map(p => p.id).filter(Boolean)
+        setUploadedPictureIds(picIds)
+      }
+      const year = date.getFullYear()
+      const artData = {
+        Title: fields.title || 'Без названия',
+        Description: fields.description || '',
+        Materials: fields.materials || '',
+        Owners_price: parseInt(fields.price) || null,
+        width: fields.width || null,
+        height: fields.height || null,
+        Year: `${year}-01-01`,
+        Pictures: picIds,
+      }
+      if (artist?.id) artData.Artist = artist.id
+
+      if (draftDocumentId) {
+        await fetch(`${API_HOST}/arts/${draftDocumentId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${sessionJwt}` },
+          body: JSON.stringify({ data: artData }),
+        })
+      } else {
+        const res = await fetch(API_HOST + '/arts/save-draft', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${sessionJwt}` },
+          body: JSON.stringify({ data: artData }),
+        })
+        const json = await res.json()
+        const created = normalizeStrapiResponse(json)
+        if (created?.documentId) setDraftDocumentId(created.documentId)
+      }
+      try { localStorage.removeItem(ART_DRAFT_KEY) } catch {}
+      setDraftSaved(true)
+      setTimeout(() => setDraftSaved(false), 2000)
+    } catch {
+      // silently fail
+    } finally {
+      setDraftBusy(false)
+    }
   }
+
+  const [draftDocumentId, setDraftDocumentId] = useState(null)
+  const [uploadedPictureIds, setUploadedPictureIds] = useState(null)
+  const [draftBusy, setDraftBusy] = useState(false)
 
   const [uploading, setUploading] = useState(false)
   const [imageLoadingProcess, setImageLoadingProcess] = useState(null)
@@ -864,13 +904,13 @@ function DetailsStep({ images, onImagesChange, sessionJwt, userId, initialArtist
       })
       const data = await res.json()
       if (data._limitExceeded) { setInteriorRemaining(0); return }
-      if (data._error) { alert(data._error); return }
+      if (data._error) { showToast(data._error, 'error'); return }
       if (data.image) {
         setInteriorDataUrl(`data:image/jpeg;base64,${data.image}`)
         if (data.remaining !== undefined) setInteriorRemaining(data.remaining)
       }
     } catch {
-      alert('Ошибка генерации, попробуйте ещё раз')
+      showToast('Ошибка генерации, попробуйте ещё раз', 'error')
     } finally {
       setInteriorLoading(false)
     }
@@ -953,7 +993,13 @@ function DetailsStep({ images, onImagesChange, sessionJwt, userId, initialArtist
     const allSubjects = [...subjects.ids, ...customSubjectIds]
     const allMediums = [...mediums.ids, ...customMediumIds]
 
-    const imagesUploaded = await uploadImages()
+    let imagesUploaded
+    if (uploadedPictureIds?.length) {
+      imagesUploaded = uploadedPictureIds.map(id => ({ id }))
+    } else {
+      imagesUploaded = await uploadImages()
+      if (imagesUploaded[0]?.id) setUploadedPictureIds(imagesUploaded.map(p => p.id).filter(Boolean))
+    }
     if (!imagesUploaded[0]?.id) {
       setUploading(false)
       setErrors(er => ({ ...er, upload: 'Ошибка загрузки изображения, попробуйте ещё раз' }))
@@ -995,14 +1041,14 @@ function DetailsStep({ images, onImagesChange, sessionJwt, userId, initialArtist
     if (artistId) artData.Artist = artistId
     if (interiorPhotoId) artData.interior_photo = interiorPhotoId
 
-    const res = await fetch(
-      `${API_HOST}/arts?populate[0]=styles&populate[1]=subjects&populate[2]=mediums&populate[3]=Artist&populate[4]=Pictures`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${sessionJwt}` },
-        body: JSON.stringify({ data: artData }),
-      }
-    )
+    const submitUrl = draftDocumentId
+      ? `${API_HOST}/arts/${draftDocumentId}?populate[0]=styles&populate[1]=subjects&populate[2]=mediums&populate[3]=Artist&populate[4]=Pictures`
+      : `${API_HOST}/arts?populate[0]=styles&populate[1]=subjects&populate[2]=mediums&populate[3]=Artist&populate[4]=Pictures`
+    const res = await fetch(submitUrl, {
+      method: draftDocumentId ? 'PUT' : 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${sessionJwt}` },
+      body: JSON.stringify({ data: artData }),
+    })
     const resJson = await res.json()
     setUploading(false)
     if (!res.ok || resJson?.error) {
@@ -1278,8 +1324,9 @@ function DetailsStep({ images, onImagesChange, sessionJwt, userId, initialArtist
               type="button"
               className="art-btn art-btn--secondary"
               onClick={saveDraftManually}
+              disabled={draftBusy || uploading}
             >
-              {draftSaved ? '✓ Сохранено' : 'Сохранить черновик'}
+              {draftBusy ? 'Сохранение…' : draftSaved ? '✓ Сохранено' : 'Сохранить черновик'}
             </button>
           </div>
           <div className="art-action-bar__primary">

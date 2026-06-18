@@ -33,30 +33,33 @@ export default function CatalogCmp({arts, hideFiltersForce, title, description, 
   }, [state.arts]);
 
   useEffect(() => {
+    const query = router.query
     async function loadArts(){
       window.addEventListener('resize', resizeThrottled)
       window.addEventListener('load', resizeThrottled)
 
-      let selectedSortValue = (Router && Router.query || {})._sort;
+      const selectedSortValue = query._sort || ''
 
       try {
-        if(useURLParams && Router && Router.query && Object.entries(Router.query).length){
-          const query = Router.query;
+        if(useURLParams && Object.entries(query).length){
           const _start = query.page ? ( query.page - 1)  * CATALOG_ITEMS_PER_PAGE: 0;
-          const newQuery = Object.assign({
+          const newQuery = {
             _start,
             _limit: CATALOG_ITEMS_PER_PAGE,
             populate: ['Pictures', 'Artist', 'styles', 'subjects', 'mediums', 'wall'],
             'filters[wall][$notNull]': true,
-          }, query);
+            ...query,
+          }
           delete newQuery.page;
-          let json = await fetchStrapi(API_HOST + '/arts' + serialize(newQuery))
-          const arts = Array.isArray(json) ? json : []
-          const countResponse = await fetchStrapi(API_HOST + '/arts/count' + serialize(newQuery))
+          const [json, countResponse] = await Promise.all([
+            fetchStrapi(API_HOST + '/arts' + serialize(newQuery)),
+            fetchStrapi(API_HOST + '/arts/count' + serialize(newQuery)),
+          ])
+          const fetchedArts = Array.isArray(json) ? json : []
           const newCount = countResponse?.count ?? countResponse?.meta?.pagination?.total ?? 0
-          setState({arts, showPreloader:false, selectedSortValue, page: parseInt(Router.query && Router.query.page, 10) || 1, count: newCount})
+          setState({arts: fetchedArts, showPreloader:false, selectedSortValue, page: parseInt(query.page, 10) || 1, count: newCount})
         }else{
-          setState({arts, showPreloader:false, selectedSortValue, page: parseInt(Router.query && Router.query.page, 10) || 1, count: count})
+          setState({arts, showPreloader:false, selectedSortValue, page: parseInt(query.page, 10) || 1, count: count})
         }
       } catch {
         setState(prev => ({ ...prev, showPreloader: false }))
@@ -80,14 +83,14 @@ export default function CatalogCmp({arts, hideFiltersForce, title, description, 
   }
 
   function changeSort(event){
-    let queryObj = Router.query || {};
-    let selectedSortValue = event.target.value
-    if(event.target.value){
-        Object.assign(queryObj, {_sort: event.target.value})
+    const selectedSortValue = event.target.value
+    const queryObj = { ...router.query }
+    if (selectedSortValue) {
+      queryObj._sort = selectedSortValue
     } else {
       delete queryObj._sort
     }
-    delete queryObj.page;
+    delete queryObj.page
     setState({showPreloader: true, selectedSortValue, page: state.page, arts: [...state.arts], count: state.count})
     Router.push({
       pathname: Router.pathname,
@@ -96,11 +99,11 @@ export default function CatalogCmp({arts, hideFiltersForce, title, description, 
   }
 
   function setPage(num){
-    let queryObj = Router.query || {};
+    const queryObj = { ...router.query, page: num }
     setState({showPreloader: true, page: num, arts: [...state.arts], count: state.count})
     Router.push({
       pathname: Router.pathname,
-      query: Object.assign(queryObj, { page: num})
+      query: queryObj
     })
   }
 

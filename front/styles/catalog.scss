@@ -1,3 +1,8 @@
+@keyframes catalog-shimmer {
+    0%   { background-position: -800px 0; }
+    100% { background-position:  800px 0; }
+}
+
 .catalog-grid {
     display: grid;
     gap: 0px 80px;
@@ -148,6 +153,13 @@
             position: relative;
             margin-bottom: 5px;
             cursor: pointer;
+            background: linear-gradient(90deg, #f0f0f0 25%, #e8e8e8 37%, #f0f0f0 63%);
+            background-size: 800px 100%;
+            animation: catalog-shimmer 1.4s ease infinite;
+            &--loaded {
+                animation: none;
+                background: none;
+            }
             .overlay{
                 position: absolute;
                 z-index: 1;
@@ -181,6 +193,11 @@
             width: 100%;
             height: auto;
             display: block;
+            opacity: 0;
+            transition: opacity 0.3s;
+            &.catalog-item__img--loaded {
+                opacity: 1;
+            }
         }
         &__btns {
             position: absolute;

@@ -11,7 +11,7 @@ const STATUS_MAP = {
 export const getArtStatus = (art) => {
   if ((art.publishedAt || art.published_at) && art.wall) return 'published'
   if (art.publishedAt || art.published_at) return 'moderation'
-  return 'moderation'
+  return 'draft'
 }
 
 const getPictureUrl = (art) => {

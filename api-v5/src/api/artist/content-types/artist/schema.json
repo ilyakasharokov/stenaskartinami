@@ -38,6 +38,75 @@
       "multiple": true,
       "required": false,
       "allowedTypes": ["images", "files", "videos"]
+    },
+    "nickname": {
+      "type": "string"
+    },
+    "avatar": {
+      "type": "media",
+      "multiple": false,
+      "required": false,
+      "allowedTypes": ["images"]
+    },
+    "cover": {
+      "type": "media",
+      "multiple": false,
+      "required": false,
+      "allowedTypes": ["images"]
+    },
+    "country": {
+      "type": "string"
+    },
+    "city_name": {
+      "type": "string"
+    },
+    "birth_year": {
+      "type": "integer"
+    },
+    "career_start_year": {
+      "type": "integer"
+    },
+    "directions": {
+      "type": "json"
+    },
+    "techniques": {
+      "type": "json"
+    },
+    "subjects": {
+      "type": "json"
+    },
+    "education": {
+      "type": "string"
+    },
+    "exhibitions": {
+      "type": "json"
+    },
+    "social_links": {
+      "type": "json"
+    },
+    "messenger_type": {
+      "type": "string"
+    },
+    "studio_location": {
+      "type": "string"
+    },
+    "timezone": {
+      "type": "string"
+    },
+    "profile_type": {
+      "type": "enumeration",
+      "enum": ["real_user", "organization"],
+      "default": "real_user"
+    },
+    "user_uploader": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "plugin::users-permissions.user"
+    },
+    "followers": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "plugin::users-permissions.user"
     }
   }
 }

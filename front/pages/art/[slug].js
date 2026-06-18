@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import Head from 'next/head'
 import Link from 'next/link'
+import { useSession } from 'next-auth/react'
 import MainLayout from "@/components/layouts/MainLayout"
 import { API_HOST } from '@/constants/constants'
 import { fetchStrapi } from '@/utils/strapi'
@@ -148,10 +149,13 @@ const BookmarkIcon = () => (
 
 // ── Page ──────────────────────────────────────────────────────────────────────
 
-export default function Art({ art, style, styleArts, artist }) {
+export default function Art({ art, style, styleArts, artist: initialArtist }) {
+  const { data: session } = useSession()
   const [buyMode, setBuyMode] = useState(null)
   const [descExpanded, setDescExpanded] = useState(false)
   const [descClipped, setDescClipped] = useState(false)
+  const [artist, setArtist] = useState(initialArtist)
+  const [followBusy, setFollowBusy] = useState(false)
   const descRef = useRef(null)
 
   useEffect(() => {
@@ -159,6 +163,20 @@ export default function Art({ art, style, styleArts, artist }) {
       setDescClipped(descRef.current.scrollHeight > descRef.current.clientHeight)
     }
   }, [art])
+
+  useEffect(() => {
+    setArtist(initialArtist)
+  }, [initialArtist])
+
+  useEffect(() => {
+    if (!session?.jwt || !initialArtist?.documentId) return
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/artists/${initialArtist.documentId}`, {
+      headers: { Authorization: `Bearer ${session.jwt}` },
+    })
+      .then(r => r.json())
+      .then(json => { if (json?.data) setArtist(a => ({ ...a, ...json.data })) })
+      .catch(() => {})
+  }, [session?.jwt, initialArtist?.documentId])
 
   if (!art) return (
     <MainLayout>
@@ -173,6 +191,26 @@ export default function Art({ art, style, styleArts, artist }) {
   const artistInitial = art.Artist?.full_name?.[0]?.toUpperCase() || '?'
   // Use the fully-fetched artist if available, fall back to art.Artist (always populated)
   const aboutArtist = artist || art.Artist || null
+  const isFollowing = !!aboutArtist?.isFollowing
+  const isOwner = !!(session && aboutArtist?.user_uploader && String(session.id) === String(aboutArtist.user_uploader.id))
+
+  const toggleFollow = async () => {
+    if (!session?.jwt || !aboutArtist?.documentId) return
+    setFollowBusy(true)
+    try {
+      const action = isFollowing ? 'unfollow' : 'follow'
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/artists/${aboutArtist.documentId}/${action}`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${session.jwt}` },
+      })
+      const json = await res.json()
+      if (res.ok) {
+        setArtist(a => ({ ...a, isFollowing: json.isFollowing, followersCount: json.followersCount }))
+      }
+    } catch {} finally {
+      setFollowBusy(false)
+    }
+  }
 
   const styleNames   = (art.styles   || []).map(s => s.Title).filter(Boolean).join(', ')
   const subjectNames = (art.subjects || []).map(s => s.Title).filter(Boolean).join(', ')
@@ -234,9 +272,16 @@ export default function Art({ art, style, styleArts, artist }) {
                   <div className="art-about__bio" dangerouslySetInnerHTML={{ __html: aboutArtist.description }} />
                 )}
                 <div className="art-about__footer">
-                  <button className="art-btn-outline art-btn-outline--sm" type="button">
-                    <BookmarkIcon /> Подписаться
-                  </button>
+                  {!isOwner && session && (
+                    <button
+                      className="art-btn-outline art-btn-outline--sm"
+                      type="button"
+                      onClick={toggleFollow}
+                      disabled={followBusy}
+                    >
+                      <BookmarkIcon /> {isFollowing ? 'Отписаться' : 'Подписаться'}
+                    </button>
+                  )}
                   {artistUrl && (
                     <Link href={artistUrl} className="art-artist__all-link">Все работы художника →</Link>
                   )}
