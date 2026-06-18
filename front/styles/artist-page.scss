@@ -32,10 +32,10 @@ $ap-orange: #f15a24;
   }
 }
 
-// More columns for arts grid on artist page
+// Arts grid on artist page — same columns as catalog
 .ap .ap-catalog-grid {
-  gap: 0 20px;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 0 80px;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
 }
 
 .ap-hero {

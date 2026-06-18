@@ -344,7 +344,7 @@ export const getServerSideProps = async () => {
       ).catch(() => null)),
       cachedFetch('home:artists', TTL, () => fetchStrapi(
         API_HOST +
-          '/artists?filters[works_count][$gt]=0&pagination[pageSize]=8&populate[0]=photos&sort=publishedAt:desc'
+          '/artists?filters[works_count][$gt]=0&pagination[pageSize]=8&populate[photos]=true&sort=publishedAt:desc'
       ).catch(() => null)),
     ]);
 
