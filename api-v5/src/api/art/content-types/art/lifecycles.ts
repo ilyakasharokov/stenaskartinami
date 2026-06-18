@@ -40,9 +40,10 @@ async function syncArtistTags(artId: number) {
     const techs = [...new Set((allArts as any[]).flatMap(a => (a.mediums  || []).map((m: any) => m.title || m.Title).filter(Boolean)))].sort();
     const subjs = [...new Set((allArts as any[]).flatMap(a => (a.subjects || []).map((s: any) => s.Title || s.title).filter(Boolean)))].sort();
 
-    await strapi.entityService.update('api::artist.artist', artist.id, {
-      data: { directions: dirs, techniques: techs, subjects: subjs } as any,
-    });
+    // Update BOTH draft and published rows via raw Knex (document_id matches all versions)
+    await (strapi.db as any).connection('artists')
+      .where('document_id', artist.documentId)
+      .update({ directions: JSON.stringify(dirs), techniques: JSON.stringify(techs), subjects: JSON.stringify(subjs) });
   } catch (e) {
     strapi.log.warn('[art lifecycle] syncArtistTags failed:', e);
   }
