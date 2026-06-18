@@ -40,8 +40,19 @@ export default function Home({ walls, arts, interiorArts, artists }) {
   return (
     <MainLayout>
       <Head>
-        <title>Картины: купить искусство онлайн | Стена с картинами, облачная галерея</title>
-        <link rel="icon" href="/favicon.ico" />
+        <title>Картины: купить искусство онлайн | Стена с картинами</title>
+        <meta name="description" content="Купите картины современных художников. Масло, акварель, акрил — более 500 работ с доставкой по России. Безопасная сделка." />
+        <link rel="canonical" href="https://stenaskartinami.com/" />
+        <meta property="og:type"        content="website" />
+        <meta property="og:site_name"   content="Стена с картинами" />
+        <meta property="og:title"       content="Купить картины современных художников — Стена с картинами" />
+        <meta property="og:description" content="Более 500 картин с доставкой по России. Масло, акварель, акрил. Безопасная сделка." />
+        <meta property="og:url"         content="https://stenaskartinami.com/" />
+        <meta property="og:image"       content="https://stenaskartinami.com/images/slidebg.jpg" />
+        <meta name="twitter:card"        content="summary_large_image" />
+        <meta name="twitter:title"       content="Купить картины современных художников" />
+        <meta name="twitter:description" content="Более 500 картин с доставкой по России." />
+        <meta name="twitter:image"       content="https://stenaskartinami.com/images/slidebg.jpg" />
       </Head>
       <div className="index-page">
 

@@ -273,7 +273,7 @@ export default function EditArt({ art, sessionJwt, documentId, isModerator }) {
   if (saved) {
     return (
       <MainLayout>
-        <Head><title>Изменения сохранены | Стена с картинами</title></Head>
+        <Head><title>Изменения сохранены | Стена с картинами</title><meta name="robots" content="noindex" /></Head>
         <div className="add-art-page edit-art-page">
           <div className="edit-art-saved">
             <div className="edit-art-saved__icon">
@@ -299,7 +299,7 @@ export default function EditArt({ art, sessionJwt, documentId, isModerator }) {
 
   return (
     <MainLayout>
-      <Head><title>Редактировать — {art.Title} | Стена с картинами</title></Head>
+      <Head><title>Редактировать — {art.Title} | Стена с картинами</title><meta name="robots" content="noindex" /></Head>
 
       {saving && (
         <div className="overlay">

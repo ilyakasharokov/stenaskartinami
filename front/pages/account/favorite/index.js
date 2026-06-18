@@ -19,7 +19,8 @@ export default function Catalog() {
 
   return (<MainLayout>
     <Head>
-      <title>Избранное | Стена с картинами, облачная галерея</title>
+      <title>Избранное | Стена с картинами</title>
+      <meta name="robots" content="noindex" />
     </Head>
     <div className="account-page favorite-page">
       {

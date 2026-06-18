@@ -11,7 +11,17 @@ export default function Catalog({ arts, filters, count }) {
 
   return (<MainLayout>
     <Head>
-      <title>Купить искусство, каталог картин | Стена с картинами, облачная галерея</title>
+      <title>Каталог картин — купить живопись онлайн | Стена с картинами</title>
+      <meta name="description" content="Каталог картин современных художников: масло, акварель, акрил, графика. Фильтры по стилю, технике, жанру. Доставка по России." />
+      <link rel="canonical" href="https://stenaskartinami.com/catalog" />
+      <meta property="og:type"        content="website" />
+      <meta property="og:site_name"   content="Стена с картинами" />
+      <meta property="og:title"       content="Каталог картин — купить живопись онлайн" />
+      <meta property="og:description" content="Каталог картин современных художников: масло, акварель, акрил, графика. Доставка по России." />
+      <meta property="og:url"         content="https://stenaskartinami.com/catalog" />
+      <meta property="og:image"       content="https://stenaskartinami.com/images/addart.jpeg" />
+      <meta name="twitter:card"  content="summary_large_image" />
+      <meta name="twitter:image" content="https://stenaskartinami.com/images/addart.jpeg" />
     </Head>
     <CatalogCmp arts={ arts } title={'Каталог'} filters={ filters } count={count} useURLParams={true}></CatalogCmp>
   </MainLayout>

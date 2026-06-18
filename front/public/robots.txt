@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+Disallow: /account/
+Disallow: /api/
+Disallow: /auth/
+Disallow: /add-wall
+Disallow: /add-artist
+Disallow: /edit-wall/
+
+Sitemap: https://stenaskartinami.com/sitemap.xml

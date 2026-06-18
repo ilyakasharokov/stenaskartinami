@@ -1584,7 +1584,7 @@ export default function AddArt({ sessionJwt, userId, initialArtist, isModerator 
 
   return (
     <MainLayout>
-      <Head><title>Добавить картину | Стена с картинами</title></Head>
+      <Head><title>Добавить картину | Стена с картинами</title><meta name="robots" content="noindex" /></Head>
       <div className="form-page add-art-page">
         <h1>Добавить картину</h1>
         <StepIndicator currentStep={step} />

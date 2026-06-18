@@ -194,8 +194,17 @@ export default function ArtistsCatalog({ artists, filterOptions, totalCount }) {
   return (
     <MainLayout>
       <Head>
-        <title>Художники | Стена с картинами</title>
-        <meta name="description" content="Откройте для себя талантливых художников и их работы" />
+        <title>Художники — каталог современных живописцев | Стена с картинами</title>
+        <meta name="description" content="Каталог современных художников: живопись, графика, акварель. Профили, портфолио работ, биографии и выставки." />
+        <link rel="canonical" href="https://stenaskartinami.com/artists" />
+        <meta property="og:type"        content="website" />
+        <meta property="og:site_name"   content="Стена с картинами" />
+        <meta property="og:title"       content="Каталог современных художников — Стена с картинами" />
+        <meta property="og:description" content="Каталог современных художников: живопись, графика, акварель. Профили, портфолио, биографии." />
+        <meta property="og:url"         content="https://stenaskartinami.com/artists" />
+        <meta property="og:image"       content="https://stenaskartinami.com/images/slidebg.jpg" />
+        <meta name="twitter:card"  content="summary_large_image" />
+        <meta name="twitter:image" content="https://stenaskartinami.com/images/slidebg.jpg" />
       </Head>
 
       <div className="ac-page">

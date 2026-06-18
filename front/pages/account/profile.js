@@ -283,7 +283,7 @@ export default function ProfilePage() {
   if (status === 'loading') {
     return (
       <MainLayout>
-        <Head><title>Профиль | Стена с картинами</title></Head>
+        <Head><title>Профиль | Стена с картинами</title><meta name="robots" content="noindex" /></Head>
         <div className="my-arts-loading"><Preloader /></div>
       </MainLayout>
     )
@@ -291,7 +291,7 @@ export default function ProfilePage() {
   if (!session) {
     return (
       <MainLayout>
-        <Head><title>Профиль | Стена с картинами</title></Head>
+        <Head><title>Профиль | Стена с картинами</title><meta name="robots" content="noindex" /></Head>
         <div style={{ padding: '60px 0', textAlign: 'center', color: '#888' }}>Вы не авторизованы</div>
       </MainLayout>
     )
@@ -300,7 +300,7 @@ export default function ProfilePage() {
   if (session.error === 'SessionExpired') {
     return (
       <MainLayout>
-        <Head><title>Профиль | Стена с картинами</title></Head>
+        <Head><title>Профиль | Стена с картинами</title><meta name="robots" content="noindex" /></Head>
         <div style={{ padding: '60px 0', textAlign: 'center' }}>
           <p style={{ marginBottom: 16, color: '#888' }}>Сессия устарела. Пожалуйста, войдите снова.</p>
           <button className="btn" onClick={() => signOut({ callbackUrl: '/auth/signin' })}>Войти снова</button>
@@ -324,7 +324,7 @@ export default function ProfilePage() {
 
   return (
     <MainLayout>
-      <Head><title>Профиль | Стена с картинами</title></Head>
+      <Head><title>Профиль | Стена с картинами</title><meta name="robots" content="noindex" /></Head>
 
       <div className="prof-page">
 

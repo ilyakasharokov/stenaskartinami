@@ -120,11 +120,42 @@ export default function ArtistPage({ artist: initialArtist }) {
     }
   }
 
+  const artistSlug    = (artist.slug || artist.documentId || '') + '--' + artist.id
+  const canonicalUrl  = `https://stenaskartinami.com/artists/${artistSlug}`
+  const ogImage       = avatarImg || coverImg || 'https://stenaskartinami.com/images/slidebg.jpg'
+  const artistDescRaw = typeof artist.description === 'string' ? artist.description.replace(/<[^>]+>/g, '').trim() : ''
+  const dirNames      = Array.isArray(artist.directions) ? artist.directions.slice(0, 3).join(', ') : ''
+  const metaDesc      = (artistDescRaw ? artistDescRaw.slice(0, 110) + '. ' : '') +
+    [dirNames, location, artist.works_count ? `${artist.works_count} работ` : ''].filter(Boolean).join(', ')
+  const metaDescClean = metaDesc.slice(0, 160) || `Художник ${artist.full_name} — работы, биография и выставки на Стена с картинами.`
+
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Person',
+    name: artist.full_name,
+    url: canonicalUrl,
+    ...(ogImage ? { image: ogImage } : {}),
+    ...(artistDescRaw ? { description: artistDescRaw.slice(0, 500) } : {}),
+    ...(location ? { address: location } : {}),
+  }
+
   return (
     <MainLayout>
       <Head>
-        <title>{artist.full_name} | Стена с картинами</title>
-        <meta name="description" content={typeof artist.description === 'string' ? artist.description.slice(0, 160) : ''} />
+        <title>{artist.full_name} — художник, купить картины | Стена с картинами</title>
+        <meta name="description" content={metaDescClean} />
+        <link rel="canonical" href={canonicalUrl} />
+        <meta property="og:type"        content="profile" />
+        <meta property="og:site_name"   content="Стена с картинами" />
+        <meta property="og:title"       content={`${artist.full_name} — художник`} />
+        <meta property="og:description" content={metaDescClean} />
+        <meta property="og:url"         content={canonicalUrl} />
+        <meta property="og:image"       content={ogImage} />
+        <meta name="twitter:card"        content="summary_large_image" />
+        <meta name="twitter:title"       content={`${artist.full_name} — художник`} />
+        <meta name="twitter:description" content={metaDescClean} />
+        <meta name="twitter:image"       content={ogImage} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       </Head>
 
       <div className="wp ap">

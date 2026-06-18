@@ -605,7 +605,7 @@ export default function EditWall({ wall }) {
 
   return (
     <MainLayout>
-      <Head><title>Редактирование стены | Стена с картинами</title></Head>
+      <Head><title>Редактирование стены | Стена с картинами</title><meta name="robots" content="noindex" /></Head>
       <div className="aw">
         <div className="aw-layout">
           <aside className="aw-steps-sidebar">

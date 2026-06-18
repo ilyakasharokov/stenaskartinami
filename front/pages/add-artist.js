@@ -688,7 +688,7 @@ export default function AddArtist() {
 
   return (
     <MainLayout>
-      <Head><title>Добавление художника | Стена с картинами</title></Head>
+      <Head><title>Добавление художника | Стена с картинами</title><meta name="robots" content="noindex" /></Head>
       <div className="aw">
         <div className="aw-layout">
           <aside className="aw-steps-sidebar">

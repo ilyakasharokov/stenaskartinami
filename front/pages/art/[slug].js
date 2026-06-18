@@ -241,10 +241,55 @@ export default function Art({ art, style, styleArts, artist: initialArtist }) {
     { label: 'Ориентация', value: orientation },
   ].filter(s => s.value)
 
+  const canonicalSlug = (art.slug || '') + '--' + art.id
+  const canonicalUrl  = `https://stenaskartinami.com/art/${canonicalSlug}`
+  const ogImage = art.Pictures?.[0]?.formats?.medium?.url
+    ? imageUrlBuilder(art.Pictures[0].formats.medium.url)
+    : art.Pictures?.[0]?.url
+      ? imageUrlBuilder(art.Pictures[0].url)
+      : 'https://stenaskartinami.com/images/addart.jpeg'
+  const descParts = [
+    art.Artist?.full_name ? `Художник: ${art.Artist.full_name}` : null,
+    mediumNames || null,
+    art.width && art.height ? `${art.width} × ${art.height} см` : null,
+    styleNames || null,
+  ].filter(Boolean)
+  const rawDesc = typeof art.Description === 'string' ? art.Description.replace(/<[^>]+>/g, '').trim() : ''
+  const metaDesc = (rawDesc ? rawDesc.slice(0, 110) + '. ' : '') + descParts.join(', ')
+  const metaDescClean = metaDesc.slice(0, 160)
+
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'VisualArtwork',
+    name: art.Title,
+    image: ogImage,
+    url: canonicalUrl,
+    ...(art.Artist ? { creator: { '@type': 'Person', name: art.Artist.full_name, url: `https://stenaskartinami.com/artists/${art.Artist.slug}--${art.Artist.id}` } } : {}),
+    ...(mediumNames ? { artMedium: mediumNames } : {}),
+    ...(styleNames  ? { genre: styleNames } : {}),
+    ...(art.Materials ? { material: art.Materials } : {}),
+    ...(art.width  ? { width:  { '@type': 'Distance', name: `${art.width} см` } } : {}),
+    ...(art.height ? { height: { '@type': 'Distance', name: `${art.height} см` } } : {}),
+    ...(art.Price && !art.sold ? { offers: { '@type': 'Offer', price: art.Price, priceCurrency: 'RUB', availability: 'https://schema.org/InStock', url: canonicalUrl } } : {}),
+  }
+
   return (
     <MainLayout>
       <Head>
-        <title>{art.Title}{art.Artist ? `, ${art.Artist.full_name}` : ''} | Стена с картинами</title>
+        <title>{art.Title}{art.Artist ? `, ${art.Artist.full_name}` : ''} — купить картину | Стена с картинами</title>
+        <meta name="description" content={metaDescClean} />
+        <link rel="canonical" href={canonicalUrl} />
+        <meta property="og:type"        content="product" />
+        <meta property="og:site_name"   content="Стена с картинами" />
+        <meta property="og:title"       content={`${art.Title}${art.Artist ? ` — ${art.Artist.full_name}` : ''}`} />
+        <meta property="og:description" content={metaDescClean} />
+        <meta property="og:url"         content={canonicalUrl} />
+        <meta property="og:image"       content={ogImage} />
+        <meta name="twitter:card"        content="summary_large_image" />
+        <meta name="twitter:title"       content={`${art.Title}${art.Artist ? ` — ${art.Artist.full_name}` : ''}`} />
+        <meta name="twitter:description" content={metaDescClean} />
+        <meta name="twitter:image"       content={ogImage} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       </Head>
       <div className="art-page">
 

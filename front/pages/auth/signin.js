@@ -159,7 +159,7 @@ export default function SignIn({ authError }) {
 
   return (
     <>
-      <Head><title>Войти | Стена с картинами</title></Head>
+      <Head><title>Войти | Стена с картинами</title><meta name="robots" content="noindex" /></Head>
       <div className="login-page__wrapper">
         <div className="login-page">
           <div className="login-page__logo">
