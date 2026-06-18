@@ -320,8 +320,8 @@ export default function Art({ art, style, styleArts, artist: initialArtist }) {
                 <h2 className="art-about__heading">О художнике</h2>
                 <div className="art-about__header">
                   <div className="art-about__avatar">
-                    {aboutArtist.photos?.[0]?.url
-                      ? <img src={imageUrlBuilder(aboutArtist.photos[0].formats?.thumbnail?.url || aboutArtist.photos[0].url)} alt={aboutArtist.full_name} />
+                    {aboutArtist.avatar?.url
+                      ? <img src={imageUrlBuilder(aboutArtist.avatar.formats?.small?.url || aboutArtist.avatar.url)} alt={aboutArtist.full_name} />
                       : aboutArtist.full_name?.[0]?.toUpperCase()
                     }
                   </div>
@@ -382,8 +382,8 @@ export default function Art({ art, style, styleArts, artist: initialArtist }) {
             {art.Artist && (
               <div className="art-artist">
                 <div className="art-artist__avatar">
-                  {art.Artist.photos?.[0]?.url
-                    ? <img src={imageUrlBuilder(art.Artist.photos[0].formats?.thumbnail?.url || art.Artist.photos[0].url)} alt={art.Artist.full_name} />
+                  {(artist?.avatar || art.Artist?.avatar)?.url
+                    ? <img src={imageUrlBuilder((artist?.avatar || art.Artist?.avatar).formats?.small?.url || (artist?.avatar || art.Artist?.avatar).url)} alt={art.Artist.full_name} />
                     : artistInitial
                   }
                 </div>
@@ -530,7 +530,7 @@ export const getStaticProps = async ({ params: { slug } }) => {
     let artist = null
     const artistLookup = art?.Artist?.documentId || art?.Artist?.id
     if (artistLookup) {
-      artist = await fetchStrapi(API_HOST + '/artists/' + artistLookup + '?populate=deep,2')
+      artist = await fetchStrapi(API_HOST + '/artists/' + artistLookup + '?populate[avatar]=true&populate[photos]=true')
       if (artist && Array.isArray(artist.Arts)) {
         artist.Arts = artist.Arts
           .sort((a, b) => {
