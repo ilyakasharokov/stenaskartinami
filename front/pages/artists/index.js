@@ -3,10 +3,11 @@ import Head from 'next/head'
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/router'
 import Router from 'next/router'
-import { API_HOST } from '@/constants/constants'
+import { API_HOST, CATALOG_ITEMS_PER_PAGE } from '@/constants/constants'
 import { fetchStrapi } from '@/utils/strapi'
 import { cachedFetch } from '@/utils/server-cache'
 import ArtistCard from '@/components/artists/ArtistCard'
+import Pagination from '@/components/catalog/pagination'
 
 const FILTER_ITEMS_NUM = 6
 
@@ -148,6 +149,8 @@ export default function ArtistsCatalog({ artists, filterOptions, totalCount }) {
   const [loading, setLoading] = useState(false)
   const [displayArtists, setDisplayArtists] = useState(artists)
 
+  const currentPage = parseInt(router.query?.page, 10) || 1
+
   useEffect(() => {
     const { q, directions, techniques } = router.query
     let result = artists
@@ -175,6 +178,16 @@ export default function ArtistsCatalog({ artists, filterOptions, totalCount }) {
     setDisplayArtists(result)
     setLoading(false)
   }, [router.query, artists])
+
+  const pageStart = (currentPage - 1) * CATALOG_ITEMS_PER_PAGE
+  const pageArtists = displayArtists.slice(pageStart, pageStart + CATALOG_ITEMS_PER_PAGE)
+
+  function setPage(num) {
+    const q = { ...router.query, page: num }
+    if (num === 1) delete q.page
+    Router.push({ pathname: router.pathname, query: q })
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
 
   return (
     <MainLayout>
@@ -209,15 +222,20 @@ export default function ArtistsCatalog({ artists, filterOptions, totalCount }) {
 
           <div className="catalog-wrapper">
             {loading && <div className="ac-page__loading" />}
-            {displayArtists.length > 0 ? (
+            {pageArtists.length > 0 ? (
               <div className="ac-grid">
-                {displayArtists.map(a => (
+                {pageArtists.map(a => (
                   <ArtistCard key={a.id} artist={a} />
                 ))}
               </div>
             ) : (
               <div className="catalog__no-results">По данным критериям художников не найдено</div>
             )}
+            <Pagination
+              currentPage={currentPage}
+              count={displayArtists.length}
+              setPage={setPage}
+            />
           </div>
         </div>
       </div>

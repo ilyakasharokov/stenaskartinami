@@ -5,6 +5,7 @@ import { useRouter } from 'next/router'
 const menuItems = [
   { title: 'Главная',          link: '/' },
   { title: 'Каталог',          link: '/catalog' },
+  { title: 'Художники',        link: '/artists' },
   { title: 'Добавить картину', link: '/account/add-art' },
   { title: 'Добавить стену',   link: '/add-wall' },
   { title: 'Добавить художника', link: '/add-artist' },
