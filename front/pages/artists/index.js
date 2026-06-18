@@ -63,7 +63,7 @@ function ArtistFilters({ filterOptions, onChange, onHide }) {
     onChange()
   }
 
-  const hasFilters = searchText || activeDir.length || activeTech.length
+  const hasFilters = !!(searchText || activeDir.length || activeTech.length)
 
   const dirs  = filterOptions.directions || []
   const techs = filterOptions.techniques || []
