@@ -320,7 +320,10 @@ export default function Art({ art, style, styleArts, artist: initialArtist }) {
                 <h2 className="art-about__heading">О художнике</h2>
                 <div className="art-about__header">
                   <div className="art-about__avatar">
-                    {aboutArtist.full_name?.[0]?.toUpperCase()}
+                    {aboutArtist.photos?.[0]?.url
+                      ? <img src={imageUrlBuilder(aboutArtist.photos[0].formats?.thumbnail?.url || aboutArtist.photos[0].url)} alt={aboutArtist.full_name} />
+                      : aboutArtist.full_name?.[0]?.toUpperCase()
+                    }
                   </div>
                   <div>
                     <div className="art-about__name">{aboutArtist.full_name}</div>
@@ -378,7 +381,12 @@ export default function Art({ art, style, styleArts, artist: initialArtist }) {
             {/* Artist */}
             {art.Artist && (
               <div className="art-artist">
-                <div className="art-artist__avatar">{artistInitial}</div>
+                <div className="art-artist__avatar">
+                  {art.Artist.photos?.[0]?.url
+                    ? <img src={imageUrlBuilder(art.Artist.photos[0].formats?.thumbnail?.url || art.Artist.photos[0].url)} alt={art.Artist.full_name} />
+                    : artistInitial
+                  }
+                </div>
                 <div className="art-artist__body">
                   <div className="art-artist__name-row">
                     <Link href={artistUrl} className="art-artist__name">{art.Artist.full_name}</Link>
