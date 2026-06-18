@@ -15,6 +15,15 @@ import InteriorPhotoBlock from '@/components/input/interior-photo-block'
 
 const DESC_MAX = 2000
 
+const SI = {
+  info: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>,
+  ruler: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M21.3 15.3l-12.6-12.6a1 1 0 0 0-1.4 0L2.7 7.3a1 1 0 0 0 0 1.4l12.6 12.6a1 1 0 0 0 1.4 0l4.6-4.6a1 1 0 0 0 0-1.4z"/><line x1="7.5" y1="7.5" x2="10.5" y2="10.5"/><line x1="10.5" y1="4.5" x2="13.5" y2="7.5"/><line x1="4.5" y1="10.5" x2="7.5" y2="13.5"/></svg>,
+  edit: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>,
+  tag: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>,
+  layout: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>,
+  price: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>,
+}
+
 // ── Shared UI ──────────────────────────────────────────────────────────────
 
 function SectionCard({ title, icon, children }) {
@@ -350,7 +359,7 @@ export default function EditArt({ art, sessionJwt, documentId, isModerator }) {
           {/* ── Right: form ── */}
           <form className="details-form" onSubmit={e => { e.preventDefault(); handleSubmit() }}>
 
-            <SectionCard title="Информация о работе" icon="🎨">
+            <SectionCard title="Информация о работе" icon={SI.info}>
               <Field label="Название" required error={errors.title}>
                 <input type="text" placeholder="Название работы" value={fields.title} onChange={set('title')} />
               </Field>
@@ -362,7 +371,7 @@ export default function EditArt({ art, sessionJwt, documentId, isModerator }) {
               </div>
             </SectionCard>
 
-            <SectionCard title="Физические характеристики" icon="📐">
+            <SectionCard title="Физические характеристики" icon={SI.ruler}>
               <Field label="Материалы и техника" required error={errors.materials}>
                 <input type="text" placeholder="Холст, масло" value={fields.materials} onChange={set('materials')} />
               </Field>
@@ -393,7 +402,7 @@ export default function EditArt({ art, sessionJwt, documentId, isModerator }) {
               </div>
             </SectionCard>
 
-            <SectionCard title="Описание" icon="✏️">
+            <SectionCard title="Описание" icon={SI.edit}>
               <Field label="О работе" required error={errors.description}>
                 <div className="art-textarea-wrap">
                   <textarea
@@ -410,14 +419,14 @@ export default function EditArt({ art, sessionJwt, documentId, isModerator }) {
               </Field>
             </SectionCard>
 
-            <SectionCard title="Классификация" icon="🏷️">
+            <SectionCard title="Классификация" icon={SI.tag}>
               <MultiSelectInput endpoint="styles"   label="Стиль"   onChange={setStyles}   initialDocumentIds={initialStyleDocIds} />
               <MultiSelectInput endpoint="subjects" label="Теги"    onChange={setSubjects} initialDocumentIds={initialSubjectDocIds} />
               <MultiSelectInput endpoint="mediums"  label="Техника" onChange={setMediums}  initialDocumentIds={initialMediumDocIds} titleField="title" />
             </SectionCard>
 
             {isModerator && (
-              <SectionCard title="Фото в интерьере" icon="🛋️">
+              <SectionCard title="Фото в интерьере" icon={SI.layout}>
                 <InteriorPhotoBlock
                   dataUrl={interiorDataUrl || (art?.interior_photo ? imageUrlBuilder(art.interior_photo.formats?.medium?.url || art.interior_photo.url) : null)}
                   loading={interiorLoading}
@@ -428,7 +437,7 @@ export default function EditArt({ art, sessionJwt, documentId, isModerator }) {
               </SectionCard>
             )}
 
-            <SectionCard title="Цена" icon="💰">
+            <SectionCard title="Цена" icon={SI.price}>
               <Field label="Желаемая цена, ₽" required error={errors.price}>
                 <input type="number" placeholder="15000" value={fields.price} onChange={set('price')} min="0" />
               </Field>
