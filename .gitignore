@@ -33,3 +33,17 @@
 /docs/aws-secrets/api.json
 /docs/aws-secrets/front.json
 /docs/aws-secrets/*.local.json
+
+# IDE
+.idea/
+
+# Next.js build cache
+.next/
+
+# Strapi local env and Meilisearch data
+api-v5/.env.local
+api-v5/.env
+api-v5/data.ms/
+
+# Database dumps
+dump/
