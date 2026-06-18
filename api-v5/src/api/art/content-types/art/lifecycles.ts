@@ -21,6 +21,33 @@ const updateDimensions = (data: any) => {
   }
 };
 
+async function syncArtistTags(artId: number) {
+  try {
+    const art = await strapi.entityService.findOne('api::art.art', artId, {
+      populate: { Artist: true, styles: true, mediums: true, subjects: true } as any,
+    });
+    if (!art || !(art as any).Artist?.id) return;
+
+    const artist = (art as any).Artist;
+
+    // Fetch all published arts by this artist with their tags
+    const allArts = await strapi.entityService.findMany('api::art.art', {
+      filters: { Artist: { id: { $eq: artist.id } } } as any,
+      populate: { styles: true, mediums: true, subjects: true } as any,
+    } as any);
+
+    const dirs  = [...new Set((allArts as any[]).flatMap(a => (a.styles   || []).map((s: any) => s.Title || s.title).filter(Boolean)))].sort();
+    const techs = [...new Set((allArts as any[]).flatMap(a => (a.mediums  || []).map((m: any) => m.title || m.Title).filter(Boolean)))].sort();
+    const subjs = [...new Set((allArts as any[]).flatMap(a => (a.subjects || []).map((s: any) => s.Title || s.title).filter(Boolean)))].sort();
+
+    await strapi.entityService.update('api::artist.artist', artist.id, {
+      data: { directions: dirs, techniques: techs, subjects: subjs } as any,
+    });
+  } catch (e) {
+    strapi.log.warn('[art lifecycle] syncArtistTags failed:', e);
+  }
+}
+
 export default {
   async beforeCreate(event: any) {
     const { data } = event.params;
@@ -49,5 +76,13 @@ export default {
     }
 
     updateDimensions(data);
+  },
+
+  async afterCreate(event: any) {
+    if (event.result?.id) await syncArtistTags(event.result.id);
+  },
+
+  async afterUpdate(event: any) {
+    if (event.result?.id) await syncArtistTags(event.result.id);
   },
 };
