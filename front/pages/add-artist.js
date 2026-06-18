@@ -461,7 +461,7 @@ export default function AddArtist() {
           <div className="aw-field">
             <label className="aw-label">Имя художника <span className="aw-req">*</span></label>
             <input className={`aw-input${errors.full_name ? ' aw-input--err' : ''}`} value={form.full_name}
-              maxLength={100} onChange={e => set('full_name', e.target.value)} placeholder="Например: Илья Кашарооков" />
+              maxLength={100} onChange={e => set('full_name', e.target.value)} placeholder="Например: Василий Кандинский" />
             {errors.full_name && <div className="aw-err">{errors.full_name}</div>}
           </div>
           <div className="aw-field">
