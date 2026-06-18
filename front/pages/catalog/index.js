@@ -38,6 +38,7 @@ export const getServerSideProps = async () => {
       _limit: CATALOG_ITEMS_PER_PAGE,
       populate: ['Pictures', 'Artist', 'styles', 'subjects', 'mediums', 'wall'],
       'filters[wall][$notNull]': true,
+      'sort[0]': 'publishedAt:desc',
     };
 
     const [artsData, countData, styles, mediums, subjects, walls] = await Promise.all([
@@ -49,11 +50,7 @@ export const getServerSideProps = async () => {
       cachedFetch('catalog:walls', 600, () => fetchStrapi(API_HOST + '/walls/')),
     ]);
 
-    const arts = (Array.isArray(artsData) ? artsData : []).sort((a, b) => {
-      const aPublished = a.publishedAt || a.published_at;
-      const bPublished = b.publishedAt || b.published_at;
-      return aPublished < bPublished ? 1 : -1;
-    });
+    const arts = Array.isArray(artsData) ? artsData : [];
     const count = countData?.count ?? countData?.meta?.pagination?.total ?? 0;
 
     return {

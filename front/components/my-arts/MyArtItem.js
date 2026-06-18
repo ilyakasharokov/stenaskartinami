@@ -54,6 +54,7 @@ const DotsIcon = () => (
 
 export default function MyArtItem({ art, onDelete, imageOnLoad }) {
   const [menuOpen, setMenuOpen] = useState(false)
+  const [imgLoaded, setImgLoaded] = useState(false)
   const menuRef = useRef(null)
   const status = getArtStatus(art)
   const statusCfg = STATUS_MAP[status]
@@ -80,7 +81,7 @@ export default function MyArtItem({ art, onDelete, imageOnLoad }) {
   return (
     <div className="catalog-item my-art-item">
       <div className="catalog-item__wrapper">
-        <div className="catalog-item__img-wrap">
+        <div className={`catalog-item__img-wrap${imgLoaded ? ' catalog-item__img-wrap--loaded' : ''}`}>
           <div className={`my-art-badge ${statusCfg.cls}`}>{statusCfg.label}</div>
           <div className="my-art-menu" ref={menuRef}>
             <button className="my-art-menu__trigger" onClick={() => setMenuOpen(v => !v)}>
@@ -121,7 +122,8 @@ export default function MyArtItem({ art, onDelete, imageOnLoad }) {
               className="catalog-item__img"
               src={imageUrlBuilder(pictureUrl)}
               alt={art.Title}
-              onLoad={imageOnLoad}
+              onLoad={() => { setImgLoaded(true); imageOnLoad?.() }}
+              onError={() => setImgLoaded(true)}
             />
           ) : (
             <div className="my-art-item__no-img">Нет фото</div>
