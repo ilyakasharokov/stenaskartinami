@@ -8,6 +8,9 @@ import { fetchStrapi } from '@/utils/strapi'
 import serialize from '@/utils/serialize'
 import imageUrlBuilder from '@/utils/img-url-builder'
 import AddFavorite from '@/components/art/add-favorite'
+import CatalogItem from '@/components/catalog/catalog-item'
+import { resizeAllGridItems } from '@/utils/grid-resizer'
+import throttle from '@/utils/throttle'
 
 // ── Gallery ──────────────────────────────────────────────────────────────────
 
@@ -26,9 +29,11 @@ function ArtGallery({ images, art }) {
       )
     : null
 
+  const aspectRatio = cur?.width && cur?.height ? `${cur.width}/${cur.height}` : undefined
+
   return (
     <div className="art-gallery">
-      <div className="art-gallery__main">
+      <div className="art-gallery__main" style={aspectRatio ? { aspectRatio } : undefined}>
         {mainUrl && <img src={mainUrl} alt={art.Title} />}
         {imgs.length > 1 && (
           <>
@@ -149,6 +154,10 @@ const BookmarkIcon = () => (
 
 // ── Page ──────────────────────────────────────────────────────────────────────
 
+const resizeSimilar = typeof window !== 'undefined'
+  ? throttle(() => resizeAllGridItems('catalog-item', 'art-similar-grid', '.catalog-item__wrapper'), 100)
+  : () => {}
+
 export default function Art({ art, style, styleArts, artist: initialArtist }) {
   const { data: session } = useSession()
   const [buyMode, setBuyMode] = useState(null)
@@ -163,6 +172,13 @@ export default function Art({ art, style, styleArts, artist: initialArtist }) {
       setDescClipped(descRef.current.scrollHeight > descRef.current.clientHeight)
     }
   }, [art])
+
+  useEffect(() => {
+    if (!styleArts?.length) return
+    const frame = requestAnimationFrame(resizeSimilar)
+    window.addEventListener('resize', resizeSimilar)
+    return () => { cancelAnimationFrame(frame); window.removeEventListener('resize', resizeSimilar) }
+  }, [styleArts])
 
   useEffect(() => {
     setArtist(initialArtist)
@@ -418,36 +434,10 @@ export default function Art({ art, style, styleArts, artist: initialArtist }) {
                   </Link>
                 )}
               </div>
-              <div className="art-similar__grid">
-                {styleArts.map(item => {
-                  const pic = item.Pictures?.[0]
-                  const picUrl = pic
-                    ? imageUrlBuilder(pic.formats?.medium?.url || pic.formats?.small?.url || pic.url)
-                    : null
-                  const itemYear = item.Year ? new Date(item.Year).getFullYear() : null
-                  return (
-                    <Link href={`/art/${item.slug}--${item.id}`} key={item.id} className="art-similar__item">
-                      <div className="art-similar__img">
-                        {picUrl && <img src={picUrl} alt={item.Title} />}
-                      </div>
-                      <div className="art-similar__title">{item.Title}</div>
-                      {(item.width && item.height) && (
-                        <div className="art-similar__size">{item.width} × {item.height}</div>
-                      )}
-                      <div className="art-similar__meta">
-                        {item.Artist && (
-                          <span className="art-similar__artist">
-                            {item.Artist.full_name}
-                            {itemYear && `, ${itemYear}`}
-                          </span>
-                        )}
-                        <span className="art-similar__price">
-                          {item.sold ? 'ПРОДАНО' : item.Price ? formatPrice(item.Price) : ''}
-                        </span>
-                      </div>
-                    </Link>
-                  )
-                })}
+              <div className="catalog-grid art-similar-grid">
+                {styleArts.map(item => (
+                  <CatalogItem key={item.id} art={item} imageOnLoad={resizeSimilar} />
+                ))}
               </div>
             </div>
           )}

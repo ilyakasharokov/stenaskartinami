@@ -7,6 +7,9 @@ import { API_HOST } from '@/constants/constants'
 import { fetchStrapi } from '@/utils/strapi'
 import serialize from '@/utils/serialize'
 import imageUrlBuilder from '@/utils/img-url-builder'
+import CatalogItem from '@/components/catalog/catalog-item'
+import { resizeAllGridItems } from '@/utils/grid-resizer'
+import throttle from '@/utils/throttle'
 
 function fmtExhibitionDate(d) {
   if (!d) return ''
@@ -47,6 +50,14 @@ export default function ArtistPage({ artist: initialArtist }) {
   const [artist, setArtist] = useState(initialArtist)
   const [activeTab, setActiveTab] = useState('works')
   const [followBusy, setFollowBusy] = useState(false)
+
+  const resizeMasonry = throttle(() => resizeAllGridItems('catalog-item', 'ap-catalog-grid', '.catalog-item__wrapper'), 100)
+
+  useEffect(() => {
+    resizeMasonry()
+    window.addEventListener('resize', resizeMasonry)
+    return () => window.removeEventListener('resize', resizeMasonry)
+  }, [activeTab, artist])
 
   useEffect(() => {
     if (!session?.jwt || !initialArtist?.documentId) return
@@ -198,22 +209,10 @@ export default function ArtistPage({ artist: initialArtist }) {
         {activeTab === 'works' && (
           <div>
             {arts.length > 0 ? (
-              <div className="wp-arts-grid">
-                {arts.map(art => {
-                  const pics = Array.isArray(art.Pictures) ? art.Pictures : []
-                  const pic = pics[0] ? imageUrlBuilder(pics[0].formats?.small?.url || pics[0].url) : null
-                  const href = `/art/${art.slug || art.documentId}--${art.id}`
-                  return (
-                    <Link key={art.id} href={href} className="wp-art-card">
-                      <div className="wp-art-card__img-wrap">
-                        {pic ? <img src={pic} alt={art.Title} className="wp-art-card__img" /> : <div style={{ width: '100%', height: '100%', background: '#f0ede8' }} />}
-                        {art.sold && <span className="ap-sold-badge">Продано</span>}
-                      </div>
-                      <div className="wp-art-card__title">{art.Title}</div>
-                      {(art.width || art.height) && <div className="wp-art-card__meta">{art.width}×{art.height} см</div>}
-                    </Link>
-                  )
-                })}
+              <div className="catalog-grid ap-catalog-grid">
+                {arts.map(art => (
+                  <CatalogItem key={art.id} art={art} imageOnLoad={resizeMasonry} />
+                ))}
               </div>
             ) : (
               <div className="wp-empty">Работ пока нет</div>
