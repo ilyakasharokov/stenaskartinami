@@ -91,10 +91,10 @@ textarea{
         top: 0;
         right: 0;
     }
-    
+
     .ok {
-        width: 26px;
-        height: 26px;
+        width: 16px;
+        height: 16px;
         background: #17c139;
         border-radius: 50px;
         margin: 12px;
@@ -119,15 +119,15 @@ textarea{
         margin-bottom: 10px;
         cursor: pointer;
     }
-    
+
     &__hints {
         padding-top: 10px;
     }
-    
+
     &__suggestion:hover {
         color: #333;
     }
-    
+
     &__suggestion.active {
         color: #fff;
         background: #38d;

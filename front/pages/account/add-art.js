@@ -1319,13 +1319,8 @@ function DetailsStep({ images, onImagesChange, sessionJwt, userId, initialArtist
           </SectionCard>
 
           {errors.upload && <div className="art-error-banner">{errors.upload}</div>}
-        </form>
-      </div>
 
-      {/* Sticky action bar — fixed, outside the two-column grid */}
-      <div className="art-action-bar">
-        <div className="art-action-bar__inner">
-          <div className="art-action-bar__secondary">
+          <div className="art-form-actions">
             <button type="button" className="art-btn art-btn--ghost" onClick={onBack}>
               ← Назад
             </button>
@@ -1337,8 +1332,6 @@ function DetailsStep({ images, onImagesChange, sessionJwt, userId, initialArtist
             >
               {draftBusy ? 'Сохранение…' : draftSaved ? '✓ Сохранено' : 'Сохранить черновик'}
             </button>
-          </div>
-          <div className="art-action-bar__primary">
             <button
               type="button"
               className="art-btn art-btn--primary"
@@ -1347,7 +1340,7 @@ function DetailsStep({ images, onImagesChange, sessionJwt, userId, initialArtist
               Отправить на модерацию →
             </button>
           </div>
-        </div>
+        </form>
       </div>
     </>
   )

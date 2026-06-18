@@ -1397,51 +1397,27 @@ input.input--error {
 }
 
 // ═══════════════════════════════════════════════════════════
-// Sticky Action Bar
+// Inline form action buttons
 // ═══════════════════════════════════════════════════════════
 
-.art-action-bar {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  z-index: 100;
-  background: rgba(255, 255, 255, 0.93);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+.art-form-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 24px;
+  padding-top: 20px;
   border-top: 1px solid var(--c-border);
-  padding: 14px 24px;
 
-  &__inner {
-    max-width: 1280px;
-    margin: 0 auto;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
+  .art-btn--primary {
+    margin-left: auto;
   }
 
-  &__secondary {
-    display: flex;
-    gap: 8px;
-
-    @media (max-width: 600px) {
-      display: none;
-    }
-  }
-
-  &__primary {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-
-    @media (max-width: 420px) {
-      gap: 8px;
-
-      .art-btn {
-        font-size: 13px;
-        padding: 10px 14px;
-      }
+  @media (max-width: 600px) {
+    .art-btn--primary {
+      margin-left: 0;
+      width: 100%;
+      justify-content: center;
     }
   }
 }
@@ -1940,16 +1916,12 @@ input.input--error {
 
 @media (max-width: 700px) {
   .add-art-page {
-    padding: 0 16px 96px;
+    padding: 0 16px 40px;
 
     h1 {
       font-size: 22px;
       margin-bottom: 20px;
     }
-  }
-
-  .art-action-bar {
-    padding: 12px 16px;
   }
 }
 

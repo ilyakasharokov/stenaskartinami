@@ -26,7 +26,7 @@ export default function Menu() {
         className={`menu-btn${showMenu ? ' menu-btn--open' : ''}`}
         onClick={() => setShowMenu(v => !v)}
         aria-label="Меню"
-      />
+      ><span /></button>
       <nav className={`top-menu${showMenu ? ' active' : ''}`}>
         {menuItems.map((item) => (
           <div key={item.link} className="top-menu__item">
