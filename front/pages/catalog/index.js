@@ -38,7 +38,6 @@ export const getServerSideProps = async () => {
       _limit: CATALOG_ITEMS_PER_PAGE,
       populate: ['Pictures', 'Artist', 'styles', 'subjects', 'mediums', 'wall'],
       'filters[wall][$notNull]': true,
-      'sort[0]': 'publishedAt:desc',
     };
 
     const [artsData, countData, styles, mediums, subjects, walls] = await Promise.all([

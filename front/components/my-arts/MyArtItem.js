@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import imageUrlBuilder from '@/utils/img-url-builder'
 
@@ -56,6 +56,11 @@ export default function MyArtItem({ art, onDelete, imageOnLoad }) {
   const [menuOpen, setMenuOpen] = useState(false)
   const [imgLoaded, setImgLoaded] = useState(false)
   const menuRef = useRef(null)
+
+  const imgRef = useCallback(node => {
+    if (!node) return
+    if (node.complete) setImgLoaded(true)
+  }, [])
   const status = getArtStatus(art)
   const statusCfg = STATUS_MAP[status]
   const pictureUrl = getPictureUrl(art)
@@ -119,7 +124,8 @@ export default function MyArtItem({ art, onDelete, imageOnLoad }) {
           <div className="overlay" />
           {pictureUrl ? (
             <img
-              className="catalog-item__img"
+              ref={imgRef}
+              className={`catalog-item__img${imgLoaded ? ' catalog-item__img--loaded' : ''}`}
               src={imageUrlBuilder(pictureUrl)}
               alt={art.Title}
               onLoad={() => { setImgLoaded(true); imageOnLoad?.() }}
