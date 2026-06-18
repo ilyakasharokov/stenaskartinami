@@ -13,8 +13,8 @@ function getPages(current, total) {
   return pages;
 }
 
-export default function Pagination({ currentPage, count, setPage }) {
-  const total = count ? Math.ceil(count / CATALOG_ITEMS_PER_PAGE) : 0;
+export default function Pagination({ currentPage, count, setPage, pageSize = CATALOG_ITEMS_PER_PAGE }) {
+  const total = count ? Math.ceil(count / pageSize) : 0;
   if (total <= 1) return null;
 
   const pages = getPages(currentPage, total);

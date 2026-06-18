@@ -3,7 +3,9 @@ import Head from 'next/head'
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/router'
 import Router from 'next/router'
-import { API_HOST, CATALOG_ITEMS_PER_PAGE } from '@/constants/constants'
+import { API_HOST } from '@/constants/constants'
+
+const ARTISTS_PER_PAGE = 21
 import { fetchStrapi } from '@/utils/strapi'
 import { cachedFetch } from '@/utils/server-cache'
 import ArtistCard from '@/components/artists/ArtistCard'
@@ -179,8 +181,8 @@ export default function ArtistsCatalog({ artists, filterOptions, totalCount }) {
     setLoading(false)
   }, [router.query, artists])
 
-  const pageStart = (currentPage - 1) * CATALOG_ITEMS_PER_PAGE
-  const pageArtists = displayArtists.slice(pageStart, pageStart + CATALOG_ITEMS_PER_PAGE)
+  const pageStart = (currentPage - 1) * ARTISTS_PER_PAGE
+  const pageArtists = displayArtists.slice(pageStart, pageStart + ARTISTS_PER_PAGE)
 
   function setPage(num) {
     const q = { ...router.query, page: num }
@@ -235,6 +237,7 @@ export default function ArtistsCatalog({ artists, filterOptions, totalCount }) {
               currentPage={currentPage}
               count={displayArtists.length}
               setPage={setPage}
+              pageSize={ARTISTS_PER_PAGE}
             />
           </div>
         </div>
