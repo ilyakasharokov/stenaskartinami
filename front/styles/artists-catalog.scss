@@ -157,6 +157,24 @@
   svg { flex-shrink: 0; color: #9ca3af; }
 }
 
+.ac__stats {
+  display: flex;
+  gap: 14px;
+  margin-top: 4px;
+}
+
+.ac__stat {
+  font-size: 13px;
+  font-weight: 600;
+  color: #111;
+
+  em {
+    font-style: normal;
+    font-weight: 400;
+    color: #9ca3af;
+  }
+}
+
 .ac__tags {
   display: flex;
   flex-wrap: wrap;

@@ -7,10 +7,10 @@ export default function ArtistCard({ artist }) {
 
   const directions = Array.isArray(artist.directions) ? artist.directions : []
   const techniques = Array.isArray(artist.techniques) ? artist.techniques : []
-  const tags = [...directions.slice(0, 2), ...techniques.slice(0, 1)].slice(0, 3)
 
   const location = [artist.city_name, artist.country].filter(Boolean).join(', ')
   const href = `/artists/${artist.slug}--${artist.id}`
+  const worksCount = artist.works_count || 0
 
   return (
     <Link href={href} className="ac">
@@ -41,9 +41,14 @@ export default function ArtistCard({ artist }) {
               {location}
             </div>
           )}
-          {tags.length > 0 && (
+          {worksCount > 0 && (
+            <div className="ac__stats">
+              <span className="ac__stat">{worksCount} <em>работ</em></span>
+            </div>
+          )}
+          {techniques.length > 0 && (
             <div className="ac__tags">
-              {tags.map((t, i) => <span key={i} className="ac__tag">{t}</span>)}
+              {techniques.slice(0, 3).map((t, i) => <span key={i} className="ac__tag">{t}</span>)}
             </div>
           )}
         </div>

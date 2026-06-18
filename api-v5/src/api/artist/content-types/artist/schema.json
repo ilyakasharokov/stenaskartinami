@@ -66,6 +66,9 @@
     "career_start_year": {
       "type": "integer"
     },
+    "works_count": {
+      "type": "integer"
+    },
     "directions": {
       "type": "json"
     },
