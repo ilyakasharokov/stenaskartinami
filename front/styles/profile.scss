@@ -723,13 +723,59 @@ textarea.prof-input {
 }
 
 @media screen and (max-width: 700px) {
-  .prof-cover { height: 140px; }
-  .prof-avatar { width: 90px; height: 90px; margin-top: -45px; }
-  .prof-header { flex-direction: column; gap: 0; }
-  .prof-header__right { align-items: flex-start; width: 100%; }
-  .prof-stats-row { gap: 16px; }
+  .prof-cover { height: 140px; border-radius: 0; }
+
+  .prof-avatar {
+    width: 84px;
+    height: 84px;
+    margin-top: -42px;
+  }
+
+  .prof-header {
+    flex-direction: column;
+    gap: 12px;
+    padding: 0 0 20px;
+  }
+
+  .prof-header__left {
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+  }
+
+  .prof-identity {
+    padding-top: 0;
+    width: 100%;
+  }
+
+  .prof-identity__name { font-size: 20px; }
+
+  .prof-header__right {
+    align-items: flex-start;
+    width: 100%;
+    padding-top: 0;
+    gap: 12px;
+  }
+
+  .prof-stats-row {
+    gap: 20px;
+    width: 100%;
+  }
+
   .prof-stat__val { font-size: 18px; }
-  .prof-tabs__btn { padding: 10px 14px; font-size: 13px; }
+
+  .prof-stat--date { margin-left: auto; }
+
+  .prof-header__actions {
+    width: 100%;
+
+    .prof-btn {
+      flex: 1;
+      justify-content: center;
+    }
+  }
+
+  .prof-tabs__btn { padding: 10px 12px; font-size: 13px; }
 }
 
 .prof-btn--secondary {
