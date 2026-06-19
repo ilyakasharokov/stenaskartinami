@@ -106,14 +106,18 @@ Meilisearch (port 7700) is indexed by the `strapi-plugin-meilisearch` plugin. Th
 
 `front/pages/api/ai/generate-interior.js` — generates an interior visualization. Same rate limit pattern.
 
-## Production deployment
+## Environments
 
-Production runs via `docker-compose.prod.yml`. Deploy with:
-
+**Local** (`localhost:3000`) — Docker Compose on the developer's machine. Rebuild after code changes:
 ```bash
-./scripts/deploy.sh         # full rebuild
-./scripts/deploy-update.sh  # faster, no full rebuild
+docker compose up -d --build front
 ```
+
+**Production** (`stenaskartinami.com`) — remote server `root@82.146.48.155`, project at `/opt/stenaskartinami`. Deploy:
+```bash
+ssh root@82.146.48.155 "cd /opt/stenaskartinami && git pull origin develop && docker compose -f docker-compose.prod.yml up -d --build front"
+```
+Always push to git before deploying so the server can pull. When the user says "задеплой на прод" / "на прод" — this is the remote server. When they say "локально" / "пересобери локальный" — this is `docker compose up -d --build front` on the local machine.
 
 File uploads use `@strapi/provider-upload-aws-s3`. Required env vars in `api-v5/.env`: `AWS_REGION`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_S3_BUCKET`.
 
