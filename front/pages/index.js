@@ -184,11 +184,14 @@ export default function Home({ walls, arts, interiorArts, artists }) {
                 return (
                   <div className={`index-masonry__item catalog-item ${art.sold ? 'sold' : ''}`} key={art.id}>
                     <div className="catalog-item__wrapper">
-                      <div className="catalog-item__img-wrap">
+                      <div
+                        className="catalog-item__img-wrap"
+                        style={pic?.width && pic?.height ? { aspectRatio: `${pic.width}/${pic.height}` } : undefined}
+                      >
                         <div className="catalog-item__btns"><AddFavorite art={art} /></div>
                         <div className="overlay" />
-                        <Link href={'/art/' + art.slug + '--' + art.id}>
-                          {imgUrl && <img src={imageUrlBuilder(imgUrl)} alt={art.Title} style={{ width: '100%', height: 'auto', display: 'block' }} loading="lazy" />}
+                        <Link href={'/art/' + art.slug + '--' + art.id} className="catalog-item__img-link">
+                          {imgUrl && <img src={imageUrlBuilder(imgUrl)} alt={art.Title} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} loading="lazy" />}
                         </Link>
                       </div>
                       <Link href={'/art/' + art.slug + '--' + art.id}>
