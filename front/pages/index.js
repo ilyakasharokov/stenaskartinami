@@ -29,7 +29,7 @@ const getArtImageUrl = (art) => {
 export default function Home({ walls, arts, interiorArts, artists }) {
   const [currentSlide, setSlide] = useState(0);
   const heroArts = arts.slice(0, 4);
-  const featuredArts = arts.slice(0, 5);
+  const featuredArts = arts.slice(4, 14);
 
   const next = () => setSlide(s => (s + 1) % Math.max(heroArts.length, 1));
   const prev = () => setSlide(s => (s - 1 + Math.max(heroArts.length, 1)) % Math.max(heroArts.length, 1));
@@ -170,38 +170,44 @@ export default function Home({ walls, arts, interiorArts, artists }) {
           </div>
         </section>
 
-        {/* ── Featured Arts (masonry) ── */}
+        {/* ── Featured Arts (justified photo grid) ── */}
         {featuredArts.length > 0 && (
           <section className="index-section">
             <div className="index-section__header">
               <h2>Избранные работы</h2>
               <Link href="/catalog" className="index-section__more">Смотреть все работы →</Link>
             </div>
-            <div className="index-arts-grid">
-              {featuredArts.slice(0, 6).map(art => {
+            <div className="index-masonry">
+              {featuredArts.slice(0, 10).map(art => {
                 const pic = art.Pictures?.[0]
                 const imgUrl = pic?.formats?.medium?.url || pic?.formats?.small?.url || pic?.url
                 return (
-                  <div className="index-arts-grid__item" key={art.id}>
-                    <div className="index-arts-grid__fav">
-                      <AddFavorite art={art} />
-                    </div>
-                    <Link href={'/art/' + art.slug + '--' + art.id} className="index-arts-grid__img-link">
-                      {imgUrl && (
-                        <img src={imageUrlBuilder(imgUrl)} alt={art.Title} loading="lazy" />
-                      )}
-                    </Link>
-                    <div className="index-arts-grid__info">
-                      <Link href={'/art/' + art.slug + '--' + art.id} className="index-arts-grid__title">
-                        {art.Title}
+                  <div className={`index-masonry__item catalog-item ${art.sold ? 'sold' : ''}`} key={art.id}>
+                    <div className="catalog-item__wrapper">
+                      <div className="catalog-item__img-wrap">
+                        <div className="catalog-item__btns"><AddFavorite art={art} /></div>
+                        <div className="overlay" />
+                        <Link href={'/art/' + art.slug + '--' + art.id}>
+                          {imgUrl && <img src={imageUrlBuilder(imgUrl)} alt={art.Title} style={{ width: '100%', height: 'auto', display: 'block' }} loading="lazy" />}
+                        </Link>
+                      </div>
+                      <Link href={'/art/' + art.slug + '--' + art.id}>
+                        <div className="catalog-item__title">{art.Title}</div>
                       </Link>
-                      <div className="index-arts-grid__meta">
+                      <div className="catalog-item__size">
+                        {art.width && art.height && <div>{art.width} x {art.height}</div>}
+                      </div>
+                      <div className="catalog-item__artist-price">
                         {art.Artist && (
-                          <Link href={'/artists/' + art.Artist.slug + '--' + art.Artist.id} className="index-arts-grid__artist">
-                            {art.Artist.full_name}
-                          </Link>
+                          <div className="catalog-item__artist">
+                            <Link href={'/artists/' + art.Artist.slug + '--' + art.Artist.id}>{art.Artist.full_name}</Link>
+                            {art.Artist.full_name && art.Year && <span>, </span>}
+                            {art.Year && <span>{new Date(art.Year).getFullYear()}</span>}
+                          </div>
                         )}
-                        {art.Price > 0 && <span className="index-arts-grid__price">{art.Price.toLocaleString('ru-RU')} ₽</span>}
+                        <div className="catalog-item__price">
+                          {art.sold ? 'ПРОДАНО' : art.Price ? art.Price + ' P' : ''}
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -243,7 +249,7 @@ export default function Home({ walls, arts, interiorArts, artists }) {
               <Link href="/artists" className="index-section__more">Смотреть всех художников →</Link>
             </div>
             <div className="index-artists">
-              {artists.slice(0, 7).map(artist => (
+              {artists.slice(0, 10).map(artist => (
                 <Link
                   href={'/artists/' + artist.slug + '--' + artist.id}
                   key={artist.id}
@@ -335,8 +341,9 @@ export const getServerSideProps = async () => {
           '/arts' +
           serialize({
             _start: 0,
-            _limit: 8,
+            _limit: 14,
             main: true,
+            sort: ['publishedAt:desc'],
             populate: ['Pictures', 'Artist', 'styles', 'subjects', 'mediums', 'wall'],
           })
       )),
@@ -346,7 +353,7 @@ export const getServerSideProps = async () => {
       ).catch(() => null)),
       cachedFetch('home:artists', TTL, () => fetchStrapi(
         API_HOST +
-          '/artists?filters[works_count][$gt]=0&pagination[pageSize]=8&populate[avatar]=true&populate[photos]=true&sort=publishedAt:desc'
+          '/artists?filters[works_count][$gt]=0&pagination[pageSize]=10&populate[avatar]=true&populate[photos]=true&sort=publishedAt:desc'
       ).catch(() => null)),
     ]);
 
