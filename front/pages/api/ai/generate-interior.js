@@ -34,53 +34,32 @@ function buildPrompt({ title, styles, materials, description }) {
   return `Профессиональная интерьерная фотография. Светлая современная гостиная с белыми стенами, мягкой мебелью и живыми растениями. В центре на стене висит ${painting}. ${description ? 'На картине: ' + description.slice(0, 120) + '.' : ''} Тёплый естественный свет из окна. Реалистичная фотосъёмка интерьера, высокое качество, без текста и водяных знаков.`
 }
 
-async function callYandexArt(prompt) {
-  const YC_API_KEY = process.env.YC_API_KEY;
-  const YC_FOLDER_ID = process.env.YC_FOLDER_ID;
-  if (!YC_API_KEY || !YC_FOLDER_ID) throw new Error('YC_API_KEY / YC_FOLDER_ID not configured');
+async function callDallE(prompt) {
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (!apiKey) throw new Error('OPENAI_API_KEY not configured');
 
-  // Step 1: start async generation
-  const startRes = await fetch(
-    'https://llm.api.cloud.yandex.net/foundationModels/v1/imageGenerationAsync',
-    {
-      method: 'POST',
-      headers: {
-        'Authorization': `Api-Key ${YC_API_KEY}`,
-        'x-folder-id': YC_FOLDER_ID,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        modelUri: `art://${YC_FOLDER_ID}/yandex-art/latest`,
-        generationOptions: {
-          seed: String(Math.floor(Math.random() * 1e9)),
-          aspectRatio: { widthRatio: '16', heightRatio: '9' },
-        },
-        messages: [{ weight: '1', text: prompt }],
-      }),
-    }
-  );
-  if (!startRes.ok) {
-    const t = await startRes.text();
-    throw new Error(`YandexART start: ${startRes.status} ${t.slice(0, 200)}`);
+  const res = await fetch('https://api.openai.com/v1/images/generations', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: 'gpt-image-1',
+      prompt,
+      n: 1,
+      size: '1536x1024',
+      quality: 'medium',
+    }),
+  });
+  if (!res.ok) {
+    const t = await res.text();
+    throw new Error(`gpt-image-1: ${res.status} ${t.slice(0, 200)}`);
   }
-  const { id: operationId } = await startRes.json();
-
-  // Step 2: poll until done (max ~60 sec)
-  for (let attempt = 0; attempt < 30; attempt++) {
-    await new Promise(r => setTimeout(r, 2000));
-    const pollRes = await fetch(
-      `https://llm.api.cloud.yandex.net/operations/${operationId}`,
-      { headers: { 'Authorization': `Api-Key ${YC_API_KEY}` } }
-    );
-    if (!pollRes.ok) continue;
-    const op = await pollRes.json();
-    if (op.done) {
-      const b64 = op.response?.image;
-      if (!b64) throw new Error('YandexART returned no image');
-      return b64; // base64 string
-    }
-  }
-  throw new Error('YandexART timed out');
+  const json = await res.json();
+  const b64 = json.data?.[0]?.b64_json;
+  if (!b64) throw new Error('gpt-image-1 returned no image');
+  return b64;
 }
 
 export default async function handler(req, res) {
@@ -100,7 +79,7 @@ export default async function handler(req, res) {
 
   try {
     const prompt = buildPrompt({ title, styles, materials, description });
-    const imageBase64 = await callYandexArt(prompt);
+    const imageBase64 = await callDallE(prompt);
     const newRemaining = consumeOne(session.id);
     return res.status(200).json({ image: imageBase64, remaining: newRemaining });
   } catch (err) {
