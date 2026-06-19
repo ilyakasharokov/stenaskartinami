@@ -231,18 +231,19 @@
 }
 
 // ── Featured Arts (5 columns) ─────────────────────────────────────────────────
-// ── Masonry featured arts ─────────────────────────────────────────────────────
-.index-masonry {
-  columns: 4;
+// ── Featured arts grid (3×2, uniform rectangle) ──────────────────────────────
+.index-arts-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
   gap: 16px;
 
   &__item {
-    break-inside: avoid;
-    margin-bottom: 16px;
     position: relative;
     border-radius: 8px;
     overflow: hidden;
     background: #f5f5f5;
+    display: flex;
+    flex-direction: column;
   }
 
   &__fav {
@@ -258,17 +259,22 @@
 
   &__img-link {
     display: block;
+    aspect-ratio: 4/3;
+    overflow: hidden;
+    flex-shrink: 0;
     img {
       width: 100%;
-      height: auto;
+      height: 100%;
+      object-fit: cover;
       display: block;
       transition: transform 0.3s;
     }
-    &:hover img { transform: scale(1.03); }
+    &:hover img { transform: scale(1.04); }
   }
 
   &__info {
     padding: 10px 12px 12px;
+    flex: 1;
   }
 
   &__title {
@@ -279,6 +285,9 @@
     text-decoration: none;
     margin-bottom: 4px;
     line-height: 1.3;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
     &:hover { text-decoration: underline; }
   }
 
@@ -293,6 +302,9 @@
     font-size: 13px;
     color: #666;
     text-decoration: none;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
     &:hover { color: #111; text-decoration: underline; }
   }
 
@@ -504,7 +516,7 @@
 
   .hero-slider__track { height: 320px; }
 
-  .index-masonry { columns: 2; }
+  .index-arts-grid { grid-template-columns: repeat(2, 1fr); }
 
   .index-interiors__item {
     flex: 0 0 75%;
@@ -524,7 +536,7 @@
 }
 
 @media screen and (max-width: 500px) {
-  .index-masonry { columns: 1; }
+  .index-arts-grid { grid-template-columns: 1fr; }
 }
 
 @keyframes background-zoom {

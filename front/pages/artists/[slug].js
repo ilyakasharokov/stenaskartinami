@@ -10,6 +10,7 @@ import imageUrlBuilder from '@/utils/img-url-builder'
 import CatalogItem from '@/components/catalog/catalog-item'
 import { resizeAllGridItems } from '@/utils/grid-resizer'
 import throttle from '@/utils/throttle'
+import { pluralWorks, pluralWalls, pluralFollowers } from '@/utils/plural'
 
 function fmtExhibitionDate(d) {
   if (!d) return ''
@@ -126,7 +127,7 @@ export default function ArtistPage({ artist: initialArtist }) {
   const artistDescRaw = typeof artist.description === 'string' ? artist.description.replace(/<[^>]+>/g, '').trim() : ''
   const dirNames      = Array.isArray(artist.directions) ? artist.directions.slice(0, 3).join(', ') : ''
   const metaDesc      = (artistDescRaw ? artistDescRaw.slice(0, 110) + '. ' : '') +
-    [dirNames, location, artist.works_count ? `${artist.works_count} работ` : ''].filter(Boolean).join(', ')
+    [dirNames, location, artist.works_count ? `${artist.works_count} ${pluralWorks(artist.works_count)}` : ''].filter(Boolean).join(', ')
   const metaDescClean = metaDesc.slice(0, 160) || `Художник ${artist.full_name} — работы, биография и выставки на Стена с картинами.`
 
   const jsonLd = {
@@ -196,9 +197,9 @@ export default function ArtistPage({ artist: initialArtist }) {
 
             <div className="wp-hero__bottom">
               <div className="wp-hero__stats">
-                <div className="wp-hero__stat">{artist.worksCount || 0} {artist.worksCount === 1 ? 'работа' : 'работ'}</div>
-                <div className="wp-hero__stat">{artist.wallsCount || 0} {artist.wallsCount === 1 ? 'стена' : 'стен'}</div>
-                <div className="wp-hero__stat">{artist.followersCount || 0} подписчиков</div>
+                <div className="wp-hero__stat">{artist.worksCount || 0} {pluralWorks(artist.worksCount || 0)}</div>
+                <div className="wp-hero__stat">{artist.wallsCount || 0} {pluralWalls(artist.wallsCount || 0)}</div>
+                <div className="wp-hero__stat">{artist.followersCount || 0} {pluralFollowers(artist.followersCount || 0)}</div>
                 {artist.soldCount > 0 && <div className="wp-hero__stat">{artist.soldCount} продано</div>}
               </div>
               <div className="wp-hero__actions">

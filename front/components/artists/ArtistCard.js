@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import imageUrlBuilder from '@/utils/img-url-builder'
+import { pluralWorks } from '@/utils/plural'
 
 export default function ArtistCard({ artist }) {
   const coverUrl = artist.cover?.formats?.medium?.url || artist.cover?.formats?.small?.url || artist.cover?.url
@@ -43,7 +44,7 @@ export default function ArtistCard({ artist }) {
           )}
           {worksCount > 0 && (
             <div className="ac__stats">
-              <span className="ac__stat">{worksCount} <em>работ</em></span>
+              <span className="ac__stat">{worksCount} <em>{pluralWorks(worksCount)}</em></span>
             </div>
           )}
           {techniques.length > 0 && (
