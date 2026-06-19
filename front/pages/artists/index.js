@@ -154,7 +154,7 @@ export default function ArtistsCatalog({ artists, filterOptions, totalCount }) {
   const currentPage = parseInt(router.query?.page, 10) || 1
 
   useEffect(() => {
-    const { q, directions } = router.query
+    const { q, directions, techniques } = router.query
     let result = artists
 
     if (q) {
@@ -168,6 +168,12 @@ export default function ArtistsCatalog({ artists, filterOptions, totalCount }) {
       const dirs = [].concat(directions)
       result = result.filter(a =>
         Array.isArray(a.directions) && dirs.some(d => a.directions.includes(d))
+      )
+    }
+    if (techniques) {
+      const techs = [].concat(techniques)
+      result = result.filter(a =>
+        Array.isArray(a.techniques) && techs.some(t => a.techniques.includes(t))
       )
     }
 
@@ -249,27 +255,17 @@ export default function ArtistsCatalog({ artists, filterOptions, totalCount }) {
   )
 }
 
-export const getServerSideProps = async ({ query: q }) => {
+export const getServerSideProps = async () => {
   try {
-    const techniques = q.techniques ? [].concat(q.techniques) : []
+    const query = '?populate[0]=avatar&populate[1]=cover&filters[publishedAt][$notNull]=true&filters[works_count][$gt]=0&sort=full_name:asc&pagination[pageSize]=500'
 
-    let artistQuery = '?populate[0]=avatar&populate[1]=cover&filters[publishedAt][$notNull]=true&filters[works_count][$gt]=0&sort=full_name:asc&pagination[pageSize]=500'
-    techniques.forEach((t, i) => {
-      artistQuery += `&filters[Arts][mediums][title][$in][${i}]=${encodeURIComponent(t)}`
-    })
-
-    const cacheKey = techniques.length ? `artists:catalog:${techniques.join(',')}` : 'artists:catalog'
-
-    const [artists, mediums] = await Promise.all([
-      cachedFetch(cacheKey, 300, () => fetchStrapi(API_HOST + '/artists' + artistQuery)),
-      cachedFetch('artists:mediums', 3600, () =>
-        fetchStrapi(API_HOST + '/mediums?pagination[pageSize]=100&sort=name:asc')
-      ),
-    ])
+    const artists = await cachedFetch('artists:catalog', 300, () =>
+      fetchStrapi(API_HOST + '/artists' + query)
+    )
 
     const list = Array.isArray(artists) ? artists : []
     const allDirs  = [...new Set(list.flatMap(a => Array.isArray(a.directions) ? a.directions : []))].sort()
-    const allTechs = Array.isArray(mediums) ? mediums.map(m => m.title).filter(Boolean) : []
+    const allTechs = [...new Set(list.flatMap(a => Array.isArray(a.techniques) ? a.techniques : []))].filter(Boolean).sort()
 
     return {
       props: {
