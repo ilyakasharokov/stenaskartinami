@@ -264,7 +264,7 @@ export const getServerSideProps = async () => {
     )
 
     const list = Array.isArray(artists) ? artists : []
-    const allDirs  = [...new Set(list.flatMap(a => Array.isArray(a.directions) ? a.directions : []))].sort()
+    const allDirs  = [...new Set(list.flatMap(a => Array.isArray(a.directions) ? a.directions : []))].filter(Boolean).sort()
     const allTechs = [...new Set(list.flatMap(a => Array.isArray(a.techniques) ? a.techniques : []))].filter(Boolean).sort()
 
     return {

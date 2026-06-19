@@ -53,10 +53,10 @@ export const getServerSideProps = async () => {
     const [artsData, countData, styles, mediums, subjects, walls] = await Promise.all([
       cachedFetch('catalog:arts', 120, () => fetchStrapi(API_HOST + '/arts' + serialize(query))),
       cachedFetch('catalog:count', 120, () => fetchStrapi(API_HOST + '/arts/count' + serialize(query))),
-      cachedFetch('catalog:styles', 600, () => fetchStrapi(API_HOST + '/styles/')),
-      cachedFetch('catalog:mediums', 600, () => fetchStrapi(API_HOST + '/mediums/')),
-      cachedFetch('catalog:subjects', 600, () => fetchStrapi(API_HOST + '/subjects/')),
-      cachedFetch('catalog:walls', 600, () => fetchStrapi(API_HOST + '/walls/')),
+      cachedFetch('catalog:styles', 600, () => fetchStrapi(API_HOST + '/styles?filters[arts][id][$notNull]=true&pagination[pageSize]=1000&sort=Title:asc')),
+      cachedFetch('catalog:mediums', 600, () => fetchStrapi(API_HOST + '/mediums?filters[arts][id][$notNull]=true&pagination[pageSize]=1000&sort=title:asc')),
+      cachedFetch('catalog:subjects', 600, () => fetchStrapi(API_HOST + '/subjects?filters[arts][id][$notNull]=true&pagination[pageSize]=1000&sort=Title:asc')),
+      cachedFetch('catalog:walls', 600, () => fetchStrapi(API_HOST + '/walls?filters[arts][id][$notNull]=true&pagination[pageSize]=1000&sort=Title:asc')),
     ]);
 
     const arts = Array.isArray(artsData) ? artsData : [];
