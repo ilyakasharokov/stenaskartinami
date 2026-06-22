@@ -3,7 +3,7 @@ import { createHmac } from 'crypto'
 
 export const config = { api: { bodyParser: false, responseLimit: false } }
 
-const STRAPI_URL = process.env.STRAPI_SERVER_URL?.replace('/api', '') || 'http://api-v5:1337'
+const STRAPI_URL = process.env.STRAPI_SERVER_URL?.replace(/\/api$/, '') || 'http://api-v5:1337'
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY
 const JWT_SECRET = process.env.JWT_SECRET
 const DB_CONFIG = {
@@ -23,22 +23,38 @@ function buildStrapiJWT(userId) {
 }
 
 function buildPrompt(art) {
-  const parts = ['картина']
-  if (art.title) parts.push(`"${art.title}"`)
-  if (art.styles?.length) parts.push(`в стиле ${art.styles.filter(Boolean).join(', ')}`)
-  if (art.materials) parts.push(`выполненная в технике ${art.materials}`)
-  return `Профессиональная интерьерная фотография. Современная гостиная со светлыми стенами, стильной мебелью и растениями. В центре на стене висит ${parts.join(' ')}. Тёплый мягкий свет. Реалистичная фотосъёмка, высокое качество, без текста и водяных знаков.`
+  const dims = art.width && art.height ? ` The painting is ${art.width}×${art.height} cm.` : ''
+  return `Place this painting naturally on the wall of a real residential interior.${dims} Neutral walls, realistic lighting. The painting should be proportional and look genuinely hung. Realistic interior photography, high quality, no text or watermarks.`
 }
 
-async function generateImage(prompt) {
-  const res = await fetch('https://api.openai.com/v1/images/generations', {
+async function fetchImageAsPng(url) {
+  const res = await fetch(url)
+  if (!res.ok) throw new Error(`Failed to fetch image: ${res.status} ${url}`)
+  const buf = Buffer.from(await res.arrayBuffer())
+  const { default: sharp } = await import('sharp')
+  return await sharp(buf).png().toBuffer()
+}
+
+async function generateInteriorWithImage(artImageUrl, prompt) {
+  const imgBuf = await fetchImageAsPng(artImageUrl)
+  const imgBlob = new Blob([imgBuf], { type: 'image/png' })
+
+  const form = new FormData()
+  form.append('model', 'gpt-image-1')
+  form.append('prompt', prompt)
+  form.append('n', '1')
+  form.append('size', '1536x1024')
+  form.append('quality', 'medium')
+  form.append('image[]', imgBlob, 'painting.png')
+
+  const res = await fetch('https://api.openai.com/v1/images/edits', {
     method: 'POST',
-    headers: { Authorization: `Bearer ${OPENAI_API_KEY}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ model: 'gpt-image-1', prompt, n: 1, size: '1536x1024', quality: 'medium' }),
+    headers: { Authorization: `Bearer ${OPENAI_API_KEY}` },
+    body: form,
   })
   if (!res.ok) {
     const err = await res.json().catch(() => ({}))
-    throw new Error(err?.error?.message || `OpenAI ${res.status}`)
+    throw new Error(err?.error?.message || `OpenAI edits ${res.status}`)
   }
   const json = await res.json()
   const b64 = json.data?.[0]?.b64_json
@@ -47,18 +63,21 @@ async function generateImage(prompt) {
 }
 
 async function uploadAndLink(b64, artId, artTitle, strapiJWT, pg) {
-  const { default: FormData } = await import('form-data')
   const buf = Buffer.from(b64, 'base64')
+  const blob = new Blob([buf], { type: 'image/png' })
   const form = new FormData()
-  form.append('files', buf, { filename: `interior_${artId}_${Date.now()}.png`, contentType: 'image/png' })
+  form.append('files', blob, `interior_${artId}_${Date.now()}.png`)
   form.append('fileInfo', JSON.stringify({ alternativeText: `Интерьер: ${artTitle}` }))
 
   const upRes = await fetch(`${STRAPI_URL}/api/upload`, {
     method: 'POST',
-    headers: { Authorization: `Bearer ${strapiJWT}`, ...form.getHeaders() },
+    headers: { Authorization: `Bearer ${strapiJWT}` },
     body: form,
   })
-  if (!upRes.ok) throw new Error(`Upload failed: ${upRes.status}`)
+  if (!upRes.ok) {
+    const t = await upRes.text().catch(() => '')
+    throw new Error(`Upload failed: ${upRes.status} ${t.slice(0, 100)}`)
+  }
   const [file] = await upRes.json()
 
   await pg.query(
@@ -92,38 +111,44 @@ export default async function handler(req, res) {
   res.setHeader('Connection', 'keep-alive')
   res.flushHeaders()
 
-  const { default: pg } = await import('pg')
-  const client = new pg.Client(DB_CONFIG)
+  const { Client } = await import('pg')
+  const client = new Client(DB_CONFIG)
   await client.connect()
 
   try {
+    // Query also fetches the primary picture URL for each art
+    const artSelect = `
+      SELECT a.id, a.title, a.materials, a.width, a.height,
+        array_agg(DISTINCT s.title) FILTER (WHERE s.title IS NOT NULL AND s.published_at IS NOT NULL) as styles,
+        (
+          SELECT f.url FROM files_related_mph frm2
+          JOIN files f ON f.id = frm2.file_id
+          WHERE frm2.related_id = a.id AND frm2.related_type = 'api::art.art' AND frm2.field = 'Pictures'
+          ORDER BY frm2.order ASC LIMIT 1
+        ) as picture_url
+      FROM arts a
+      LEFT JOIN arts_styles_lnk asl ON asl.art_id = a.id
+      LEFT JOIN styles s ON s.id = asl.style_id
+    `
+
     let artsQuery
     if (artId) {
-      artsQuery = await client.query(`
-        SELECT a.id, a.title, a.materials,
-          array_agg(DISTINCT s.title) FILTER (WHERE s.title IS NOT NULL AND s.published_at IS NOT NULL) as styles
-        FROM arts a
-        LEFT JOIN arts_styles_lnk asl ON asl.art_id = a.id
-        LEFT JOIN styles s ON s.id = asl.style_id
-        WHERE a.id = $1 AND a.published_at IS NOT NULL
-        GROUP BY a.id, a.title, a.materials
-      `, [artId])
+      artsQuery = await client.query(
+        artSelect + ` WHERE a.id = $1 AND a.published_at IS NOT NULL GROUP BY a.id, a.title, a.materials, a.width, a.height`,
+        [artId]
+      )
     } else {
-      artsQuery = await client.query(`
-        SELECT a.id, a.title, a.materials,
-          array_agg(DISTINCT s.title) FILTER (WHERE s.title IS NOT NULL AND s.published_at IS NOT NULL) as styles
-        FROM arts a
-        LEFT JOIN arts_styles_lnk asl ON asl.art_id = a.id
-        LEFT JOIN styles s ON s.id = asl.style_id
+      artsQuery = await client.query(
+        artSelect + `
         WHERE a.published_at IS NOT NULL AND a.title IS NOT NULL AND a.title != ''
           AND EXISTS (SELECT 1 FROM arts_wall_lnk awl WHERE awl.art_id = a.id)
           AND NOT EXISTS (
             SELECT 1 FROM files_related_mph frm
             WHERE frm.related_id = a.id AND frm.related_type = 'api::art.art' AND frm.field = 'interior_photo'
           )
-        GROUP BY a.id, a.title, a.materials
-        ORDER BY a.id ASC
-      `)
+        GROUP BY a.id, a.title, a.materials, a.width, a.height
+        ORDER BY a.id ASC`
+      )
     }
 
     const arts = limit < Infinity ? artsQuery.rows.slice(0, limit) : artsQuery.rows
@@ -142,13 +167,22 @@ export default async function handler(req, res) {
       send(res, { type: 'progress', index: i + 1, total: arts.length, artId: art.id, title: art.title })
 
       try {
+        if (!art.picture_url) throw new Error('Нет фотографий картины')
+
+        const artImageUrl = `${STRAPI_URL}${art.picture_url}`
         const prompt = buildPrompt(art)
-        const b64 = await generateImage(prompt)
+        console.log(`[batch-interiors] generating art #${art.id} "${art.title}" from ${artImageUrl}`)
+
+        const b64 = await generateInteriorWithImage(artImageUrl, prompt)
+        console.log(`[batch-interiors] generated, uploading...`)
+
         const file = await uploadAndLink(b64, art.id, art.title, strapiJWT, client)
+        console.log(`[batch-interiors] uploaded file`, file?.id, file?.url)
         send(res, { type: 'ok', artId: art.id, title: art.title, fileUrl: file.url, index: i + 1 })
         ok++
       } catch (e) {
-        send(res, { type: 'error', artId: art.id, title: art.title, message: e.message, index: i + 1 })
+        const msg = e.cause ? `${e.message}: ${e.cause.message || e.cause}` : e.message
+        send(res, { type: 'error', artId: art.id, title: art.title, message: msg, index: i + 1 })
         failed++
         if (e.message.includes('billing') || e.message.includes('rate_limit')) {
           send(res, { type: 'abort', reason: e.message })

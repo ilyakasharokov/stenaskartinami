@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/router'
+const API_BASE = process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || ''
 import MainLayout from '@/components/layouts/MainLayout'
 import Head from 'next/head'
 
@@ -91,7 +92,7 @@ export default function GenerateInteriors() {
         return <div key={i} style={{ color: '#aaa' }}>⏳ [{e.index}/{e.total}] #{e.artId} {e.title}</div>
       case 'ok':
         return <div key={i} style={{ color: '#2a9d5c' }}>✓ [{e.index}] #{e.artId} &ldquo;{e.title}&rdquo;
-          {e.fileUrl && <a href={e.fileUrl} target="_blank" rel="noreferrer" style={{ marginLeft: 8, fontSize: 12 }}>посмотреть</a>}
+          {e.fileUrl && <a href={e.fileUrl.startsWith('http') ? e.fileUrl : API_BASE + e.fileUrl} target="_blank" rel="noreferrer" style={{ marginLeft: 8, fontSize: 12 }}>посмотреть</a>}
         </div>
       case 'error':
         return <div key={i} style={{ color: '#e05a2b' }}>✗ [{e.index}] #{e.artId} &ldquo;{e.title}&rdquo;: {e.message}</div>

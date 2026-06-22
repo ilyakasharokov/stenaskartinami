@@ -17,6 +17,7 @@ import throttle from '@/utils/throttle'
 function ArtGallery({ images, art }) {
   const imgs = Array.isArray(images) ? images : []
   const [idx, setIdx] = useState(0)
+  useEffect(() => { setIdx(0) }, [art?.id])
   const cur = imgs[idx] || null
 
   const prev = () => setIdx(i => (i - 1 + imgs.length) % imgs.length)
@@ -158,7 +159,11 @@ const resizeSimilar = typeof window !== 'undefined'
   ? throttle(() => resizeAllGridItems('catalog-item', 'art-similar-grid', '.catalog-item__wrapper'), 100)
   : () => {}
 
-export default function Art({ art, style, styleArts, artist: initialArtist }) {
+const resizeArtistArts = typeof window !== 'undefined'
+  ? throttle(() => resizeAllGridItems('catalog-item', 'art-artist-grid', '.catalog-item__wrapper'), 100)
+  : () => {}
+
+export default function Art({ art, style, styleArts, artistArts, artist: initialArtist }) {
   const { data: session } = useSession()
   const [buyMode, setBuyMode] = useState(null)
   const [descExpanded, setDescExpanded] = useState(false)
@@ -179,6 +184,13 @@ export default function Art({ art, style, styleArts, artist: initialArtist }) {
     window.addEventListener('resize', resizeSimilar)
     return () => { cancelAnimationFrame(frame); window.removeEventListener('resize', resizeSimilar) }
   }, [styleArts])
+
+  useEffect(() => {
+    if (!artistArts?.length) return
+    const frame = requestAnimationFrame(resizeArtistArts)
+    window.addEventListener('resize', resizeArtistArts)
+    return () => { cancelAnimationFrame(frame); window.removeEventListener('resize', resizeArtistArts) }
+  }, [artistArts])
 
   useEffect(() => {
     setArtist(initialArtist)
@@ -313,7 +325,7 @@ export default function Art({ art, style, styleArts, artist: initialArtist }) {
 
           {/* Gallery + About artist */}
           <div className="art-layout__gallery">
-            <ArtGallery images={art.Pictures} art={art} />
+            <ArtGallery images={[...(art.Pictures || []), ...(art.interior_photo ? [art.interior_photo] : [])]} art={art} />
 
             {aboutArtist && (
               <div className="art-about">
@@ -476,6 +488,25 @@ export default function Art({ art, style, styleArts, artist: initialArtist }) {
 
         {/* Similar works */}
         <div className="art-bottom">
+          {/* Artist arts */}
+          {artistArts && artistArts.length > 0 && (
+            <div className="art-similar">
+              <div className="art-similar__header">
+                <h2>Другие работы автора</h2>
+                {art.Artist && (
+                  <Link href={`/artists/${art.Artist.slug}--${art.Artist.id}`} className="art-similar__all-link">
+                    Смотреть все →
+                  </Link>
+                )}
+              </div>
+              <div className="catalog-grid art-similar-grid art-artist-grid">
+                {artistArts.map(item => (
+                  <CatalogItem key={item.id} art={item} imageOnLoad={resizeArtistArts} />
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Similar works */}
           {styleArts && styleArts.length > 0 && (
             <div className="art-similar">
@@ -545,6 +576,14 @@ export const getStaticProps = async ({ params: { slug } }) => {
       }
     }
 
+    let artistArts = []
+    if (art.Artist?.id) {
+      const artistArtsJson = await fetchStrapi(
+        API_HOST + `/arts?filters[Artist][id][$eq]=${art.Artist.id}&filters[wall][$notNull]=true&filters[id][$ne]=${art.id}&populate[0]=Pictures&populate[1]=Artist&pagination[pageSize]=4&sort=publishedAt:desc`
+      )
+      artistArts = Array.isArray(artistArtsJson) ? artistArtsJson : []
+    }
+
     let style = art.styles?.[0] || null
     let styleArts = []
     if (style) {
@@ -553,7 +592,6 @@ export const getStaticProps = async ({ params: { slug } }) => {
           `/arts?filters[styles][id][$eq]=${style.id}&filters[wall][$notNull]=true&populate[0]=Pictures&populate[1]=Artist`
       )
       const styleList = Array.isArray(json) ? json : []
-      const artistArts = artist?.Arts || []
       styleArts = styleList
         .sort((a, b) => {
           const ap = a.publishedAt || a.published_at
@@ -564,7 +602,7 @@ export const getStaticProps = async ({ params: { slug } }) => {
         .slice(0, 4)
     }
 
-    return { props: { art, style, styleArts, artist }, revalidate: 60 }
+    return { props: { art, style, styleArts, artistArts, artist }, revalidate: 60 }
   } catch {
     return { notFound: true }
   }

@@ -12,11 +12,10 @@ import Pagination from './pagination'
 import CatalogItem from './catalog-item'
 
 
-export default function CatalogCmp({arts, hideFiltersForce, title, description, filters, count, useURLParams, hideSort, emptyText}){
+export default function CatalogCmp({arts, hideFiltersForce, title, description, filters, count, useURLParams, hideSort, emptyText, initialPage}){
 
-  //console.log(arts)
   const router = useRouter()
-  const [ state, setState ] = useState({showPreloader: false, selectedSortValue: "", arts:arts, count: count})
+  const [ state, setState ] = useState({showPreloader: false, selectedSortValue: "", arts:arts, count: count, page: initialPage || 1})
   const [ showFilters, setShowFilters ] = useState(false)
   const [ currentPage, setCurrentPage ] = useState(1)
   const [ loadingMore, setLoadingMore ] = useState(false)
