@@ -168,33 +168,40 @@ export default function ArtistPage({ artist: initialArtist }) {
           }
           <div className="wp-hero__overlay" />
 
+          <div className="wp-hero__top-actions">
+            <button className="wp-hero__top-btn" onClick={() => navigator.share?.({ title: artist.full_name, url: window.location.href })}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+              Поделиться
+            </button>
+          </div>
+
           <div className="wp-hero__content">
-            <div className="ap-hero__top">
+            {isVerified && (
+              <div className="wp-hero__badge">
+                <svg width="8" height="8" viewBox="0 0 8 8"><circle cx="4" cy="4" r="4" fill="currentColor"/></svg>
+                Подтверждённый художник
+              </div>
+            )}
+            <div className="ap-hero__title-row">
               <div className="ap-avatar">
                 {avatarImg
                   ? <img src={avatarImg} alt={artist.full_name} />
                   : <span>{(artist.full_name || '?').slice(0, 1).toUpperCase()}</span>
                 }
               </div>
-              <div className="ap-hero__id">
+              <div>
                 <div className="ap-hero__name-row">
                   <h1 className="wp-hero__title">{artist.full_name}</h1>
-                  {isVerified && (
-                    <span className="ap-badge-verified" title="Подтверждённый профиль">
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#f15a24" /><path d="M8 12l3 3 5-5" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
-                    </span>
-                  )}
                 </div>
                 {artist.nickname && <div className="ap-hero__nickname">«{artist.nickname}»</div>}
-                {location && (
-                  <div className="wp-hero__addr">
-                    <Icon d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
-                    {location}
-                  </div>
-                )}
               </div>
             </div>
-
+            {location && (
+              <div className="wp-hero__addr">
+                <Icon d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
+                {location}
+              </div>
+            )}
             <div className="wp-hero__bottom">
               <div className="wp-hero__stats">
                 <div className="wp-hero__stat">{artist.worksCount || 0} {pluralWorks(artist.worksCount || 0)}</div>
@@ -218,6 +225,12 @@ export default function ArtistPage({ artist: initialArtist }) {
                     <Icon d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 1.26h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.91 8.91a16 16 0 0 0 6.29 6.29l.91-.91a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" size={14} />
                     Связаться
                   </a>
+                )}
+                {isOwner && (
+                  <Link href={`/account/edit-artist/${artist.documentId}`} className="wp-hero__btn wp-hero__btn--dark">
+                    <Icon d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" size={14} />
+                    Редактировать
+                  </Link>
                 )}
               </div>
             </div>

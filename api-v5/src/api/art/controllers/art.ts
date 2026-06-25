@@ -365,4 +365,40 @@ export default factories.createCoreController(uid, () => ({
 
     return sanitizeOutput(entity, ctx);
   },
+
+  async moderation(ctx) {
+    const user = ctx.state.user;
+    if (!user) return ctx.unauthorized();
+    const userRecord = await strapi.entityService.findOne('plugin::users-permissions.user', user.id, {}) as any;
+    if (!userRecord?.is_moderator) return ctx.forbidden('Not a moderator');
+
+    const { results, pagination } = await strapi.service(uid).find({
+      status: 'published',
+      filters: { wall: { id: { $null: true } } } as any,
+      populate: { Pictures: true, Artist: true, user_uploader: true },
+      sort: 'createdAt:desc',
+      pagination: { pageSize: 50, page: Number(ctx.query.page) || 1 },
+    });
+    const sanitized = await this.sanitizeOutput(results, ctx);
+    return this.transformResponse(sanitized, { pagination });
+  },
+
+  async reject(ctx) {
+    const user = ctx.state.user;
+    if (!user) return ctx.unauthorized();
+    const userRecord = await strapi.entityService.findOne('plugin::users-permissions.user', user.id, {}) as any;
+    if (!userRecord?.is_moderator) return ctx.forbidden('Not a moderator');
+
+    const { id } = ctx.params;
+    const results = await strapi.entityService.findMany(uid, {
+      status: 'published',
+      filters: { id: { $eq: Number(id) } } as any,
+      pagination: { pageSize: 1 },
+    });
+    const entity = Array.isArray(results) ? results[0] : null;
+    if (!entity) return ctx.notFound();
+
+    await strapi.entityService.update(uid, entity.id, { data: { publishedAt: null } as any });
+    ctx.send({ ok: true });
+  },
 }));

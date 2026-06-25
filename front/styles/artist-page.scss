@@ -17,7 +17,6 @@ $ap-orange: #f15a24;
 }
 
 // Restore padding for non-hero content
-.ap .wp-tabs,
 .ap .wp-body,
 .ap .wp-arts-grid,
 .ap .ap-catalog-grid,
@@ -38,19 +37,17 @@ $ap-orange: #f15a24;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
 }
 
-.ap-hero {
-  .wp-hero__content { display: flex; flex-direction: column; gap: 16px; }
-}
-
-.ap-hero__top {
+.ap-hero__title-row {
   display: flex;
-  align-items: flex-end;
-  gap: 16px;
+  align-items: center;
+  gap: 14px;
+
+  .wp-hero__title { margin-bottom: 0; }
 }
 
 .ap-avatar {
-  width: 76px;
-  height: 76px;
+  width: 64px;
+  height: 64px;
   border-radius: 50%;
   border: 3px solid #fff;
   background: $ap-orange;
@@ -58,7 +55,7 @@ $ap-orange: #f15a24;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 28px;
+  font-size: 24px;
   font-weight: 700;
   flex-shrink: 0;
   overflow: hidden;
@@ -67,25 +64,16 @@ $ap-orange: #f15a24;
   img { width: 100%; height: 100%; object-fit: cover; display: block; }
 }
 
-.ap-hero__id { min-width: 0; }
-
 .ap-hero__name-row {
   display: flex;
   align-items: center;
   gap: 8px;
-
-  .wp-hero__title { margin-bottom: 0; }
-}
-
-.ap-badge-verified {
-  display: inline-flex;
-  flex-shrink: 0;
 }
 
 .ap-hero__nickname {
   font-size: 14px;
   color: rgba(255,255,255,.85);
-  margin: 2px 0 4px;
+  margin: 2px 0 0;
 }
 
 // ─── Sold badge on art cards ────────────────────────────────────────────────

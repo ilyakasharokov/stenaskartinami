@@ -338,7 +338,10 @@ export default function Art({ art, style, styleArts, artistArts, artist: initial
                     }
                   </div>
                   <div>
-                    <div className="art-about__name">{aboutArtist.full_name}</div>
+                    {artistUrl
+                      ? <Link href={artistUrl} className="art-about__name art-about__name--link">{aboutArtist.full_name}</Link>
+                      : <div className="art-about__name">{aboutArtist.full_name}</div>
+                    }
                     {aboutArtist.city && typeof aboutArtist.city === 'string' && (
                       <div className="art-about__location">{aboutArtist.city}</div>
                     )}
@@ -393,12 +396,12 @@ export default function Art({ art, style, styleArts, artistArts, artist: initial
             {/* Artist */}
             {art.Artist && (
               <div className="art-artist">
-                <div className="art-artist__avatar">
+                <Link href={artistUrl} className="art-artist__avatar">
                   {(artist?.avatar || art.Artist?.avatar)?.url
                     ? <img src={imageUrlBuilder((artist?.avatar || art.Artist?.avatar).formats?.small?.url || (artist?.avatar || art.Artist?.avatar).url)} alt={art.Artist.full_name} />
                     : artistInitial
                   }
-                </div>
+                </Link>
                 <div className="art-artist__body">
                   <div className="art-artist__name-row">
                     <Link href={artistUrl} className="art-artist__name">{art.Artist.full_name}</Link>

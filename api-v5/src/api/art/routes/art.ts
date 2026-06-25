@@ -20,6 +20,18 @@ export default {
     },
     {
       method: 'GET',
+      path: '/arts/moderation',
+      handler: 'art.moderation',
+      config: { policies: [] },
+    },
+    {
+      method: 'POST',
+      path: '/arts/:id/reject',
+      handler: 'art.reject',
+      config: { policies: [] },
+    },
+    {
+      method: 'GET',
       path: '/arts/all',
       handler: 'art.allArts',
       config: { policies: [] },

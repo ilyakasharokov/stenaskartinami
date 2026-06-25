@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Head from 'next/head'
 import Link from 'next/link'
 import { useSession } from 'next-auth/react'
@@ -8,6 +8,9 @@ import { API_HOST } from '@/constants/constants'
 import { fetchStrapi } from '@/utils/strapi'
 import serialize from '@/utils/serialize'
 import imageUrlBuilder from '@/utils/img-url-builder'
+import CatalogItem from '@/components/catalog/catalog-item'
+import throttle from '@/utils/throttle'
+import { resizeAllGridItems } from '@/utils/grid-resizer'
 
 const WALL_TYPE_LABELS = {
   cafe: 'Кафе',
@@ -44,9 +47,31 @@ const TABS = [
   { key: 'map',      label: 'На карте' },
 ]
 
+const resizeWallArts = typeof window !== 'undefined'
+  ? throttle(() => resizeAllGridItems('catalog-item', 'wall-arts-masonry', '.catalog-item__wrapper'), 100)
+  : () => {}
+
+const resizePreviewArts = typeof window !== 'undefined'
+  ? throttle(() => resizeAllGridItems('catalog-item', 'wall-preview-masonry', '.catalog-item__wrapper'), 100)
+  : () => {}
+
 export default function WallPage({ wall }) {
   const { data: session } = useSession()
   const [activeTab, setActiveTab] = useState('about')
+
+  useEffect(() => {
+    if (activeTab !== 'arts') return
+    const frame = requestAnimationFrame(resizeWallArts)
+    window.addEventListener('resize', resizeWallArts)
+    return () => { cancelAnimationFrame(frame); window.removeEventListener('resize', resizeWallArts) }
+  }, [activeTab, wall?.arts])
+
+  useEffect(() => {
+    if (activeTab !== 'about') return
+    const frame = requestAnimationFrame(resizePreviewArts)
+    window.addEventListener('resize', resizePreviewArts)
+    return () => { cancelAnimationFrame(frame); window.removeEventListener('resize', resizePreviewArts) }
+  }, [activeTab, wall?.arts])
 
   if (!wall) {
     return (
@@ -246,32 +271,10 @@ export default function WallPage({ wall }) {
                       Смотреть все
                     </button>
                   </div>
-                  <div className="wp-arts-grid">
-                    {arts.slice(0, 4).map(art => {
-                      const pics = Array.isArray(art.Pictures) ? art.Pictures : []
-                      const pic = pics[0]
-                        ? imageUrlBuilder(pics[0].formats?.small?.url || pics[0].url)
-                        : null
-                      const href = `/art/${art.slug || art.documentId}--${art.id}`
-                      return (
-                        <Link key={art.id} href={href} className="wp-art-card">
-                          <div className="wp-art-card__img-wrap">
-                            {pic
-                              ? <img src={pic} alt={art.Title} className="wp-art-card__img" />
-                              : <div style={{ width: '100%', height: '100%', background: '#f0ede8' }} />
-                            }
-                          </div>
-                          <div className="wp-art-card__title">{art.Title}</div>
-                          {art.Artist?.Name && <div className="wp-art-card__artist">{art.Artist.Name}</div>}
-                          {(art.width || art.mediums?.[0]?.Title) && (
-                            <div className="wp-art-card__meta">
-                              {art.width && art.height && `${art.width}×${art.height} см`}
-                              {art.mediums?.[0]?.Title && `, ${art.mediums[0].Title}`}
-                            </div>
-                          )}
-                        </Link>
-                      )
-                    })}
+                  <div className="catalog-grid wall-preview-masonry">
+                    {arts.slice(0, 4).map(art => (
+                      <CatalogItem key={art.id} art={art} imageOnLoad={resizePreviewArts} />
+                    ))}
                   </div>
                 </div>
               )}
@@ -396,31 +399,12 @@ export default function WallPage({ wall }) {
 
         {/* ── Картины ── */}
         {activeTab === 'arts' && (
-          <div>
+          <div style={{ padding: '0 16px' }}>
             {arts.length > 0 ? (
-              <div className="wp-arts-grid" style={{ gridTemplateColumns: 'repeat(5, 1fr)' }}>
-                {arts.map(art => {
-                  const pics = Array.isArray(art.Pictures) ? art.Pictures : []
-                  const pic = pics[0]
-                    ? imageUrlBuilder(pics[0].formats?.small?.url || pics[0].url)
-                    : null
-                  const href = `/art/${art.slug || art.documentId}--${art.id}`
-                  return (
-                    <Link key={art.id} href={href} className="wp-art-card">
-                      <div className="wp-art-card__img-wrap">
-                        {pic
-                          ? <img src={pic} alt={art.Title} className="wp-art-card__img" />
-                          : <div style={{ width: '100%', height: '100%', background: '#f0ede8' }} />
-                        }
-                      </div>
-                      <div className="wp-art-card__title">{art.Title}</div>
-                      {art.Artist?.Name && <div className="wp-art-card__artist">{art.Artist.Name}</div>}
-                      {art.width && art.height && (
-                        <div className="wp-art-card__meta">{art.width}×{art.height} см</div>
-                      )}
-                    </Link>
-                  )
-                })}
+              <div className="catalog-grid wall-arts-masonry">
+                {arts.map(art => (
+                  <CatalogItem key={art.id} art={art} imageOnLoad={resizeWallArts} />
+                ))}
               </div>
             ) : (
               <div className="wp-empty">Картин пока нет</div>

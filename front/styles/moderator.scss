@@ -1,0 +1,154 @@
+.mod-page {
+  padding: 32px 0 80px;
+}
+
+.mod-header {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 28px;
+}
+
+.mod-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #111;
+  margin: 0;
+}
+
+.mod-count {
+  font-size: 14px;
+  color: #888;
+}
+
+.mod-empty {
+  text-align: center;
+  color: #aaa;
+  font-size: 15px;
+  padding: 60px 0;
+}
+
+.mod-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.mod-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: #fff;
+  border: 1px solid #eee;
+  border-radius: 12px;
+  padding: 14px 16px;
+  transition: box-shadow 0.15s;
+
+  &:hover { box-shadow: 0 2px 12px rgba(0,0,0,.07); }
+}
+
+.mod-item__thumb {
+  flex-shrink: 0;
+  width: 72px;
+  height: 72px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #f5f3f0;
+  display: block;
+
+  img { width: 100%; height: 100%; object-fit: cover; display: block; }
+}
+
+.mod-item__no-img {
+  width: 100%;
+  height: 100%;
+  background: #eee;
+}
+
+.mod-item__body {
+  flex: 1;
+  min-width: 0;
+}
+
+.mod-item__title {
+  display: block;
+  font-size: 15px;
+  font-weight: 600;
+  color: #111;
+  text-decoration: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 4px;
+
+  &:hover { color: #f15a24; }
+}
+
+.mod-item__artist {
+  display: block;
+  font-size: 13px;
+  color: #555;
+  text-decoration: none;
+  margin-bottom: 6px;
+
+  &:hover { color: #f15a24; }
+}
+
+.mod-item__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  font-size: 12px;
+  color: #888;
+}
+
+.mod-item__date { color: #bbb; }
+
+.mod-item__uploader {
+  font-size: 11px;
+  color: #bbb;
+  margin-top: 4px;
+}
+
+.mod-item__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.mod-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 7px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: none;
+  border: none;
+  white-space: nowrap;
+  transition: all 0.15s;
+
+  &--ghost {
+    background: #f5f5f5;
+    color: #444;
+    &:hover { background: #eee; }
+  }
+
+  &--reject {
+    background: #fef2f2;
+    color: #dc2626;
+    &:hover { background: #fee2e2; }
+    &:disabled { opacity: 0.5; cursor: default; }
+  }
+}
+
+@media (max-width: 600px) {
+  .mod-item {
+    flex-wrap: wrap;
+    .mod-item__actions { flex-direction: row; width: 100%; }
+    .mod-btn { flex: 1; }
+  }
+}

@@ -181,6 +181,18 @@ export default function NavRight() {
             >
               Настройки
             </Link>
+            {(session?.info?.isModerator || session?.info?.is_moderator) && (
+              <>
+                <div className="nav-user__divider" />
+                <Link
+                  href="/moderator"
+                  className="nav-user__item"
+                  onClick={() => setDropdownOpen(false)}
+                >
+                  Модерация
+                </Link>
+              </>
+            )}
             <div className="nav-user__divider" />
             <button
               className="nav-user__item nav-user__item--danger"
