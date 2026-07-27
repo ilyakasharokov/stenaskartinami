@@ -99,7 +99,7 @@ export default function ArtistPage({ artist: initialArtist }) {
   const coverImg = artist.cover ? imageUrlBuilder(artist.cover.formats?.large?.url || artist.cover.formats?.medium?.url || artist.cover.url) : null
   const avatarImg = artist.avatar ? imageUrlBuilder(artist.avatar.formats?.small?.url || artist.avatar.url) : null
   const isVerified = artist.profile_type === 'real_user'
-  const isOwner = session && artist.user_uploader && String(session.id) === String(artist.user_uploader.id)
+  const isOwner = session && artist.user_uploader && String((session as any).id || session.info?.id) === String(artist.user_uploader.id)
   const isFollowing = !!artist.isFollowing
   const location = [artist.country, artist.city_name].filter(Boolean).join(', ')
 

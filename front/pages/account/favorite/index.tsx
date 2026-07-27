@@ -1,7 +1,7 @@
 import MainLayout from "@/components/layouts/MainLayout"
 import { useState, useEffect } from "react"
 import Head from 'next/head'
-import { useSession, session } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import ProductListStatic from '@/components/catalog/product-list-static'
 import CatalogCmp from "@/components/catalog/catalog"
 

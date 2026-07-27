@@ -37,7 +37,7 @@ async function fetchImageAsPng(url) {
 
 async function generateInteriorWithImage(artImageUrl, prompt) {
   const imgBuf = await fetchImageAsPng(artImageUrl)
-  const imgBlob = new Blob([imgBuf], { type: 'image/png' })
+  const imgBlob = new Blob([imgBuf as any], { type: 'image/png' })
 
   const form = new FormData()
   form.append('model', 'gpt-image-1')

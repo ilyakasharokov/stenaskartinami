@@ -36,8 +36,8 @@ export default function MultiSelectInput({ endpoint, label, titleField = 'Title'
 
   useEffect(() => {
     if (!aiNames.length || !options.length) return
-    const newSelected = new Set()
-    const matched = new Set()
+    const newSelected = new Set<any>()
+    const matched = new Set<string>()
     for (const opt of options) {
       const name = (opt[titleField] || '').toLowerCase().trim()
       const hit = aiNames.find(n => name.includes(n.toLowerCase().trim()) || n.toLowerCase().trim().includes(name))

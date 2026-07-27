@@ -220,7 +220,7 @@ export default function Art({ art, style, styleArts, artistArts, artist: initial
   // Use the fully-fetched artist if available, fall back to art.Artist (always populated)
   const aboutArtist = artist || art.Artist || null
   const isFollowing = !!aboutArtist?.isFollowing
-  const isOwner = !!(session && aboutArtist?.user_uploader && String(session.id) === String(aboutArtist.user_uploader.id))
+  const isOwner = !!(session && aboutArtist?.user_uploader && String((session as any).id || session.info?.id) === String(aboutArtist.user_uploader.id))
 
   const toggleFollow = async () => {
     if (!session?.jwt || !aboutArtist?.documentId) return

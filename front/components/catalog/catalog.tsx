@@ -12,7 +12,7 @@ import Pagination from './pagination'
 import CatalogItem from './catalog-item'
 
 
-export default function CatalogCmp({arts, hideFiltersForce, title, description, filters, count, useURLParams, hideSort, emptyText, initialPage}){
+export default function CatalogCmp({arts, hideFiltersForce = false, title = '', description = null, filters = {}, count = 0, useURLParams = false, hideSort = false, emptyText = null, initialPage = 1}){
 
   const router = useRouter()
   const [ state, setState ] = useState({showPreloader: false, selectedSortValue: "", arts:arts, count: count, page: initialPage || 1})
@@ -37,12 +37,12 @@ export default function CatalogCmp({arts, hideFiltersForce, title, description, 
       window.addEventListener('resize', resizeThrottled)
       window.addEventListener('load', resizeThrottled)
 
-      const selectedSortValue = query._sort || ''
+      const selectedSortValue = (query._sort as string) || ''
 
       try {
         if(useURLParams && Object.entries(query).length){
-          const _start = query.page ? ( query.page - 1)  * CATALOG_ITEMS_PER_PAGE: 0;
-          const newQuery = {
+          const _start = query.page ? ( parseInt(query.page as string) - 1)  * CATALOG_ITEMS_PER_PAGE: 0;
+          const newQuery: Record<string, any> = {
             _start,
             _limit: CATALOG_ITEMS_PER_PAGE,
             populate: ['Pictures', 'Artist', 'styles', 'subjects', 'mediums', 'wall'],
@@ -56,9 +56,9 @@ export default function CatalogCmp({arts, hideFiltersForce, title, description, 
           ])
           const fetchedArts = Array.isArray(json) ? json : []
           const newCount = countResponse?.count ?? countResponse?.meta?.pagination?.total ?? 0
-          setState({arts: fetchedArts, showPreloader:false, selectedSortValue, page: parseInt(query.page, 10) || 1, count: newCount})
+          setState({arts: fetchedArts, showPreloader:false, selectedSortValue, page: parseInt(query.page as string, 10) || 1, count: newCount})
         }else{
-          setState({arts, showPreloader:false, selectedSortValue, page: parseInt(query.page, 10) || 1, count: count})
+          setState({arts, showPreloader:false, selectedSortValue, page: parseInt(query.page as string, 10) || 1, count: count})
         }
       } catch {
         setState(prev => ({ ...prev, showPreloader: false }))
@@ -70,7 +70,7 @@ export default function CatalogCmp({arts, hideFiltersForce, title, description, 
     loadArts()
     window.addEventListener('scroll', onScroll)
 
-    return _ => {
+    return () => {
       window.removeEventListener('resize', resizeThrottled)
       window.removeEventListener('load', resizeThrottled)
       window.removeEventListener('scroll', onScroll)
@@ -90,7 +90,7 @@ export default function CatalogCmp({arts, hideFiltersForce, title, description, 
       delete queryObj._sort
     }
     delete queryObj.page
-    setState({showPreloader: true, selectedSortValue, page: state.page, arts: [...state.arts], count: state.count})
+    setState(prev => ({...prev, showPreloader: true, selectedSortValue, page: state.page, arts: [...state.arts], count: state.count}))
     Router.push({
       pathname: Router.pathname,
       query: queryObj
@@ -99,7 +99,7 @@ export default function CatalogCmp({arts, hideFiltersForce, title, description, 
 
   function setPage(num){
     const queryObj = { ...router.query, page: num }
-    setState({showPreloader: true, page: num, arts: [...state.arts], count: state.count})
+    setState(prev => ({...prev, showPreloader: true, page: num, arts: [...state.arts], count: state.count}))
     Router.push({
       pathname: Router.pathname,
       query: queryObj
@@ -141,7 +141,7 @@ export default function CatalogCmp({arts, hideFiltersForce, title, description, 
             <img src="/images/filter.png"/>
             <div>Фильтры </div>
         </div>
-        <CatalogFilters arts={state.arts} onChange={() => setState({showPreloader: true, arts: [...state.arts], count: state.count})} filtersPreloaded={filters} hideFilters={() => hideFilters()}></CatalogFilters>
+        <CatalogFilters onChange={() => setState(prev => ({...prev, showPreloader: true, arts: [...state.arts], count: state.count}))} filtersPreloaded={filters} hideFilters={() => hideFilters()}></CatalogFilters>
         </div>
       }
       {

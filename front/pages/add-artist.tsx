@@ -8,6 +8,7 @@ import { getSession } from '@/lib/getSession'
 import { useToast } from '@/components/ui/Toast'
 import { fetchStrapi } from '@/utils/strapi'
 import { API_HOST } from '@/constants/constants'
+import { CityInput, CountryInput, countryToCode } from '@/components/ui/AddressInput'
 const MESSENGER_TYPES = [['telegram', 'Telegram'], ['whatsapp', 'WhatsApp'], ['phone', 'Телефон'], ['email', 'Email']]
 
 const STEPS = [
@@ -96,8 +97,8 @@ export default function AddArtist() {
   const { data: session } = useSession()
   const showToast = useToast()
   const [step, setStep] = useState(1)
-  const [form, setForm] = useState(initState)
-  const [errors, setErrors] = useState({})
+  const [form, setForm] = useState<Record<string, any>>(initState)
+  const [errors, setErrors] = useState<Record<string, any>>({})
   const [submitting, setSubmitting] = useState(false)
   const [dragOver, setDragOver] = useState(false)
   const [wallsList, setWallsList] = useState([])
@@ -195,7 +196,7 @@ export default function AddArtist() {
   }
 
   const validateStep = (s) => {
-    const e = {}
+    const e: Record<string, any> = {}
     if (s === 1) {
       if (!form.full_name.trim()) e.full_name = 'Укажите имя художника'
       if (!form.avatar) e.avatar = 'Добавьте фото профиля'
@@ -470,11 +471,11 @@ export default function AddArtist() {
           </div>
           <div className="aw-field">
             <label className="aw-label">Страна</label>
-            <input className="aw-input" value={form.country} onChange={e => set('country', e.target.value)} placeholder="Выберите страну" />
+            <CountryInput value={form.country} onChange={v => set('country', v)} inputClassName="aw-input" />
           </div>
           <div className="aw-field">
             <label className="aw-label">Город</label>
-            <input className="aw-input" value={form.city_name} onChange={e => set('city_name', e.target.value)} placeholder="Например: Москва" />
+            <CityInput value={form.city_name} onChange={v => set('city_name', v)} inputClassName="aw-input" placeholder="Например: Москва" countrycodes={countryToCode(form.country)} />
           </div>
         </div>
       </div>

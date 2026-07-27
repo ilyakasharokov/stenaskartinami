@@ -12,7 +12,7 @@ export default function About({ Component, pageProps }) {
     </Head>
     <div className="content-page">
       <h1>О проекте</h1>
-      <img src="/images/about/IMG_5369.JPG" class="float-left"/>
+      <img src="/images/about/IMG_5369.JPG" className="float-left"/>
       <p>Весной 2020 года, в момент бушующей пандемии,  общество было парализовано всеобщей истерией.
       Но любой кризис в умелых "остроумных руках", может обернуться окном возможностей, толчком к действию.
       Два художника-куратора Михаил Дудкин и Глеб Блокович, давно вынашивали идею открыть свою галерею.

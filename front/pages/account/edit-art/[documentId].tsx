@@ -38,7 +38,7 @@ function SectionCard({ title, icon, children }) {
   )
 }
 
-function Field({ label, required, error, children }) {
+function Field({ label = null, required = false, error = null, children }) {
   return (
     <div className={`art-field${error ? ' art-field--error' : ''}`}>
       {label && (
@@ -75,7 +75,7 @@ export default function EditArt({ art, sessionJwt, documentId, isModerator }) {
   const addMoreRef = useRef(null)
 
   // Form fields
-  const [fields, setFields] = useState({
+  const [fields, setFields] = useState<Record<string, any>>({
     title:       art?.Title || '',
     description: art?.Description || '',
     materials:   art?.Materials || '',
@@ -93,7 +93,7 @@ export default function EditArt({ art, sessionJwt, documentId, isModerator }) {
   const [subjects, setSubjects] = useState({ ids: [], custom: [] })
   const [mediums, setMediums]   = useState({ ids: [], custom: [] })
 
-  const [errors, setErrors]   = useState({})
+  const [errors, setErrors]   = useState<Record<string, any>>({})
   const [saving, setSaving]   = useState(false)
   const [saved, setSaved]     = useState(false)
   const [saveError, setSaveError] = useState('')
@@ -119,7 +119,7 @@ export default function EditArt({ art, sessionJwt, documentId, isModerator }) {
   const initialMediumDocIds  = (art?.mediums  || []).map(s => s.documentId).filter(Boolean)
 
   const handleAddMore = async (e) => {
-    const files = Array.from(e.target.files || [])
+    const files = Array.from(e.target.files || []) as File[]
     if (!files.length) return
     const imgs = await Promise.all(files.map(f => new Promise(res => {
       const reader = new FileReader()
@@ -159,7 +159,7 @@ export default function EditArt({ art, sessionJwt, documentId, isModerator }) {
   }
 
   const handleSubmit = useCallback(async () => {
-    const errs = {}
+    const errs: Record<string, any> = {}
     if (!fields.title.trim())       errs.title       = 'Укажите название'
     if (!fields.description.trim()) errs.description = 'Добавьте описание'
     if (!fields.materials.trim())   errs.materials   = 'Укажите материалы'
@@ -226,7 +226,7 @@ export default function EditArt({ art, sessionJwt, documentId, isModerator }) {
         ...uploaded,
       ]
       const year = date.getFullYear()
-      const data = {
+      const data: Record<string, any> = {
         Title:        fields.title,
         Description:  fields.description,
         Materials:    fields.materials,

@@ -151,14 +151,14 @@ export default function ArtistsCatalog({ artists, filterOptions, totalCount }) {
   const [loading, setLoading] = useState(false)
   const [displayArtists, setDisplayArtists] = useState(artists)
 
-  const currentPage = parseInt(router.query?.page, 10) || 1
+  const currentPage = parseInt(router.query?.page as string, 10) || 1
 
   useEffect(() => {
     const { q, directions, techniques } = router.query
     let result = artists
 
     if (q) {
-      const lq = q.toLowerCase()
+      const lq = (q as string).toLowerCase()
       result = result.filter(a =>
         a.full_name?.toLowerCase().includes(lq) ||
         (Array.isArray(a.directions) && a.directions.some(d => d.toLowerCase().includes(lq)))
@@ -264,8 +264,8 @@ export const getServerSideProps = async () => {
     )
 
     const list = Array.isArray(artists) ? artists : []
-    const allDirs  = [...new Set(list.flatMap(a => Array.isArray(a.directions) ? a.directions : []))].filter(Boolean).sort()
-    const allTechs = [...new Set(list.flatMap(a => Array.isArray(a.techniques) ? a.techniques : []))].filter(Boolean).sort()
+    const allDirs  = Array.from(new Set(list.flatMap(a => Array.isArray(a.directions) ? a.directions : []))).filter(Boolean).sort()
+    const allTechs = Array.from(new Set(list.flatMap(a => Array.isArray(a.techniques) ? a.techniques : []))).filter(Boolean).sort()
 
     return {
       props: {

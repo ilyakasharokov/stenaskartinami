@@ -31,5 +31,5 @@ export async function getSession(req, res) {
     if (!_devSession) _devSession = await fetchDevSession()
     if (_devSession) return _devSession
   }
-  return getServerSession(req, res, authOptions)
+  return getServerSession(req, res, authOptions as any)
 }

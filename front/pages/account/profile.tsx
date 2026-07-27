@@ -117,18 +117,18 @@ export default function ProfilePage() {
   }, [artsLoading, arts, artFilter, visibleCount, activeTab])
 
   useEffect(() => {
-    const t = router.query.tab
+    const t = router.query.tab as string
     if (VALID_TABS.includes(t)) setActiveTab(t)
   }, [router.query.tab])
 
   useEffect(() => {
     if (!info) return
-    if (info.username)        setUsername(info.username)
-    if (info.bio)             setBio(info.bio)
-    if (info.location)        setLocation(info.location)
-    if (info.website)         setWebsite(info.website)
-    if (info.instagram)       setInstagram(info.instagram)
-    if (info.telegram_handle) setTgHandle(info.telegram_handle)
+    if (info.username)        setUsername(info.username as string)
+    if (info.bio)             setBio(info.bio as string)
+    if (info.location)        setLocation(info.location as string)
+    if (info.website)         setWebsite(info.website as string)
+    if (info.instagram)       setInstagram(info.instagram as string)
+    if (info.telegram_handle) setTgHandle(info.telegram_handle as string)
     if (info.cover_image?.url)   setCoverSrc(imageUrlBuilder(info.cover_image.url))
     if (info.profile_image?.url) setAvatarSrc(imageUrlBuilder(info.profile_image.url))
   }, [info])
@@ -144,7 +144,7 @@ export default function ProfilePage() {
       'populate[4]': 'mediums',  'populate[5]': 'wall',
       'pagination[pageSize]': '100',
     })
-    ids.forEach((id, i) => params.append(`filters[id][$in][${i}]`, id))
+    ids.forEach((id, i) => params.append(`filters[id][$in][${i}]`, String(id)))
     fetchStrapi(`${process.env.NEXT_PUBLIC_API_URL}/arts?${params}`)
       .then(data => setFavoriteArts(Array.isArray(data) ? [...data].reverse() : []))
       .catch(() => setFavoriteArts([]))

@@ -158,7 +158,7 @@ export default function SignUp({ smsEnabled }) {
 }
 
 export async function getServerSideProps(context) {
-  const session = await getServerSession(context.req, context.res, authOptions);
+  const session = await getServerSession(context.req, context.res, authOptions as any);
   if (session) {
     return { redirect: { destination: '/', permanent: false } };
   }

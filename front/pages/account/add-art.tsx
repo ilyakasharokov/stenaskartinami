@@ -278,7 +278,7 @@ function AiBlock({ aiUsed, analyzing, aiError, aiSuggestions, fields, remaining,
 
 // ── Section Card ───────────────────────────────────────────
 
-function SectionCard({ title, icon, badge, children }) {
+function SectionCard({ title, icon = null, badge = null, children }) {
   return (
     <div className="art-section">
       <div className="art-section__header">
@@ -295,7 +295,7 @@ function SectionCard({ title, icon, badge, children }) {
 
 // ── Field wrapper ──────────────────────────────────────────
 
-function Field({ label, required, error, hint, children }) {
+function Field({ label = null, required = false, error = null, hint = null, children }) {
   return (
     <div className={`art-field${error ? ' art-field--error' : ''}`}>
       {label && (
@@ -474,7 +474,7 @@ function UploadStep({ onNext }) {
   const addMoreRef = useRef(null)
 
   const handleAddMore = async (e) => {
-    const files = Array.from(e.target.files || [])
+    const files = Array.from(e.target.files || []) as File[]
     if (!files.length) return
     const newImages = await Promise.all(files.map(file => new Promise(resolve => {
       const reader = new FileReader()
@@ -493,7 +493,7 @@ function UploadStep({ onNext }) {
     setChecking(true)
     const dims = await getImageDimensions(list[0].data_url)
     setChecking(false)
-    if (dims) setQuality({ ok: dims.width >= MIN_WIDTH && dims.height >= MIN_HEIGHT, ...dims })
+    if (dims) setQuality({ ok: (dims as any).width >= MIN_WIDTH && (dims as any).height >= MIN_HEIGHT, ...(dims as any) })
   }, [])
 
   const startCrop = (index) => {
@@ -674,7 +674,7 @@ function DetailsStep({ images, onImagesChange, sessionJwt, userId, initialArtist
   const showToast = useToast()
   const savedDraft = typeof window !== 'undefined' ? loadArtDraft() : null
 
-  const [fields, setFields] = useState(savedDraft?.fields || {
+  const [fields, setFields] = useState<Record<string, any>>(savedDraft?.fields || {
     title: '', description: '', materials: '', price: '', width: '', height: '', depth: '',
   })
   const [unit, setUnit] = useState(savedDraft?.unit || 'см')
@@ -748,7 +748,7 @@ function DetailsStep({ images, onImagesChange, sessionJwt, userId, initialArtist
         setUploadedPictureIds(picIds)
       }
       const year = date.getFullYear()
-      const artData = {
+      const artData: Record<string, any> = {
         Title: fields.title || 'Без названия',
         Description: fields.description || '',
         Materials: fields.materials || '',
@@ -792,7 +792,7 @@ function DetailsStep({ images, onImagesChange, sessionJwt, userId, initialArtist
 
   const [uploading, setUploading] = useState(false)
   const [imageLoadingProcess, setImageLoadingProcess] = useState(null)
-  const [errors, setErrors] = useState({})
+  const [errors, setErrors] = useState<Record<string, any>>({})
   const [cropIndex, setCropIndex] = useState(null)
   const [cropSrc, setCropSrc] = useState(null)
   const [crop, setCrop] = useState(undefined)
@@ -828,7 +828,7 @@ function DetailsStep({ images, onImagesChange, sessionJwt, userId, initialArtist
 
   const detailsAddMoreRef = useRef(null)
   const handleDetailsAddMore = async (e) => {
-    const files = Array.from(e.target.files || [])
+    const files = Array.from(e.target.files || []) as File[]
     if (!files.length) return
     const newImages = await Promise.all(files.map(file => new Promise(resolve => {
       const reader = new FileReader()
@@ -947,7 +947,7 @@ function DetailsStep({ images, onImagesChange, sessionJwt, userId, initialArtist
   async function handleSubmit(e) {
     if (e?.preventDefault) e.preventDefault()
 
-    const errs = {}
+    const errs: Record<string, any> = {}
     if (!fields.title.trim()) errs.title = 'Укажите название работы'
     if (!artist.id && !artist.full_name?.trim()) errs.artist = 'Укажите художника'
     if (!fields.description.trim()) errs.description = 'Добавьте описание'
@@ -1034,7 +1034,7 @@ function DetailsStep({ images, onImagesChange, sessionJwt, userId, initialArtist
     }
 
     const year = date.getFullYear()
-    const artData = {
+    const artData: Record<string, any> = {
       Title: fields.title,
       Description: fields.description,
       Materials: fields.materials,

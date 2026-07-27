@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react"
 import DatePicker from "react-datepicker";
 import { registerLocale, setDefaultLocale } from  "react-datepicker";
-import ru from 'date-fns/locale/ru';
+import { ru } from 'date-fns/locale';
 registerLocale('ru', ru)
 
 import "react-datepicker/dist/react-datepicker.css";
 
-export default function YearInput({onChange, initialDate}){
+export default function YearInput({onChange, initialDate = null}){
 
     const [startDate, setStartDate] = useState(initialDate ? new Date(initialDate) : new Date());
 

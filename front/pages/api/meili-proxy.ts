@@ -11,8 +11,8 @@ export default async function handler(req, res) {
     const headers = { 'Content-Type': 'application/json' };
     if (MEILI_KEY) headers['Authorization'] = `Bearer ${MEILI_KEY}`;
 
-    const p = params || {};
-    const body = {};
+    const p: Record<string, any> = params || {};
+    const body: Record<string, any> = {};
     if (p.query !== undefined) body.q = p.query;
     else if (p.q !== undefined) body.q = p.q;
     const ALLOWED = ['offset', 'limit', 'page', 'hitsPerPage', 'attributesToRetrieve',

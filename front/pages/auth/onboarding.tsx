@@ -263,7 +263,7 @@ export default function Onboarding({ userInfo, sessionJwt, steps }) {
 }
 
 export async function getServerSideProps(context) {
-  const session = await getServerSession(context.req, context.res, authOptions);
+  const session = await getServerSession(context.req, context.res, authOptions as any) as any;
   if (!session?.jwt) {
     return { redirect: { destination: '/auth/signin', permanent: false } };
   }

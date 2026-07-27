@@ -6,7 +6,7 @@ import { authOptions } from '@/lib/authOptions';
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end();
 
-  const session = await getServerSession(req, res, authOptions);
+  const session = await getServerSession(req, res, authOptions as any) as any;
   if (!session?.jwt) return res.status(401).json({ error: 'Не авторизован' });
 
   const { token, code } = req.body;

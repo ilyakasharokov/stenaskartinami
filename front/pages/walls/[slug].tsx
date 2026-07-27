@@ -92,7 +92,7 @@ export default function WallPage({ wall }) {
   const ownerName = owner?.username || owner?.email || 'Владелец'
   const ownerAvatar = owner?.profile_image?.url ? imageUrlBuilder(owner.profile_image.url) : null
 
-  const isOwner = session && owner && String(session.id) === String(owner.id)
+  const isOwner = session && owner && String((session as any).id || session.info?.id) === String(owner.id)
 
   return (
     <MainLayout>

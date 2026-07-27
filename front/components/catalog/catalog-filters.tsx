@@ -4,15 +4,17 @@ import Router from 'next/router'
 import Preloader from '../preloader/preloader';
 
 const FILTER_ITEMS_NUM = 6;
+const SECTION_SEARCH_MIN = 8; // показывать поиск внутри секции если элементов больше
 
 export default function CatalogFilters({filtersPreloaded, onChange, hideFilters}){
 
   const router = useRouter();
-  const [searchText, setSearchText] = useState(router.query?.q || '');
+  const [searchText, setSearchText] = useState((router.query?.q as string) || '');
+  const [sectionSearch, setSectionSearch] = useState({});
   const searchTimerRef = useRef(null);
 
   useEffect(() => {
-    setSearchText(router.query?.q || '');
+    setSearchText((router.query?.q as string) || '');
   }, [router.query?.q]);
 
   function handleSearchChange(e) {
@@ -20,7 +22,7 @@ export default function CatalogFilters({filtersPreloaded, onChange, hideFilters}
     setSearchText(val);
     clearTimeout(searchTimerRef.current);
     searchTimerRef.current = setTimeout(() => {
-      const newQuery = { ...Router.query, q: val };
+      const newQuery: Record<string, any> = { ...Router.query, q: val };
       if (!val) delete newQuery.q;
       delete newQuery.page;
       onChange();
@@ -99,9 +101,10 @@ export default function CatalogFilters({filtersPreloaded, onChange, hideFilters}
           if(newFilters[key]){ 
             newFilters[key].activeCount = 0;
             newFilters[key].items.forEach(item => {
-              if(Router.query[key].findIndex && Router.query[key].findIndex((queryItem)=>{
+              const qval = Router.query[key]
+              if(Array.isArray(qval) && qval.findIndex((queryItem)=>{
                 return item.slug === queryItem;
-              }) > -1 || Router.query[key] === item.slug){
+              }) > -1 || qval === item.slug){
                 item.active = true;
                 newFilters[key].open = true;
                 newFilters[key].activeCount ++;
@@ -139,7 +142,7 @@ export default function CatalogFilters({filtersPreloaded, onChange, hideFilters}
       query[key] = filters[key].items.filter((item)=> item.active).map((item)=> item.slug)
     }
     onChange()
-    const newQuery = Router.query ? Object.assign({}, Router.query, query) : query
+    const newQuery: Record<string, any> = Router.query ? Object.assign({}, Router.query, query) : query
     delete newQuery.page;
     Router.push({
       pathname: Router.pathname,
@@ -147,9 +150,23 @@ export default function CatalogFilters({filtersPreloaded, onChange, hideFilters}
     })
   } 
 
+  function getFilteredItems(key) {
+    const q = (sectionSearch[key] || '').toLowerCase().trim()
+    if (!q) return filters[key].items
+    return filters[key].items.filter(item =>
+      item.active || (item.Title || item.title || '').toLowerCase().includes(q)
+    )
+  }
+
   function getMaxHeight(key){
     const ITEM_HEIGHT = 45;
-    return (filters[key].open && ((!filters[key].showAll && FILTER_ITEMS_NUM || filters[key].items.length ) + 1) * ITEM_HEIGHT) || 0 + 'px'
+    const SEARCH_HEIGHT = 48;
+    const q = (sectionSearch[key] || '').trim()
+    const items = getFilteredItems(key)
+    const hasSearch = filters[key].items.length > SECTION_SEARCH_MIN
+    const visibleCount = q ? items.length : (!filters[key].showAll ? Math.min(items.length, FILTER_ITEMS_NUM) : items.length)
+    const showAllLink = !q && !filters[key].showAll && filters[key].items.length > FILTER_ITEMS_NUM ? 1 : 0
+    return (filters[key].open && ((visibleCount + showAllLink) * ITEM_HEIGHT + (hasSearch ? SEARCH_HEIGHT : 0))) || 0 + 'px'
   }
 
   return (
@@ -183,18 +200,37 @@ export default function CatalogFilters({filtersPreloaded, onChange, hideFilters}
               }
               </div> 
             </div> 
-            <div className="catalog-filters__collapsable" style={ { maxHeight: getMaxHeight(key)  }} length={!filters[key].showAll && FILTER_ITEMS_NUM || filters[key].items.length}>
+            <div className="catalog-filters__collapsable" style={{ maxHeight: getMaxHeight(key) }}>
             {
-              (!filters[key].showAll && filters[key].items && filters[key].items.slice(0, FILTER_ITEMS_NUM) || filters[key].items && filters[key].items).map( (item) => 
-                <div className="catalog-filters__item" key={item.id}>
-                  <div className={`checkbox ${item.active ? "checkbox--active": ""}`} onClick={()=>сheckboxClick(item, key)}></div>
-                  <div>{ item.Title || item.title }</div>
+              filters[key].items.length > SECTION_SEARCH_MIN && (
+                <div className="catalog-filters__section-search">
+                  <input
+                    type="text"
+                    className="catalog-filters__section-search-input"
+                    placeholder={`Поиск по «${filters[key].title.toLowerCase()}»…`}
+                    value={sectionSearch[key] || ''}
+                    onChange={e => setSectionSearch(prev => ({ ...prev, [key]: e.target.value }))}
+                    onClick={e => e.stopPropagation()}
+                  />
                 </div>
               )
             }
             {
-              !filters[key].showAll && filters[key].items.length > FILTER_ITEMS_NUM &&
-              <div className="catalog-filters__show-all" onClick={ ()=> showAll(key) }>Показать все</div>
+              (() => {
+                const q = (sectionSearch[key] || '').trim()
+                const items = getFilteredItems(key)
+                const visible = q ? items : (!filters[key].showAll ? items.slice(0, FILTER_ITEMS_NUM) : items)
+                return visible.map(item =>
+                  <div className="catalog-filters__item" key={item.id}>
+                    <div className={`checkbox ${item.active ? 'checkbox--active' : ''}`} onClick={() => сheckboxClick(item, key)}></div>
+                    <div>{item.Title || item.title}</div>
+                  </div>
+                )
+              })()
+            }
+            {
+              !(sectionSearch[key] || '').trim() && !filters[key].showAll && filters[key].items.length > FILTER_ITEMS_NUM &&
+              <div className="catalog-filters__show-all" onClick={() => showAll(key)}>Показать все</div>
             }
             </div>
           </div>

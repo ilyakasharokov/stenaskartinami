@@ -65,12 +65,12 @@ const appendPopulate = (params, populate, defaults = []) => {
         });
         return;
       }
-      params.push(`populate[${key}]=${encodeURIComponent(value)}`);
+      params.push(`populate[${key}]=${encodeURIComponent(value as string)}`);
     });
   }
 };
 
-function serialize(obj = {}) {
+function serialize(obj: Record<string, any> = {}) {
   const params = [];
   const sort = obj._sort || obj.sort || 'publishedAt:desc';
 
