@@ -3,6 +3,7 @@ import { API_HOST } from "@/constants/constants"
 import Head from 'next/head'
 import { useState, useCallback, useMemo, useRef, useEffect, Fragment } from "react"
 import { useToast } from '@/components/ui/Toast'
+import { Check, AlertTriangle, ArrowRight, ArrowLeft } from '@/components/ui/icons'
 import ImageUploading from "react-images-uploading"
 import ReactCrop from "react-image-crop"
 import ArtistInput from "@/components/input/artist-input"
@@ -638,8 +639,8 @@ function UploadStep({ onNext }) {
             {quality && (
               <div className={`quality-badge quality-badge--${quality.ok ? 'ok' : 'warn'}`}>
                 {quality.ok
-                  ? `✓ Отличное качество — ${quality.width}×${quality.height} px`
-                  : `⚠ Низкое разрешение — ${quality.width}×${quality.height} px. Можно продолжить.`}
+                  ? <><Check size={15} /> Отличное качество — {quality.width}×{quality.height} px</>
+                  : <><AlertTriangle size={15} /> Низкое разрешение — {quality.width}×{quality.height} px. Можно продолжить.</>}
               </div>
             )}
           </div>
@@ -650,7 +651,7 @@ function UploadStep({ onNext }) {
               disabled={images.length === 0}
               onClick={() => onNext(finalImages)}
             >
-              <PictureIcon /> Продолжить →
+              <PictureIcon /> Продолжить <ArrowRight size={16} />
             </button>
           </div>
           <TrustBar />
@@ -1157,7 +1158,7 @@ function DetailsStep({ images, onImagesChange, sessionJwt, userId, initialArtist
               </div>
             )}
             <button type="button" className="art-preview-hero__change-btn" onClick={onBack}>
-              ← Изменить изображение
+              <ArrowLeft size={15} style={{ verticalAlign: 'middle' }} /> Изменить изображение
             </button>
           </div>
         )}
@@ -1322,7 +1323,7 @@ function DetailsStep({ images, onImagesChange, sessionJwt, userId, initialArtist
 
           <div className="art-form-actions">
             <button type="button" className="art-btn art-btn--ghost" onClick={onBack}>
-              ← Назад
+              <ArrowLeft size={16} style={{ verticalAlign: 'middle' }} /> Назад
             </button>
             <button
               type="button"
@@ -1337,7 +1338,7 @@ function DetailsStep({ images, onImagesChange, sessionJwt, userId, initialArtist
               className="art-btn art-btn--primary"
               onClick={handleSubmit}
             >
-              Отправить на модерацию →
+              Отправить на модерацию <ArrowRight size={16} style={{ verticalAlign: 'middle' }} />
             </button>
           </div>
         </form>

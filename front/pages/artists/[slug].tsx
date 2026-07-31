@@ -8,6 +8,7 @@ import { fetchStrapi } from '@/utils/strapi'
 import serialize from '@/utils/serialize'
 import imageUrlBuilder from '@/utils/img-url-builder'
 import CatalogItem from '@/components/catalog/catalog-item'
+import { Heart, Eye } from '@/components/ui/icons'
 import { resizeAllGridItems } from '@/utils/grid-resizer'
 import throttle from '@/utils/throttle'
 import { pluralWorks, pluralWalls, pluralFollowers } from '@/utils/plural'
@@ -207,6 +208,8 @@ export default function ArtistPage({ artist: initialArtist }) {
                 <div className="wp-hero__stat">{artist.worksCount || 0} {pluralWorks(artist.worksCount || 0)}</div>
                 <div className="wp-hero__stat">{artist.wallsCount || 0} {pluralWalls(artist.wallsCount || 0)}</div>
                 <div className="wp-hero__stat">{artist.followersCount || 0} {pluralFollowers(artist.followersCount || 0)}</div>
+                {artist.totalLikes > 0 && <div className="wp-hero__stat"><Heart size={15} filled /> {artist.totalLikes}</div>}
+                {artist.totalViews > 0 && <div className="wp-hero__stat"><Eye size={15} /> {artist.totalViews}</div>}
                 {artist.soldCount > 0 && <div className="wp-hero__stat">{artist.soldCount} продано</div>}
               </div>
               <div className="wp-hero__actions">

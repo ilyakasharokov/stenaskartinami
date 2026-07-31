@@ -93,16 +93,11 @@
     z-index: 2;
 
     .favorite-btn {
-      width: 38px;
-      height: 38px;
-      background-image: url(/images/heart.png);
-      background-size: 200%;
-      background-position: left center;
-      background-repeat: no-repeat;
-      border-radius: 0;
+      width: 40px;
+      height: 40px;
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
 
-      &.active { background-position-x: right; }
+      .favorite-btn__icon { width: 22px; height: 22px; }
     }
   }
 
@@ -207,6 +202,12 @@
   margin-bottom: 18px;
 
   &__dot { color: #ccc; }
+  &__views {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    svg { color: #aaa; }
+  }
 }
 
 // Artist row
@@ -257,6 +258,9 @@
     color: #dc3a0f;
     text-decoration: none;
     white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
     &:hover { text-decoration: underline; }
   }
 
@@ -591,6 +595,9 @@
     font-size: 13px;
     color: #888;
     text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
     &:hover { color: #111; }
   }
 

@@ -6,8 +6,10 @@ import MainLayout from "@/components/layouts/MainLayout"
 import { API_HOST } from '@/constants/constants'
 import { fetchStrapi } from '@/utils/strapi'
 import serialize from '@/utils/serialize'
-import imageUrlBuilder from '@/utils/img-url-builder'
+import Image from 'next/image'
+import imageUrlBuilder, { imagePath } from '@/utils/img-url-builder'
 import AddFavorite from '@/components/art/add-favorite'
+import { Eye, ArrowRight } from '@/components/ui/icons'
 import CatalogItem from '@/components/catalog/catalog-item'
 import { resizeAllGridItems } from '@/utils/grid-resizer'
 import throttle from '@/utils/throttle'
@@ -24,10 +26,8 @@ function ArtGallery({ images, art }) {
   const next = () => setIdx(i => (i + 1) % imgs.length)
 
   const mainUrl = cur
-    ? imageUrlBuilder(
-        cur.formats?.large?.url || cur.formats?.medium?.url ||
-        cur.formats?.small?.url || cur.url
-      )
+    ? (cur.formats?.large?.url || cur.formats?.medium?.url ||
+       cur.formats?.small?.url || cur.url)
     : null
 
   const aspectRatio = cur?.width && cur?.height ? `${cur.width}/${cur.height}` : undefined
@@ -35,7 +35,18 @@ function ArtGallery({ images, art }) {
   return (
     <div className="art-gallery">
       <div className="art-gallery__main" style={aspectRatio ? { aspectRatio } : undefined}>
-        {mainUrl && <img src={mainUrl} alt={art.Title} />}
+        {mainUrl && (
+          cur?.width && cur?.height
+            ? <Image
+                src={imagePath(mainUrl)}
+                alt={art.Title || ''}
+                width={cur.width}
+                height={cur.height}
+                priority={idx === 0}
+                sizes="(max-width: 900px) 100vw, 55vw"
+              />
+            : <img src={imageUrlBuilder(mainUrl)} alt={art.Title} />
+        )}
         {imgs.length > 1 && (
           <>
             <button className="art-gallery__arrow art-gallery__arrow--prev" onClick={prev} type="button" aria-label="Предыдущее">‹</button>
@@ -195,6 +206,22 @@ export default function Art({ art, style, styleArts, artistArts, artist: initial
   useEffect(() => {
     setArtist(initialArtist)
   }, [initialArtist])
+
+  // Count a view once per art per day (deduped via localStorage)
+  useEffect(() => {
+    if (!art?.id || typeof window === 'undefined') return
+    const today = new Date().toISOString().slice(0, 10)
+    const key = `viewed_art_${art.id}`
+    try {
+      if (localStorage.getItem(key) === today) return
+      localStorage.setItem(key, today)
+    } catch { /* private mode — count anyway */ }
+    fetch('/api/view-art', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ artId: art.id }),
+    }).catch(() => {})
+  }, [art?.id])
 
   useEffect(() => {
     if (!session?.jwt || !initialArtist?.documentId) return
@@ -362,7 +389,7 @@ export default function Art({ art, style, styleArts, artistArts, artist: initial
                     </button>
                   )}
                   {artistUrl && (
-                    <Link href={artistUrl} className="art-artist__all-link">Все работы художника →</Link>
+                    <Link href={artistUrl} className="art-artist__all-link">Все работы художника <ArrowRight size={15} /></Link>
                   )}
                 </div>
               </div>
@@ -391,6 +418,8 @@ export default function Art({ art, style, styleArts, artistArts, artist: initial
               {year && <span>{year}</span>}
               {year && <span className="art-meta__dot">·</span>}
               <span>ID: {art.id}</span>
+              {art.views > 0 && <span className="art-meta__dot">·</span>}
+              {art.views > 0 && <span className="art-meta__views" title="Просмотры"><Eye size={15} /> {art.views}</span>}
             </div>
 
             {/* Artist */}
@@ -405,7 +434,7 @@ export default function Art({ art, style, styleArts, artistArts, artist: initial
                 <div className="art-artist__body">
                   <div className="art-artist__name-row">
                     <Link href={artistUrl} className="art-artist__name">{art.Artist.full_name}</Link>
-                    <Link href={artistUrl} className="art-artist__all-link">Все работы художника →</Link>
+                    <Link href={artistUrl} className="art-artist__all-link">Все работы художника <ArrowRight size={15} /></Link>
                   </div>
                   {art.Artist.city && <div className="art-artist__location">{art.Artist.city}</div>}
                 </div>
@@ -498,7 +527,7 @@ export default function Art({ art, style, styleArts, artistArts, artist: initial
                 <h2>Другие работы автора</h2>
                 {art.Artist && (
                   <Link href={`/artists/${art.Artist.slug}--${art.Artist.id}`} className="art-similar__all-link">
-                    Смотреть все →
+                    Смотреть все <ArrowRight size={15} />
                   </Link>
                 )}
               </div>
@@ -517,7 +546,7 @@ export default function Art({ art, style, styleArts, artistArts, artist: initial
                 <h2>Похожие работы</h2>
                 {style && (
                   <Link href={`/catalog/?styles=${style.slug}`} className="art-similar__all-link">
-                    Смотреть все →
+                    Смотреть все <ArrowRight size={15} />
                   </Link>
                 )}
               </div>

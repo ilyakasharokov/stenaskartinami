@@ -401,4 +401,32 @@ export default factories.createCoreController(uid, () => ({
     await strapi.entityService.update(uid, entity.id, { data: { publishedAt: null } as any });
     ctx.send({ ok: true });
   },
+
+  // POST /arts/:id/view — increment view counter (deduped client-side)
+  async incrementView(ctx) {
+    const id = Number(ctx.params.id);
+    if (!id) return ctx.badRequest('id required');
+
+    const db = strapi.db.connection;
+    try {
+      const rows = await db('arts')
+        .where({ id })
+        .increment('views', 1)
+        .returning(['views', 'document_id']);
+      const row = Array.isArray(rows) ? rows[0] : null;
+      if (!row) return ctx.notFound();
+
+      // Bump every version sharing this document_id so drafts stay in sync
+      if (row.document_id) {
+        await db('arts')
+          .where({ document_id: row.document_id })
+          .whereNot({ id })
+          .update({ views: row.views });
+      }
+      ctx.send({ views: row.views });
+    } catch (e: any) {
+      strapi.log.warn('[art] incrementView failed: ' + e.message);
+      ctx.send({ views: null });
+    }
+  },
 }));

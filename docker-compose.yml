@@ -53,6 +53,8 @@ services:
       dockerfile: dockerfile
       args:
         NEXT_PUBLIC_API_URL: http://localhost:1337/api
+        NEXT_PUBLIC_DEV_AUTO_LOGIN: "true"
+        STRAPI_SERVER_URL: http://api-v5:1337/api
     container_name: stenaskartinami-front
     restart: unless-stopped
     env_file:

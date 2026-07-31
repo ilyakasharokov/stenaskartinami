@@ -1,0 +1,26 @@
+{
+  "kind": "collectionType",
+  "collectionName": "mail_logs",
+  "info": {
+    "singularName": "mail-log",
+    "pluralName": "mail-logs",
+    "displayName": "Mail Log"
+  },
+  "options": { "draftAndPublish": false },
+  "attributes": {
+    "artist": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::artist.artist"
+    },
+    "token":           { "type": "uid", "required": true },
+    "subject":         { "type": "string" },
+    "recipient_email": { "type": "string" },
+    "sent_at":         { "type": "datetime" },
+    "opened_at":       { "type": "datetime" },
+    "clicked_at":      { "type": "datetime" },
+    "score_before":    { "type": "integer" },
+    "score_after":     { "type": "integer" },
+    "campaign_id":     { "type": "string" }
+  }
+}

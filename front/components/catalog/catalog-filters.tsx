@@ -13,9 +13,37 @@ export default function CatalogFilters({filtersPreloaded, onChange, hideFilters}
   const [sectionSearch, setSectionSearch] = useState({});
   const searchTimerRef = useRef(null);
 
+  const [price, setPrice] = useState({
+    min: (router.query?.priceMin as string) || '',
+    max: (router.query?.priceMax as string) || '',
+  });
+  const [priceOpen, setPriceOpen] = useState(!!(router.query?.priceMin || router.query?.priceMax));
+  const priceTimerRef = useRef(null);
+
   useEffect(() => {
     setSearchText((router.query?.q as string) || '');
   }, [router.query?.q]);
+
+  useEffect(() => {
+    setPrice({
+      min: (router.query?.priceMin as string) || '',
+      max: (router.query?.priceMax as string) || '',
+    });
+  }, [router.query?.priceMin, router.query?.priceMax]);
+
+  function handlePriceChange(field, value) {
+    const next = { ...price, [field]: value.replace(/[^\d]/g, '') };
+    setPrice(next);
+    clearTimeout(priceTimerRef.current);
+    priceTimerRef.current = setTimeout(() => {
+      const newQuery: Record<string, any> = { ...Router.query };
+      if (next.min) newQuery.priceMin = next.min; else delete newQuery.priceMin;
+      if (next.max) newQuery.priceMax = next.max; else delete newQuery.priceMax;
+      delete newQuery.page;
+      onChange();
+      Router.push({ pathname: Router.pathname, query: newQuery });
+    }, 600);
+  }
 
   function handleSearchChange(e) {
     const val = e.target.value;
@@ -236,6 +264,35 @@ export default function CatalogFilters({filtersPreloaded, onChange, hideFilters}
           </div>
         )
       }
+        <div className="catalog-filters__section">
+          <div className="catalog-filters__section-top" onClick={() => setPriceOpen(!priceOpen)}>
+            <div className="catalog-filters__section-title">Цена, ₽</div>
+            <div className="catalog-filters__section-expand-btn">
+            {
+              priceOpen
+                ? <svg className="minus" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 1"><path d="M0 0h10v1H0V0z" fill="#333"></path></svg>
+                : <svg viewBox="0 0 13 13" xmlns="http://www.w3.org/2000/svg"><g fill="#333" fillRule="evenodd"><path d="M0 6h13v1H0z"></path><path d="M6 0h1v13H6z"></path></g></svg>
+            }
+            </div>
+          </div>
+          <div className="catalog-filters__collapsable" style={{ maxHeight: priceOpen ? '60px' : 0 }}>
+            <div className="catalog-filters__price-row">
+              <input
+                type="text" inputMode="numeric" placeholder="от"
+                className="catalog-filters__price-input"
+                value={price.min}
+                onChange={e => handlePriceChange('min', e.target.value)}
+              />
+              <span className="catalog-filters__price-dash">—</span>
+              <input
+                type="text" inputMode="numeric" placeholder="до"
+                className="catalog-filters__price-input"
+                value={price.max}
+                onChange={e => handlePriceChange('max', e.target.value)}
+              />
+            </div>
+          </div>
+        </div>
       </div>
       <div className="align-center">
         <div className="btn hide-big" onClick={ () => hideFilters()}>Применить</div>

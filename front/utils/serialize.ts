@@ -108,6 +108,11 @@ function serialize(obj: Record<string, any> = {}) {
     params.push(`filters[main][$eq]=${obj.main}`);
   }
 
+  const priceMin = Number(obj.priceMin);
+  const priceMax = Number(obj.priceMax);
+  if (priceMin > 0) params.push(`filters[Price][$gte]=${priceMin}`);
+  if (priceMax > 0) params.push(`filters[Price][$lte]=${priceMax}`);
+
   const sizeValues = Array.isArray(obj.size) ? obj.size : obj.size ? [obj.size] : [];
   if (sizeValues.length) {
     sizeValues.forEach((value, index) => {
@@ -136,6 +141,8 @@ function serialize(obj: Record<string, any> = {}) {
     'size',
     'populate',
     'q',
+    'priceMin',
+    'priceMax',
   ]);
   let andIndex = sizeValues.length ? 1 : 0;
 

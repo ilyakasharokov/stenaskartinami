@@ -119,6 +119,8 @@ export default function CatalogCmp({arts, hideFiltersForce = false, title = '', 
           <div className="catalog__sort">
             <select className="stena-select" value={ state.selectedSortValue } onChange={(event)=>changeSort(event)}>
               <option value="">По новизне</option>
+              <option value="likes_count:desc">По популярности</option>
+              <option value="views:desc">По просмотрам</option>
               <option value="Price:asc">Дешевле</option>
               <option value="Price:desc">Дороже</option>
             </select>

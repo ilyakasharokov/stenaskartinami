@@ -102,6 +102,11 @@
       "default": 0,
       "min": 0
     },
+    "likes_count": {
+      "type": "integer",
+      "default": 0,
+      "min": 0
+    },
     "user_uploader": {
       "type": "relation",
       "relation": "manyToOne",

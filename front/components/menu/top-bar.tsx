@@ -1,6 +1,7 @@
 import { useSession, signOut } from 'next-auth/react'
 import Link from 'next/link'
 import { useState, useRef, useEffect, useCallback } from 'react'
+import { Image as ImageIcon, Heart, User, Bell } from '@/components/ui/icons'
 
 const BellIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
@@ -16,9 +17,9 @@ const ChevronIcon = () => (
 )
 
 const NOTIF_ICONS = {
-  new_art:      '🖼',
-  new_like:     '❤️',
-  new_follower: '👤',
+  new_art:      ImageIcon,
+  new_like:     Heart,
+  new_follower: User,
 }
 
 function timeAgo(dateStr) {
@@ -189,7 +190,21 @@ export default function NavRight() {
                   className="nav-user__item"
                   onClick={() => setDropdownOpen(false)}
                 >
-                  Модерация
+                  Модерация картин
+                </Link>
+                <Link
+                  href="/moderator/artists"
+                  className="nav-user__item"
+                  onClick={() => setDropdownOpen(false)}
+                >
+                  Художники
+                </Link>
+                <Link
+                  href="/moderator/campaigns"
+                  className="nav-user__item"
+                  onClick={() => setDropdownOpen(false)}
+                >
+                  Рассылки
                 </Link>
               </>
             )}
@@ -208,9 +223,10 @@ export default function NavRight() {
 }
 
 function NotifContent({ n }) {
+  const NotifIcon = NOTIF_ICONS[n.type] || Bell
   return (
     <>
-      <span className="nav-notif__icon">{NOTIF_ICONS[n.type] || '🔔'}</span>
+      <span className="nav-notif__icon"><NotifIcon size={18} /></span>
       <div className="nav-notif__body">
         <span className="nav-notif__actor">{n.actor_name}</span>
         {' '}

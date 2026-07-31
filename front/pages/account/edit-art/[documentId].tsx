@@ -9,6 +9,7 @@ import YearInput from '@/components/input/year-input'
 import MultiSelectInput from '@/components/input/multi-select-input'
 import Preloader from '@/components/preloader/preloader'
 import { normalizeStrapiResponse } from '@/utils/strapi'
+import { ArrowRight, ArrowLeft } from '@/components/ui/icons'
 import { getSession } from '@/lib/getSession'
 import imageUrlBuilder from '@/utils/img-url-builder'
 import InteriorPhotoBlock from '@/components/input/interior-photo-block'
@@ -264,7 +265,7 @@ export default function EditArt({ art, sessionJwt, documentId, isModerator }) {
       <MainLayout>
         <div className="add-art-page edit-art-page">
           <p>Работа не найдена.</p>
-          <Link href="/account/my-arts">← Мои работы</Link>
+          <Link href="/account/my-arts"><ArrowLeft size={15} style={{ verticalAlign: 'middle' }} /> Мои работы</Link>
         </div>
       </MainLayout>
     )
@@ -309,7 +310,7 @@ export default function EditArt({ art, sessionJwt, documentId, isModerator }) {
 
       <div className="add-art-page edit-art-page">
         <div className="edit-art-page__header">
-          <Link href="/account/my-arts" className="edit-art-page__back">← Мои работы</Link>
+          <Link href="/account/my-arts" className="edit-art-page__back"><ArrowLeft size={15} style={{ verticalAlign: 'middle' }} /> Мои работы</Link>
           <h1>Редактировать работу</h1>
         </div>
 
@@ -451,11 +452,11 @@ export default function EditArt({ art, sessionJwt, documentId, isModerator }) {
         <div className="art-action-bar">
           <div className="art-action-bar__inner">
             <div className="art-action-bar__secondary">
-              <Link href="/account/my-arts" className="art-btn art-btn--ghost">← Отмена</Link>
+              <Link href="/account/my-arts" className="art-btn art-btn--ghost"><ArrowLeft size={15} /> Отмена</Link>
             </div>
             <div className="art-action-bar__primary">
               <button type="button" className="art-btn art-btn--primary" onClick={handleSubmit} disabled={saving}>
-                {saving ? 'Сохраняем…' : 'Сохранить изменения →'}
+                {saving ? 'Сохраняем…' : <>Сохранить изменения <ArrowRight size={16} /></>}
               </button>
             </div>
           </div>

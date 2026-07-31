@@ -1,13 +1,15 @@
 import Head from 'next/head'
 import Link from 'next/link'
+import Image from 'next/image'
 import MainLayout from '@/components/layouts/MainLayout'
 import { API_HOST } from "@/constants/constants"
-import imageUrlBuilder from '@/utils/img-url-builder'
+import imageUrlBuilder, { imagePath } from '@/utils/img-url-builder'
 import { useState } from 'react'
 import serialize from '@/utils/serialize'
 import { fetchStrapi } from '@/utils/strapi'
 import { cachedFetch } from '@/utils/server-cache'
 import AddFavorite from '@/components/art/add-favorite'
+import { Heart, Eye, ArrowRight } from '@/components/ui/icons'
 import dynamic from 'next/dynamic'
 
 const YandexMap = dynamic(() => import('@/components/YandexMap'), { ssr: false });
@@ -26,7 +28,61 @@ const getArtImageUrl = (art) => {
   return picture.url || null;
 };
 
-export default function Home({ walls, arts, interiorArts, artists }) {
+// Masonry: 5 columns desktop, 3 tablet, 1 mobile
+const MASONRY_SIZES = '(max-width: 640px) 100vw, (max-width: 1024px) 33vw, 20vw'
+
+const MasonryImage = ({ pic, url, alt }) => (
+  pic?.width && pic?.height
+    ? <Image
+        src={imagePath(url)}
+        alt={alt || ''}
+        width={pic.width}
+        height={pic.height}
+        sizes={MASONRY_SIZES}
+        style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+      />
+    : <img src={imageUrlBuilder(url)} alt={alt} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} loading="lazy" />
+)
+
+const TopArtCard = ({ art, badge }) => {
+  const pic = art.Pictures?.[0]
+  const imgUrl = pic?.formats?.medium?.url || pic?.formats?.small?.url || pic?.url
+  return (
+    <div className={`index-masonry__item catalog-item ${art.sold ? 'sold' : ''}`}>
+      <div className="catalog-item__wrapper">
+        <div
+          className="catalog-item__img-wrap"
+          style={pic?.width && pic?.height ? { aspectRatio: `${pic.width}/${pic.height}` } : undefined}
+        >
+          <div className="catalog-item__btns"><AddFavorite art={art} /></div>
+          {badge && <div className="top-badge">{badge}</div>}
+          <div className="overlay" />
+          <Link href={'/art/' + art.slug + '--' + art.id} className="catalog-item__img-link">
+            {imgUrl && <MasonryImage pic={pic} url={imgUrl} alt={art.Title} />}
+          </Link>
+        </div>
+        <Link href={'/art/' + art.slug + '--' + art.id}>
+          <div className="catalog-item__title">{art.Title}</div>
+        </Link>
+        <div className="catalog-item__size">
+          {art.width && art.height && <div>{art.width} x {art.height}</div>}
+        </div>
+        <div className="catalog-item__artist-price">
+          {art.Artist && (
+            <div className="catalog-item__artist">
+              <Link href={'/artists/' + art.Artist.slug + '--' + art.Artist.id}>{art.Artist.full_name}</Link>
+            </div>
+          )}
+          <div className="catalog-item__price">
+            {art.sold ? 'ПРОДАНО' : art.Price ? art.Price + ' P' : ''}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+export default function Home({ walls, arts, interiorArts, artists, topLikes = [], topViews = [] }) {
   const [currentSlide, setSlide] = useState(0);
   const heroArts = arts.slice(0, 4);
   const featuredArts = arts.slice(4, 14);
@@ -81,7 +137,7 @@ export default function Home({ walls, arts, interiorArts, artists }) {
               </div>
             </div>
             <div className="index-hero__ctas">
-              <Link href="/catalog" className="btn index-hero__btn-primary">Смотреть каталог →</Link>
+              <Link href="/catalog" className="btn index-hero__btn-primary">Смотреть каталог <ArrowRight size={16} /></Link>
               <Link href="/account/add-art" className="index-hero__btn-outline">Добавить работу</Link>
             </div>
           </div>
@@ -94,10 +150,13 @@ export default function Home({ walls, arts, interiorArts, artists }) {
                     <div key={art.id} className={`hero-slider__slide ${i === currentSlide ? 'active' : ''}`}>
                       {getArtImageUrl(art) && (
                         <Link href={'/art/' + art.slug + '--' + art.id}>
-                          <img
-                            src={imageUrlBuilder(getArtImageUrl(art))}
-                            alt={art.Title}
+                          <Image
+                            src={imagePath(getArtImageUrl(art))}
+                            alt={art.Title || ''}
                             className="hero-slider__img"
+                            fill
+                            priority={i === 0}
+                            sizes="(max-width: 900px) 100vw, 50vw"
                           />
                         </Link>
                       )}
@@ -175,7 +234,7 @@ export default function Home({ walls, arts, interiorArts, artists }) {
           <section className="index-section">
             <div className="index-section__header">
               <h2>Избранные работы</h2>
-              <Link href="/catalog" className="index-section__more">Смотреть все работы →</Link>
+              <Link href="/catalog" className="index-section__more">Смотреть все работы <ArrowRight size={16} /></Link>
             </div>
             <div className="index-masonry">
               {featuredArts.slice(0, 10).map(art => {
@@ -191,7 +250,7 @@ export default function Home({ walls, arts, interiorArts, artists }) {
                         <div className="catalog-item__btns"><AddFavorite art={art} /></div>
                         <div className="overlay" />
                         <Link href={'/art/' + art.slug + '--' + art.id} className="catalog-item__img-link">
-                          {imgUrl && <img src={imageUrlBuilder(imgUrl)} alt={art.Title} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} loading="lazy" />}
+                          {imgUrl && <MasonryImage pic={pic} url={imgUrl} alt={art.Title} />}
                         </Link>
                       </div>
                       <Link href={'/art/' + art.slug + '--' + art.id}>
@@ -220,12 +279,42 @@ export default function Home({ walls, arts, interiorArts, artists }) {
           </section>
         )}
 
+        {/* ── Top by likes ── */}
+        {topLikes.length > 0 && (
+          <section className="index-section">
+            <div className="index-section__header">
+              <h2>Популярное по лайкам</h2>
+              <Link href="/catalog" className="index-section__more">Смотреть все работы <ArrowRight size={16} /></Link>
+            </div>
+            <div className="index-masonry">
+              {topLikes.map(art => (
+                <TopArtCard key={art.id} art={art} badge={<><Heart size={13} filled /> {art.likes_count}</>} />
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* ── Top by views ── */}
+        {topViews.length > 0 && (
+          <section className="index-section">
+            <div className="index-section__header">
+              <h2>Популярное по просмотрам</h2>
+              <Link href="/catalog" className="index-section__more">Смотреть все работы <ArrowRight size={16} /></Link>
+            </div>
+            <div className="index-masonry">
+              {topViews.map(art => (
+                <TopArtCard key={art.id} art={art} badge={<><Eye size={13} /> {art.views}</>} />
+              ))}
+            </div>
+          </section>
+        )}
+
         {/* ── Interiors ── */}
         {interiorArts.length > 0 && (
           <section className="index-section">
             <div className="index-section__header">
               <h2>Как картины выглядят в интерьере</h2>
-              <Link href="/catalog" className="index-section__more">Смотреть все интерьеры →</Link>
+              <Link href="/catalog" className="index-section__more">Смотреть все интерьеры <ArrowRight size={16} /></Link>
             </div>
             <div className="index-interiors">
               {interiorArts.map(art => (
@@ -234,7 +323,13 @@ export default function Home({ walls, arts, interiorArts, artists }) {
                   key={art.id}
                   className="index-interiors__item"
                 >
-                  <img src={imageUrlBuilder(art.interior_photo?.url)} alt={art.Title} />
+                  <Image
+                    src={imagePath(art.interior_photo?.url)}
+                    alt={art.Title || ''}
+                    width={art.interior_photo?.width || 800}
+                    height={art.interior_photo?.height || 600}
+                    sizes="(max-width: 900px) 75vw, 25vw"
+                  />
                   <div className="index-interiors__hover">
                     <AddFavorite art={art} />
                   </div>
@@ -249,7 +344,7 @@ export default function Home({ walls, arts, interiorArts, artists }) {
           <section className="index-section">
             <div className="index-section__header">
               <h2>Художники</h2>
-              <Link href="/artists" className="index-section__more">Смотреть всех художников →</Link>
+              <Link href="/artists" className="index-section__more">Смотреть всех художников <ArrowRight size={16} /></Link>
             </div>
             <div className="index-artists">
               {artists.slice(0, 10).map(artist => (
@@ -260,9 +355,9 @@ export default function Home({ walls, arts, interiorArts, artists }) {
                 >
                   <div className="index-artists__photo">
                     {artist.avatar?.url ? (
-                      <img src={imageUrlBuilder(artist.avatar.formats?.small?.url || artist.avatar.url)} alt={artist.full_name} />
+                      <Image src={imagePath(artist.avatar.formats?.small?.url || artist.avatar.url)} alt={artist.full_name || ''} width={130} height={130} sizes="130px" style={{ objectFit: 'cover' }} />
                     ) : artist.photos?.[0]?.url ? (
-                      <img src={imageUrlBuilder(artist.photos[0].url)} alt={artist.full_name} />
+                      <Image src={imagePath(artist.photos[0].url)} alt={artist.full_name || ''} width={130} height={130} sizes="130px" style={{ objectFit: 'cover' }} />
                     ) : (
                       <span className="index-artists__initials">
                         {(artist.full_name || '').charAt(0).toUpperCase()}
@@ -325,7 +420,7 @@ export default function Home({ walls, arts, interiorArts, artists }) {
 export const getServerSideProps = async () => {
   try {
     const TTL = 300; // 5 minutes
-    const [wallsJson, artsJson, intJson, artistsJson] = await Promise.all([
+    const [wallsJson, artsJson, intJson, artistsJson, topLikesJson, topViewsJson] = await Promise.all([
       cachedFetch('home:walls', TTL, () => fetchStrapi(
         API_HOST +
           '/walls' +
@@ -358,6 +453,14 @@ export const getServerSideProps = async () => {
         API_HOST +
           '/artists?filters[works_count][$gt]=0&pagination[pageSize]=10&populate[avatar]=true&populate[photos]=true&sort=publishedAt:desc'
       ).catch(() => null)),
+      cachedFetch('home:topLikes', TTL, () => fetchStrapi(
+        API_HOST +
+          '/arts?filters[wall][$notNull]=true&filters[likes_count][$gt]=0&pagination[pageSize]=8&populate[0]=Pictures&populate[1]=Artist&sort=likes_count:desc'
+      ).catch(() => null)),
+      cachedFetch('home:topViews', TTL, () => fetchStrapi(
+        API_HOST +
+          '/arts?filters[wall][$notNull]=true&filters[views][$gt]=0&pagination[pageSize]=8&populate[0]=Pictures&populate[1]=Artist&sort=views:desc'
+      ).catch(() => null)),
     ]);
 
     const walls = Array.isArray(wallsJson) ? wallsJson : [];
@@ -382,11 +485,13 @@ export const getServerSideProps = async () => {
         arts,
         interiorArts: Array.isArray(intJson) ? intJson : [],
         artists: Array.isArray(artistsJson) ? artistsJson : [],
+        topLikes: Array.isArray(topLikesJson) ? topLikesJson : [],
+        topViews: Array.isArray(topViewsJson) ? topViewsJson : [],
       },
     };
   } catch {
     return {
-      props: { walls: [], arts: [], interiorArts: [], artists: [] },
+      props: { walls: [], arts: [], interiorArts: [], artists: [], topLikes: [], topViews: [] },
     };
   }
 };

@@ -148,6 +148,22 @@ export default (plugin: any) => {
       const nextIds = isFavorite ? existingIds.filter(id => id !== numericId) : [...existingIds, numericId];
       ctx.send({ arts: nextIds, isFavorite: !isFavorite });
 
+      // Keep denormalized likes_count in sync across all versions of the art
+      setImmediate(async () => {
+        try {
+          const [{ count }] = await db('up_users_arts_lnk').where({ art_id: numericId }).count({ count: '*' });
+          const likesCount = Number(count) || 0;
+          const artRow = await db('arts').where({ id: numericId }).first('document_id');
+          if (artRow?.document_id) {
+            await db('arts').where({ document_id: artRow.document_id }).update({ likes_count: likesCount });
+          } else {
+            await db('arts').where({ id: numericId }).update({ likes_count: likesCount });
+          }
+        } catch (e: any) {
+          s.log.warn('[toggleart] likes_count sync failed: ' + e.message);
+        }
+      });
+
       // Notify artist owner when their art is liked (non-blocking)
       if (!isFavorite) {
         setImmediate(async () => {

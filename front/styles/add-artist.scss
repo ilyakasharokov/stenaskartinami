@@ -1,6 +1,6 @@
 // ─── Add Artist Wizard (extends .aw-* from add-wall.scss) ─────────────────────
 
-$aa-orange: #f15a24;
+$aa-orange: #dc3a0f;
 $aa-border: #e5e7eb;
 $aa-border-strong: #d1d5db;
 $aa-text-hint: #9ca3af;
@@ -16,7 +16,7 @@ $aa-text-hint: #9ca3af;
 
 .aw-artist-header {
   padding: 20px 24px 0;
-  max-width: 1140px;
+  max-width: 1280px;
   width: 100%;
   margin: 0 auto;
 
@@ -50,7 +50,7 @@ $aa-text-hint: #9ca3af;
   grid-template-columns: 1fr 300px;
   gap: 24px;
   width: 100%;
-  max-width: 1140px;
+  max-width: 1280px;
   margin: 0 auto;
   padding: 0 24px 40px;
   align-items: start;

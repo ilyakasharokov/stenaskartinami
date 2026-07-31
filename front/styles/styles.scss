@@ -265,16 +265,38 @@ main {
 }
 
 .favorite-btn {
-    &.active{
-        background-position-x: right;
-    }
     width: 35px;
     height: 35px;
-    background: url(/images/heart.png);
-    background-size: 200%;
-    background-position: left;
-    background-repeat: no-repeat;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.9);
+    box-shadow: 0 1px 5px rgba(0, 0, 0, 0.15);
     cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: background 0.15s, transform 0.12s;
+
+    &:hover { background: #fff; transform: scale(1.06); }
+    &:active { transform: scale(0.92); }
+
+    &__icon {
+        width: 20px;
+        height: 20px;
+        color: #555;
+        transition: color 0.18s, transform 0.25s cubic-bezier(0.2, 1.4, 0.4, 1);
+    }
+
+    &.active &__icon {
+        color: #e0245e;
+        animation: favorite-pop 0.32s cubic-bezier(0.2, 1.4, 0.4, 1);
+    }
+}
+
+@keyframes favorite-pop {
+    0%   { transform: scale(0.6); }
+    45%  { transform: scale(1.25); }
+    100% { transform: scale(1); }
 }
 
 @media screen and (max-width: 994px) {

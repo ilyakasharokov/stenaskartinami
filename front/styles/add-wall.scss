@@ -3,7 +3,7 @@
 @use 'sass:color';
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
-$orange: #f15a24;
+$orange: #dc3a0f;
 $orange-light: #fff0ea;
 $orange-border: #f4a07a;
 $text: #111827;
@@ -35,6 +35,7 @@ $shadow-md: 0 4px 6px rgba(0,0,0,.06), 0 1px 3px rgba(0,0,0,.08);
   grid-template-columns: 220px 1fr 260px;
   gap: 24px;
   width: 100%;
+  max-width: 1280px; // single canonical wizard width (matches add-art)
   margin: 0 auto;
   padding: 28px 24px 40px;
   align-items: start;
@@ -862,9 +863,12 @@ $shadow-md: 0 4px 6px rgba(0,0,0,.06), 0 1px 3px rgba(0,0,0,.08);
 }
 
 .aw-footer__back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   background: $white;
   border: 1.5px solid $border-strong;
-  border-radius: 8px;
+  border-radius: $radius-sm;
   padding: 11px 24px;
   font-size: 14px;
   font-weight: 500;
@@ -893,7 +897,7 @@ $shadow-md: 0 4px 6px rgba(0,0,0,.06), 0 1px 3px rgba(0,0,0,.08);
   font-family: 'Inter', sans-serif;
   background: $orange;
   border: none;
-  border-radius: 8px;
+  border-radius: $radius-sm;
   color: $white;
   cursor: pointer;
   white-space: nowrap;
@@ -936,7 +940,7 @@ $shadow-md: 0 4px 6px rgba(0,0,0,.06), 0 1px 3px rgba(0,0,0,.08);
   white-space: nowrap;
   background: $orange;
   border: none;
-  border-radius: 8px;
+  border-radius: $radius-sm;
   color: $white;
   font-weight: 600;
   cursor: pointer;

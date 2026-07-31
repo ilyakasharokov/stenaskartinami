@@ -19,6 +19,12 @@ export default {
       config: { policies: [] },
     },
     {
+      method: 'PUT',
+      path: '/artists/:id/admin',
+      handler: 'artist.adminUpdate',
+      config: { policies: [] },
+    },
+    {
       method: 'POST',
       path: '/artists/:id/follow',
       handler: 'artist.follow',

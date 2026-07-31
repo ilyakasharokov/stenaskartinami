@@ -7,6 +7,7 @@ import MainLayout from '@/components/layouts/MainLayout'
 import AddressInput from '@/components/ui/AddressInput'
 import { getSession } from '@/lib/getSession'
 import { useToast } from '@/components/ui/Toast'
+import { ArrowRight, ArrowLeft } from '@/components/ui/icons'
 
 const WALL_TYPE_ICONS = {
   cafe: (
@@ -750,7 +751,7 @@ export default function AddWall() {
           <div className="aw-steps__skip-title">Не хотите заполнять сейчас?</div>
           <div className="aw-steps__skip-text">Вы сможете добавить или изменить эту информацию позже в настройках стены.</div>
           <button type="button" className="aw-steps__skip-btn" onClick={() => submit(false)}>
-            Пропустить этот шаг →
+            Пропустить этот шаг <ArrowRight size={15} style={{ verticalAlign: 'middle' }} />
           </button>
         </div>
       </>
@@ -798,23 +799,23 @@ export default function AddWall() {
               <div className="aw-footer__left">
                 {step > 1 ? (
                   <button type="button" className="aw-footer__back" onClick={goBack}>
-                    ← Назад
+                    <ArrowLeft size={16} /> Назад
                   </button>
                 ) : <div />}
               </div>
               <div className="aw-footer__nav">
                 {step < 3 ? (
                   <button type="button" className="aw-footer__next" onClick={goNext}>
-                    Продолжить →
+                    Продолжить <ArrowRight size={16} />
                   </button>
                 ) : (
                   <div className="aw-footer__finish-wrap">
                     <button type="button" className="aw-footer__skip" onClick={() => submit(false)} disabled={submitting}>
-                      Пропустить этот шаг →
+                      <span>Пропустить этот шаг <ArrowRight size={14} style={{ verticalAlign: 'middle' }} /></span>
                       <span>Можно будет редактировать позже</span>
                     </button>
                     <button type="button" className="aw-footer__finish" onClick={() => submit(true)} disabled={submitting}>
-                      {submitting ? 'Сохранение…' : 'Завершить и перейти к публикации →'}
+                      {submitting ? 'Сохранение…' : <>Завершить и перейти к публикации <ArrowRight size={16} /></>}
                     </button>
                   </div>
                 )}

@@ -9,6 +9,7 @@ import { useToast } from '@/components/ui/Toast'
 import { fetchStrapi } from '@/utils/strapi'
 import { API_HOST } from '@/constants/constants'
 import { CityInput, CountryInput, countryToCode } from '@/components/ui/AddressInput'
+import { ArrowRight, ArrowLeft } from '@/components/ui/icons'
 const MESSENGER_TYPES = [['telegram', 'Telegram'], ['whatsapp', 'WhatsApp'], ['phone', 'Телефон'], ['email', 'Email']]
 
 const STEPS = [
@@ -432,7 +433,7 @@ export default function AddArtist() {
         <div className="aw-existing-artist-banner">
           У вас уже есть профиль художника.{' '}
           <Link href={`/artists/${existingArtist.slug || existingArtist.documentId}--${existingArtist.id}`}>
-            Перейти к профилю →
+            Перейти к профилю <ArrowRight size={15} style={{ verticalAlign: 'middle' }} />
           </Link>
         </div>
       )}
@@ -727,16 +728,16 @@ export default function AddArtist() {
             <div className="aw-footer">
               <div className="aw-footer__left">
                 {step > 1
-                  ? <button type="button" className="aw-footer__back" onClick={goBack}>← Назад</button>
+                  ? <button type="button" className="aw-footer__back" onClick={goBack}><ArrowLeft size={16} /> Назад</button>
                   : <div />
                 }
               </div>
               <div className="aw-footer__nav">
                 {step < 4 ? (
-                  <button type="button" className="aw-footer__next" onClick={goNext}>Продолжить →</button>
+                  <button type="button" className="aw-footer__next" onClick={goNext}>Продолжить <ArrowRight size={16} /></button>
                 ) : (
                   <button type="button" className="aw-footer__finish" onClick={submit} disabled={submitting}>
-                    {submitting ? 'Публикация…' : 'Опубликовать профиль →'}
+                    {submitting ? 'Публикация…' : <>Опубликовать профиль <ArrowRight size={16} /></>}
                   </button>
                 )}
               </div>

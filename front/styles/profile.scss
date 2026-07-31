@@ -863,7 +863,7 @@ textarea.prof-input {
     align-items: center;
     gap: 6px;
     padding: 11px 22px;
-    background: #f15a24;
+    background: #dc3a0f;
     color: #fff;
     border-radius: 10px;
     text-decoration: none;
@@ -906,8 +906,8 @@ textarea.prof-input {
     transition: color 0.15s, border-color 0.15s;
 
     &.is-active {
-      color: #f15a24;
-      border-bottom-color: #f15a24;
+      color: #dc3a0f;
+      border-bottom-color: #dc3a0f;
       font-weight: 600;
     }
 
@@ -921,7 +921,7 @@ textarea.prof-input {
     min-width: 20px;
     height: 20px;
     padding: 0 5px;
-    background: #f15a24;
+    background: #dc3a0f;
     color: #fff;
     border-radius: 10px;
     font-size: 11px;
@@ -1038,7 +1038,7 @@ textarea.prof-input {
     line-height: 1.3;
     text-decoration: none;
     display: block;
-    &:hover { color: #f15a24; }
+    &:hover { color: #dc3a0f; }
   }
 
   &__addr {
@@ -1083,8 +1083,8 @@ textarea.prof-input {
 
     &--orange {
       background: none;
-      border: 1.5px solid #f15a24;
-      color: #f15a24;
+      border: 1.5px solid #dc3a0f;
+      color: #dc3a0f;
       &:hover { background: #fff0ea; }
     }
   }

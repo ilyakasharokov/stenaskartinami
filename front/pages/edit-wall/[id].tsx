@@ -8,6 +8,7 @@ import { getSession } from '@/lib/getSession'
 import { API_HOST } from '@/constants/constants'
 import imageUrlBuilder from '@/utils/img-url-builder'
 import { useToast } from '@/components/ui/Toast'
+import { ArrowRight, ArrowLeft } from '@/components/ui/icons'
 
 const WALL_TYPE_ICONS = {
   cafe: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M17 8h1a4 4 0 0 1 0 8h-1"/><path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V8z"/><path d="M6 2v2M10 2v2M14 2v2"/></svg>,
@@ -640,12 +641,12 @@ export default function EditWall({ wall }) {
             <div className="aw-footer">
               <div className="aw-footer__left">
                 {step > 1
-                  ? <button type="button" className="aw-footer__back" onClick={goBack}>← Назад</button>
+                  ? <button type="button" className="aw-footer__back" onClick={goBack}><ArrowLeft size={16} /> Назад</button>
                   : <div />}
               </div>
               <div className="aw-footer__nav">
                 {step < 3 ? (
-                  <button type="button" className="aw-footer__next" onClick={goNext}>Продолжить →</button>
+                  <button type="button" className="aw-footer__next" onClick={goNext}>Продолжить <ArrowRight size={16} /></button>
                 ) : (
                   <button type="button" className="aw-footer__finish" onClick={submit} disabled={submitting}>
                     {submitting ? 'Сохранение…' : 'Сохранить изменения'}

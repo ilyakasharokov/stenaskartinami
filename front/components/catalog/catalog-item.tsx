@@ -1,7 +1,11 @@
 import { useRef, useCallback } from 'react'
-import imageUrlBuilder from '@/utils/img-url-builder'
+import Image from 'next/image'
+import imageUrlBuilder, { imagePath } from '@/utils/img-url-builder'
 import Link from 'next/link'
 import AddFavorite from '../art/add-favorite'
+
+// Card is ~25vw in a 4-col grid, wider on tablet/mobile
+const CARD_SIZES = '(max-width: 700px) 50vw, (max-width: 1200px) 33vw, 25vw'
 
 const getPictureUrl = (art) => {
   if (!Array.isArray(art?.Pictures) || !art.Pictures[0]) return null;
@@ -63,14 +67,25 @@ export default function CatalogItem({art, imageOnLoad}){
                         }
                         <div className="overlay"></div>
                         <Link href={ '/art/' + art.slug + '--' + art.id} className="catalog-item__img-link" title={art.Title}>
-                            <img
-                              ref={imgRefCallback}
-                              className="catalog-item__img"
-                              src={imageUrlBuilder(picUrl)}
-                              alt={art.Title}
-                              width={imgW || undefined}
-                              height={imgH || undefined}
-                            />
+                            {
+                              imgW && imgH
+                                ? <Image
+                                    ref={imgRefCallback}
+                                    className="catalog-item__img"
+                                    src={imagePath(picUrl)}
+                                    alt={art.Title || ''}
+                                    width={imgW}
+                                    height={imgH}
+                                    sizes={CARD_SIZES}
+                                    onLoad={e => { markLoaded(e.currentTarget); imageOnLoadRef.current?.(); }}
+                                  />
+                                : <img
+                                    ref={imgRefCallback}
+                                    className="catalog-item__img"
+                                    src={imageUrlBuilder(picUrl)}
+                                    alt={art.Title}
+                                  />
+                            }
                         </Link>
                     </div>
                 }

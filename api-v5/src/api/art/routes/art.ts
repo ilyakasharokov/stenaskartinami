@@ -62,6 +62,12 @@ export default {
     },
     {
       method: 'POST',
+      path: '/arts/:id/view',
+      handler: 'art.incrementView',
+      config: { policies: [], auth: false },
+    },
+    {
+      method: 'POST',
       path: '/arts',
       handler: 'art.create',
       config: { policies: [] },

@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useSession } from 'next-auth/react'
 import Router from 'next/router'
+import { Heart } from '@/components/ui/icons'
 
 export default function AddFavorite({ art }) {
   const { data: session } = useSession()
@@ -45,8 +46,12 @@ export default function AddFavorite({ art }) {
   return (
     <div
       title="Избранное"
+      role="button"
+      aria-pressed={isActive}
       className={`favorite-btn ${isActive ? 'active' : ''}`}
       onClick={toggleFavorite}
-    />
+    >
+      <Heart className="favorite-btn__icon" filled={isActive} />
+    </div>
   )
 }

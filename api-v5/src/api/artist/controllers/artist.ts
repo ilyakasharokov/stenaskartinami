@@ -37,7 +37,7 @@ const computeStats = async (entity: any, userId?: number) => {
   const arts = await strapi.entityService.findMany(artUid, {
     filters: { Artist: { documentId: { $eq: entity.documentId } } } as any,
     populate: { wall: true } as any,
-    fields: ['id', 'sold'] as any,
+    fields: ['id', 'sold', 'views', 'likes_count'] as any,
     status: 'published',
     pagination: { pageSize: 1000 },
   });
@@ -52,6 +52,8 @@ const computeStats = async (entity: any, userId?: number) => {
     worksCount: artsList.length,
     soldCount: artsList.filter((a: any) => a.sold).length,
     wallsCount: wallIds.size,
+    totalViews: artsList.reduce((s: number, a: any) => s + (a.views || 0), 0),
+    totalLikes: artsList.reduce((s: number, a: any) => s + (a.likes_count || 0), 0),
     isFollowing: userId ? followers.some((f: any) => f.id === userId) : false,
   };
 };
@@ -209,6 +211,29 @@ export default factories.createCoreController(uid, () => ({
         });
       } catch (e) { /* non-critical */ }
     });
+  },
+
+  async adminUpdate(ctx) {
+    const user = ctx.state.user;
+    if (!user) return ctx.unauthorized();
+    const userRecord = await strapi.entityService.findOne(userUid, user.id, {}) as any;
+    if (!userRecord?.is_moderator) return ctx.forbidden('Not a moderator');
+
+    const documentId = ctx.params.id;
+    const artist = await findPublishedByDocumentId(documentId);
+    if (!artist) return ctx.notFound();
+
+    const ALLOWED = ['full_name', 'description', 'country', 'city_name', 'birth_year',
+      'career_start_year', 'directions', 'techniques', 'subjects', 'education',
+      'exhibitions', 'social_links', 'studio_location', 'nickname'];
+    const body = ctx.request.body?.data ?? ctx.request.body ?? {};
+    const data: Record<string, any> = {};
+    for (const key of ALLOWED) {
+      if (Object.prototype.hasOwnProperty.call(body, key)) data[key] = body[key];
+    }
+
+    await strapi.entityService.update(uid, artist.id, { data } as any);
+    ctx.body = { ok: true };
   },
 
   async unfollow(ctx) {

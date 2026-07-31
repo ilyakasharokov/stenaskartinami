@@ -25,7 +25,11 @@
     text-decoration: none;
     white-space: nowrap;
     flex-shrink: 0;
-    &:hover { text-decoration: underline; }
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    &:hover { color: #dc3a0f; }
+    svg { flex-shrink: 0; }
   }
 }
 
@@ -83,6 +87,9 @@
   &__btn-primary {
     font-size: 16px;
     padding: 14px 28px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
   }
 
   &__btn-outline {
@@ -239,6 +246,25 @@
     break-inside: avoid;
     margin-bottom: 12px;
   }
+}
+
+.top-badge {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 9px;
+  background: rgba(0, 0, 0, 0.7);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.4;
+  border-radius: 20px;
+  backdrop-filter: blur(2px);
+  pointer-events: none;
 }
 
 // ── Interiors ─────────────────────────────────────────────────────────────────

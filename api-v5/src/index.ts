@@ -82,6 +82,10 @@ export default {
         'api::artist.artist.create',
         'api::artist.artist.follow',
         'api::artist.artist.unfollow',
+        'api::artist.artist.adminUpdate',
+        'api::mail-log.mail-log.sendCampaign',
+        'api::mail-log.mail-log.logs',
+        'api::mail-log.mail-log.refreshScores',
         'plugin::upload.content-api.upload',
       ];
 
@@ -164,6 +168,34 @@ export default {
     };
 
     await ensureUploadFilesPublished();
+
+    const backfillLikesCount = async () => {
+      try {
+        const client = strapi.db.connection.client.config.client || '';
+        if (['pg', 'postgres', 'postgresql'].some((c) => client.includes(c))) {
+          // New columns arrive as NULL for existing rows; Postgres sorts NULLs
+          // first in DESC, which breaks popularity sorting — normalize to 0.
+          await strapi.db.connection.raw(`UPDATE arts SET likes_count = 0 WHERE likes_count IS NULL`);
+          await strapi.db.connection.raw(`UPDATE arts SET views = 0 WHERE views IS NULL`);
+          await strapi.db.connection.raw(`
+            UPDATE arts a
+            SET likes_count = COALESCE(sub.cnt, 0)
+            FROM (
+              SELECT p.document_id AS doc, COUNT(l.art_id) AS cnt
+              FROM up_users_arts_lnk l
+              JOIN arts p ON p.id = l.art_id
+              GROUP BY p.document_id
+            ) sub
+            WHERE a.document_id = sub.doc
+              AND a.likes_count IS DISTINCT FROM sub.cnt
+          `);
+        }
+      } catch (e: any) {
+        strapi.log.warn('[bootstrap] backfillLikesCount failed: ' + e.message);
+      }
+    };
+
+    await backfillLikesCount();
 
     if (process.env.REGENERATE_UPLOAD_FORMATS === 'true') {
       const { default: regenerateUploadFormats } = await import(

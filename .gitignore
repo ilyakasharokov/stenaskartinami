@@ -47,3 +47,6 @@ api-v5/data.ms/
 
 # Database dumps
 dump/
+
+# site-check screenshots/reports
+front/scripts/site-check-out/

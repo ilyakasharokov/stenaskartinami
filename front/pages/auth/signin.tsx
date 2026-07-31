@@ -3,7 +3,6 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/authOptions';
 import Head from 'next/head';
 import Router from 'next/router';
-import Link from 'next/link';
 import { useState, useCallback } from 'react';
 import dynamic from 'next/dynamic';
 
@@ -159,7 +158,7 @@ export default function SignIn({ authError }) {
 
   return (
     <>
-      <Head><title>Войти | Стена с картинами</title><meta name="robots" content="noindex" /></Head>
+      <Head><title>Вход или регистрация | Стена с картинами</title><meta name="robots" content="noindex" /></Head>
       <div className="login-page__wrapper">
         <div className="login-page">
           <div className="login-page__logo">
@@ -167,7 +166,7 @@ export default function SignIn({ authError }) {
             <div className="login-page__text">Стена с картинами</div>
           </div>
 
-          <div className="login-page__title">Войти</div>
+          <div className="login-page__title">Вход или регистрация</div>
 
           {tabs.length > 1 && (
             <div className="login-page__tabs">
@@ -270,7 +269,7 @@ export default function SignIn({ authError }) {
           </div>
 
           <div className="login-page__signup-link">
-            Нет аккаунта? <Link href="/auth/signin">Вход создаст его автоматически</Link>
+            Нет аккаунта? Он создастся автоматически при первом входе.
           </div>
         </div>
       </div>
