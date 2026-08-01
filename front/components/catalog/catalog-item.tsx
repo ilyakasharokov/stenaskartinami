@@ -3,6 +3,7 @@ import Image from 'next/image'
 import imageUrlBuilder, { imagePath } from '@/utils/img-url-builder'
 import Link from 'next/link'
 import AddFavorite from '../art/add-favorite'
+import { Eye, Heart } from '../ui/icons'
 
 // Card is ~25vw in a 4-col grid, wider on tablet/mobile
 const CARD_SIZES = '(max-width: 700px) 50vw, (max-width: 1200px) 33vw, 25vw'
@@ -95,6 +96,13 @@ export default function CatalogItem({art, imageOnLoad}){
                 {
                     art.width && art.height &&
                     <div className="catalog-item__size">{art.width} x {art.height}</div>
+                }
+                {
+                    (art.views > 0 || art.likes_count > 0) &&
+                    <div className="catalog-item__stats">
+                        {art.views > 0 && <span title="Просмотры"><Eye size={13} /> {art.views}</span>}
+                        {art.likes_count > 0 && <span title="Лайки"><Heart size={13} filled /> {art.likes_count}</span>}
+                    </div>
                 }
                 <div className="catalog-item__artist-price">
                     {

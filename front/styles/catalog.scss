@@ -149,6 +149,19 @@
             margin-bottom: 8px;
             height: 16px;
         }
+        &__stats {
+            display: flex;
+            gap: 14px;
+            margin: -4px 0 8px;
+            font-size: 12px;
+            color: #999;
+            span {
+                display: inline-flex;
+                align-items: center;
+                gap: 4px;
+            }
+            svg { color: #bbb; }
+        }
         &__bg-img{
             margin-bottom: 5px;
         }

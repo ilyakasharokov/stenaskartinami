@@ -418,8 +418,8 @@ export default function Art({ art, style, styleArts, artistArts, artist: initial
               {year && <span>{year}</span>}
               {year && <span className="art-meta__dot">·</span>}
               <span>ID: {art.id}</span>
-              {art.views > 0 && <span className="art-meta__dot">·</span>}
-              {art.views > 0 && <span className="art-meta__views" title="Просмотры"><Eye size={15} /> {art.views}</span>}
+              <span className="art-meta__dot">·</span>
+              <span className="art-meta__views" title="Просмотры"><Eye size={15} /> {art.views || 0}</span>
             </div>
 
             {/* Artist */}
