@@ -28,6 +28,9 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+    # Reach the host's native Meilisearch for indexing (write) operations
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     volumes:
       - ./api-v5/public/uploads:/usr/src/app/public/uploads
 
