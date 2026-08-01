@@ -66,6 +66,39 @@ export default ({ env }) => ({
           displayedAttributes: ["id", "Title", "slug", "img", "Artist_full_name"],
         },
       },
+      artist: {
+        indexName: "artist",
+        populate: ["avatar"],
+        transformEntry({ entry }) {
+          const av = entry.avatar;
+          return {
+            id: entry.id,
+            full_name: entry.full_name || "",
+            nickname: entry.nickname || "",
+            slug: entry.slug || "",
+            avatar: av?.formats?.thumbnail?.url || av?.formats?.small?.url || av?.url || null,
+          };
+        },
+        settings: {
+          searchableAttributes: ["full_name", "nickname"],
+          displayedAttributes: ["id", "full_name", "nickname", "slug", "avatar"],
+        },
+      },
+      wall: {
+        indexName: "wall",
+        transformEntry({ entry }) {
+          return {
+            id: entry.id,
+            Title: entry.Title || "",
+            slug: entry.slug || "",
+            Address: entry.Address || "",
+          };
+        },
+        settings: {
+          searchableAttributes: ["Title", "Address"],
+          displayedAttributes: ["id", "Title", "slug", "Address"],
+        },
+      },
     },
   },
 });

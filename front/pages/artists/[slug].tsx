@@ -63,7 +63,12 @@ export default function ArtistPage({ artist: initialArtist }) {
 
   useEffect(() => {
     if (!session?.jwt || !initialArtist?.documentId) return
-    fetch(`${process.env.NEXT_PUBLIC_API_URL}/artists/${initialArtist.documentId}`, {
+    // Refetch fresh — including Arts — so a just-published work shows without
+    // waiting for ISR revalidation (fixes "3 работы" counter vs empty grid).
+    const populate = 'populate[avatar]=true&populate[cover]=true&populate[photos]=true'
+      + '&populate[Arts][populate][0]=Pictures&populate[Arts][populate][1]=wall'
+      + '&populate[Arts][populate][2]=styles&populate[Arts][populate][3]=subjects&populate[Arts][populate][4]=mediums'
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/artists/${initialArtist.documentId}?${populate}`, {
       headers: { Authorization: `Bearer ${session.jwt}` },
     })
       .then(r => r.json())
