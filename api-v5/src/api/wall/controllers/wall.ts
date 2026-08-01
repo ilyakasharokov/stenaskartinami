@@ -1,5 +1,6 @@
 import { sanitize } from '@strapi/utils';
 import { factories } from '@strapi/strapi';
+import { meiliSync } from '../../../meili/client';
 
 const uid = 'api::wall.wall';
 
@@ -77,6 +78,7 @@ export default factories.createCoreController(uid, ({ strapi }) => ({
     }
     const response = await super.update(ctx);
     await strapi.documents(uid).publish({ documentId });
+    meiliSync('wall', documentId);
     return response;
   },
 
@@ -97,6 +99,7 @@ export default factories.createCoreController(uid, ({ strapi }) => ({
         data: { user_uploader: userId } as any,
       })
       await strapi.documents(uid).publish({ documentId })
+      meiliSync('wall', documentId)
     }
 
     return response

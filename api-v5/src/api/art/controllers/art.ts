@@ -1,5 +1,6 @@
 import { sanitize } from '@strapi/utils';
 import { factories } from '@strapi/strapi';
+import { meiliSync, meiliRemove } from '../../../meili/client';
 
 const uid = 'api::art.art';
 
@@ -304,6 +305,7 @@ export default factories.createCoreController(uid, () => ({
       } catch (error) {
         strapi.log.error(error);
       }
+      meiliSync('art', response.data?.documentId);
     }
 
     return response;
@@ -399,6 +401,7 @@ export default factories.createCoreController(uid, () => ({
     if (!entity) return ctx.notFound();
 
     await strapi.entityService.update(uid, entity.id, { data: { publishedAt: null } as any });
+    meiliRemove('art', entity.id);
     ctx.send({ ok: true });
   },
 

@@ -1,3 +1,5 @@
+import { toArtDoc, toArtistDoc, toWallDoc } from '../src/meili/transforms';
+
 export default ({ env }) => ({
   email: {
     config: {
@@ -51,16 +53,7 @@ export default ({ env }) => ({
       art: {
         indexName: "art",
         populate: ["Artist", "Pictures"],
-        transformEntry({ entry }) {
-          const pic = entry.Pictures?.[0];
-          return {
-            id: entry.id,
-            Title: entry.Title || "",
-            slug: entry.slug || "",
-            img: pic?.url || null,
-            Artist_full_name: entry.Artist?.full_name || "",
-          };
-        },
+        transformEntry: ({ entry }) => toArtDoc(entry),
         settings: {
           searchableAttributes: ["Title", "Artist_full_name"],
           displayedAttributes: ["id", "Title", "slug", "img", "Artist_full_name"],
@@ -69,16 +62,7 @@ export default ({ env }) => ({
       artist: {
         indexName: "artist",
         populate: ["avatar"],
-        transformEntry({ entry }) {
-          const av = entry.avatar;
-          return {
-            id: entry.id,
-            full_name: entry.full_name || "",
-            nickname: entry.nickname || "",
-            slug: entry.slug || "",
-            avatar: av?.formats?.thumbnail?.url || av?.formats?.small?.url || av?.url || null,
-          };
-        },
+        transformEntry: ({ entry }) => toArtistDoc(entry),
         settings: {
           searchableAttributes: ["full_name", "nickname"],
           displayedAttributes: ["id", "full_name", "nickname", "slug", "avatar"],
@@ -86,14 +70,7 @@ export default ({ env }) => ({
       },
       wall: {
         indexName: "wall",
-        transformEntry({ entry }) {
-          return {
-            id: entry.id,
-            Title: entry.Title || "",
-            slug: entry.slug || "",
-            Address: entry.Address || "",
-          };
-        },
+        transformEntry: ({ entry }) => toWallDoc(entry),
         settings: {
           searchableAttributes: ["Title", "Address"],
           displayedAttributes: ["id", "Title", "slug", "Address"],

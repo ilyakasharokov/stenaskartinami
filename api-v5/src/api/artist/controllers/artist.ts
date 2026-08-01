@@ -1,5 +1,6 @@
 import { sanitize } from '@strapi/utils';
 import { factories } from '@strapi/strapi';
+import { meiliSync } from '../../../meili/client';
 
 const uid = 'api::artist.artist';
 const userUid = 'plugin::users-permissions.user';
@@ -150,6 +151,8 @@ export default factories.createCoreController(uid, () => ({
 
       const published = await findPublishedByDocumentId(documentId);
 
+      meiliSync('artist', documentId);
+
       if (profileType === 'real_user' && published) {
         await strapi.entityService.update(userUid, userId, {
           data: { pending_artist: published.id, artist_confirmed: true } as any,
@@ -233,6 +236,7 @@ export default factories.createCoreController(uid, () => ({
     }
 
     await strapi.entityService.update(uid, artist.id, { data } as any);
+    meiliSync('artist', documentId);
     ctx.body = { ok: true };
   },
 
