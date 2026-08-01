@@ -146,14 +146,15 @@ export default function CatalogCmp({arts, hideFiltersForce = false, title = '', 
         <CatalogFilters onChange={() => setState(prev => ({...prev, showPreloader: true, arts: [...state.arts], count: state.count}))} filtersPreloaded={filters} hideFilters={() => hideFilters()}></CatalogFilters>
         </div>
       }
+      <div className="catalog-arts">
       {
         state.showPreloader &&
-        <div className="overlay">
+        <div className="overlay overlay--catalog">
           <Preloader></Preloader>
         </div>
       }
       {
-        state.arts && state.arts.length > 0 && 
+        state.arts && state.arts.length > 0 &&
         <div className="catalog-wrapper">
           <div className="catalog-grid">
             {
@@ -180,6 +181,7 @@ export default function CatalogCmp({arts, hideFiltersForce = false, title = '', 
           { emptyText ? emptyText : "Извините, по данным критериям ничего нет :(" }
         </div>
       }
+      </div>
     </div>
   </div>
 

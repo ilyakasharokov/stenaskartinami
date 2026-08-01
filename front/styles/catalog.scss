@@ -21,8 +21,23 @@
     align-items: flex-start;
     margin-bottom: 50px;
     position: relative;
+    &-arts {
+        flex: 1;
+        min-width: 0;
+        position: relative; // scope the loading overlay to the arts column
+    }
     &-wrapper{
         width: 100%;
+    }
+    // Loading overlay covers only the arts area (not sidebar/header),
+    // with the spinner centred inside that area rather than the viewport.
+    .overlay--catalog {
+        position: absolute;
+        inset: 0;
+        min-height: 200px;
+        .preloader {
+            position: absolute;
+        }
     }
     &-filters__preloader{
         text-align: center;

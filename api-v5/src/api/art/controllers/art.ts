@@ -4,6 +4,74 @@ import { meiliSync, meiliRemove } from '../../../meili/client';
 
 const uid = 'api::art.art';
 
+const MODERATION_RECIPIENTS = 'ilyakasharokov@mail.ru, dudkinet@gmail.com';
+
+// Rich "new art on moderation" email. Re-fetches the entry with full relations
+// so title/artist/etc. are always present (the entry is fresh at create time).
+async function sendModerationEmail(documentId: string, fallbackId: number) {
+  try {
+    let art: any = null;
+    if (documentId) {
+      const rows = await strapi.entityService.findMany(uid, {
+        filters: { documentId: { $eq: documentId } } as any,
+        populate: {
+          Artist: { fields: ['full_name', 'nickname', 'slug', 'id'] },
+          styles: { fields: ['Title', 'title'] },
+          subjects: { fields: ['Title', 'title'] },
+          mediums: { fields: ['title', 'Title'] },
+          Pictures: { fields: ['url'] },
+          user_uploader: { fields: ['username', 'email', 'real_email', 'phone'] },
+        } as any,
+        pagination: { pageSize: 1 },
+      });
+      art = Array.isArray(rows) ? rows[0] : rows;
+    }
+    if (!art && fallbackId) {
+      art = await strapi.entityService.findOne(uid, fallbackId, { populate: { Artist: true } as any });
+    }
+    if (!art) return;
+
+    const tagNames = (arr: any[]) =>
+      (Array.isArray(arr) ? arr : []).map((t) => t?.Title || t?.title).filter(Boolean).join(', ') || '—';
+    const u = art.user_uploader || {};
+    const contact = [u.email, u.real_email, u.phone].filter(Boolean).join(', ') || '—';
+    const dims = art.width && art.height ? `${art.width} × ${art.height} см` : '—';
+    const price = art.Owners_price ? `${art.Owners_price} ₽` : 'не указана';
+    const artUrl = art.slug ? `https://stenaskartinami.com/art/${art.slug}--${art.id}` : '—';
+
+    const title = art.Title || 'Без названия';
+    const artist = art.Artist?.full_name || '—';
+
+    const lines = [
+      `Название: ${title}`,
+      `Художник: ${artist}${art.Artist?.nickname ? ` (${art.Artist.nickname})` : ''}`,
+      `Материалы и техника: ${art.Materials || '—'}`,
+      `Размеры: ${dims}`,
+      `Год: ${art.Year ? new Date(art.Year).getFullYear() : '—'}`,
+      `Желаемая цена автора: ${price}`,
+      `Стили: ${tagNames(art.styles)}`,
+      `Теги: ${tagNames(art.subjects)}`,
+      `Техника: ${tagNames(art.mediums)}`,
+      `Загрузил: ${u.username || '—'} (${contact})`,
+      `Описание: ${art.Description ? String(art.Description).replace(/<[^>]+>/g, '').slice(0, 500) : '—'}`,
+      ``,
+      `Работа: ${artUrl}`,
+      `Модерация: https://stenaskartinami.com/moderator`,
+      ``,
+      `Не забудьте назначить стену и публичную цену при одобрении.`,
+    ];
+
+    await strapi.plugin('email').service('email').send({
+      to: MODERATION_RECIPIENTS,
+      from: 'no-reply@stenaskartinami.com',
+      subject: `Новая работа на модерации: «${title}» — ${artist}`,
+      text: lines.join('\n'),
+    });
+  } catch (error) {
+    strapi.log.error('[art] sendModerationEmail failed:', error);
+  }
+}
+
 // Published entity IDs come from the content API (default).
 // Draft arts must reference draft entity IDs so Strapi admin resolves them correctly.
 async function toDraftId(table: string, id: number): Promise<number> {
@@ -293,15 +361,7 @@ export default factories.createCoreController(uid, () => ({
             data: { user_uploader: userId } as any,
           });
         }
-        const entity = await strapi.entityService.findOne(uid, createdId, {
-          populate: { Artist: true },
-        });
-        await strapi.plugin('email').service('email').send({
-          to: 'ilyakasharokov@mail.ru, dudkinet@gmail.com',
-          from: 'no-reply@stenaskartinami.com',
-          subject: 'Стена с картинами, новая картина на модерации',
-          text: `Форма: "Новая картина"\nНазвание: ${(entity as any)?.Title || ''}\nХудожник: ${(entity as any)?.Artist?.full_name || ''}`,
-        });
+        await sendModerationEmail(response.data?.documentId, createdId);
       } catch (error) {
         strapi.log.error(error);
       }
