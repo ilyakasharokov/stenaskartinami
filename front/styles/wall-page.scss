@@ -68,6 +68,13 @@ $orange: #dc3a0f;
     z-index: 2;
   }
 
+  &__badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+
   &__badge {
     display: inline-flex;
     align-items: center;
@@ -79,7 +86,13 @@ $orange: #dc3a0f;
     font-size: 12px;
     font-weight: 600;
     margin-bottom: 10px;
+
+    &--ai {
+      background: #4f46e5; // AI accent
+    }
   }
+
+  &__badges &__badge { margin-bottom: 0; }
 
   &__title {
     font-size: 32px;

@@ -101,6 +101,10 @@
       "enum": ["real_user", "organization"],
       "default": "real_user"
     },
+    "is_ai": {
+      "type": "boolean",
+      "default": false
+    },
     "user_uploader": {
       "type": "relation",
       "relation": "manyToOne",
