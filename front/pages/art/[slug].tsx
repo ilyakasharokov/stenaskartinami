@@ -611,7 +611,7 @@ export const getStaticProps = async ({ params: { slug } }) => {
     let artistArts = []
     if (art.Artist?.id) {
       const artistArtsJson = await fetchStrapi(
-        API_HOST + `/arts?filters[Artist][id][$eq]=${art.Artist.id}&filters[wall][$notNull]=true&filters[id][$ne]=${art.id}&populate[0]=Pictures&populate[1]=Artist&pagination[pageSize]=4&sort=publishedAt:desc`
+        API_HOST + `/arts?filters[Artist][id][$eq]=${art.Artist.id}&filters[id][$ne]=${art.id}&populate[0]=Pictures&populate[1]=Artist&pagination[pageSize]=4&sort=publishedAt:desc`
       )
       artistArts = Array.isArray(artistArtsJson) ? artistArtsJson : []
     }

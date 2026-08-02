@@ -29,40 +29,37 @@ export async function genBase(prompt, size = '1024x1536') {
   return Buffer.from(j.data[0].b64_json, 'base64')
 }
 
-// full + detail + framed-on-wall, from a base painting buffer
-export async function photosFromBase(baseName, baseBuf) {
-  const meta = await sharp(baseBuf).metadata()
-  const W = meta.width, H = meta.height
+// Edit the base painting with a prompt (keeps it the SAME painting) — used to
+// AI-generate additional "photos": framed on a wall, in an interior.
+export async function genEdit(baseBuf, prompt, size = '1024x1024') {
+  const fd = new FormData()
+  fd.append('model', 'gpt-image-1')
+  fd.append('image', new Blob([baseBuf], { type: 'image/jpeg' }), 'art.jpg')
+  fd.append('prompt', prompt)
+  fd.append('size', size)
+  fd.append('quality', 'medium')
+  const r = await fetch('https://api.openai.com/v1/images/edits', {
+    method: 'POST', headers: { Authorization: `Bearer ${OPENAI_KEY}` }, body: fd,
+  })
+  const j = await r.json()
+  if (!j.data?.[0]?.b64_json) throw new Error(`OpenAI edit: ${r.status} ${JSON.stringify(j).slice(0, 200)}`)
+  return Buffer.from(j.data[0].b64_json, 'base64')
+}
 
+// 3 photos, all AI: the painting, framed on a gallery wall, in a living room.
+export async function photosFromBase(baseName, baseBuf) {
   const main = resolve(OUT, `${baseName}-1.jpg`)
   await sharp(baseBuf).jpeg({ quality: 92 }).toFile(main)
 
-  const detail = resolve(OUT, `${baseName}-2.jpg`)
-  await sharp(baseBuf)
-    .extract({ left: Math.round(W * 0.24), top: Math.round(H * 0.28), width: Math.round(W * 0.5), height: Math.round(H * 0.5) })
-    .resize(1000).jpeg({ quality: 90 }).toFile(detail)
+  const gallery = await genEdit(baseBuf, 'Realistic interior photo: this exact painting in a thin dark frame hanging on a light neutral gallery wall, soft natural lighting, eye-level, minimal, photographic')
+  const g = resolve(OUT, `${baseName}-2.jpg`)
+  await sharp(gallery).jpeg({ quality: 90 }).toFile(g)
 
-  const FW = 1400, FH = 1600
-  const wall = Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" width="${FW}" height="${FH}">
-    <defs><linearGradient id="w" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#efeae3"/><stop offset="1" stop-color="#e2dccf"/></linearGradient>
-    <filter id="wn"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2"/><feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.03 0"/></filter></defs>
-    <rect width="${FW}" height="${FH}" fill="url(#w)"/><rect width="${FW}" height="${FH}" filter="url(#wn)"/></svg>`)
-  const artW = Math.round(FW * 0.6)
-  const artBuf = await sharp(baseBuf).resize(artW).jpeg({ quality: 92 }).toBuffer()
-  const am = await sharp(artBuf).metadata()
-  const aw = am.width, ah = am.height
-  const left = Math.round((FW - aw) / 2), top = Math.round((FH - ah) / 2)
-  const fr = 18
-  const shadow = Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" width="${aw + fr * 2 + 40}" height="${ah + fr * 2 + 40}"><rect x="20" y="26" width="${aw + fr * 2}" height="${ah + fr * 2}" rx="4" fill="#000" opacity="0.20"/></svg>`)
-  const frame = Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" width="${aw + fr * 2}" height="${ah + fr * 2}"><rect width="${aw + fr * 2}" height="${ah + fr * 2}" fill="#2b2622"/><rect x="6" y="6" width="${aw + fr * 2 - 12}" height="${ah + fr * 2 - 12}" fill="#0f0d0b"/></svg>`)
-  const framed = resolve(OUT, `${baseName}-3.jpg`)
-  await sharp(wall).composite([
-    { input: shadow, left: left - fr - 6, top: top - fr + 2 },
-    { input: frame, left: left - fr, top: top - fr },
-    { input: artBuf, left, top },
-  ]).jpeg({ quality: 90 }).toFile(framed)
+  const room = await genEdit(baseBuf, 'Cozy realistic interior photo: this exact painting framed on the wall above a sofa in a warm modern living room, natural daylight, some plants, photographic, wide shot')
+  const r = resolve(OUT, `${baseName}-3.jpg`)
+  await sharp(room).jpeg({ quality: 90 }).toFile(r)
 
-  return [main, detail, framed]
+  return [main, g, r]
 }
 
 export async function makeAiPhotos(baseName, prompt) {

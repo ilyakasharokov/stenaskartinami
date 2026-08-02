@@ -67,6 +67,12 @@ const TopArtCard = ({ art, badge }) => {
         <div className="catalog-item__size">
           {art.width && art.height && <div>{art.width} x {art.height}</div>}
         </div>
+        {(art.views > 0 || art.likes_count > 0) && (
+          <div className="catalog-item__stats">
+            {art.views > 0 && <span title="Просмотры"><Eye size={13} /> {art.views}</span>}
+            {art.likes_count > 0 && <span title="Лайки"><Heart size={13} filled /> {art.likes_count}</span>}
+          </div>
+        )}
         <div className="catalog-item__artist-price">
           {art.Artist && (
             <div className="catalog-item__artist">
@@ -82,7 +88,15 @@ const TopArtCard = ({ art, badge }) => {
   )
 }
 
-export default function Home({ walls, arts, interiorArts, artists, topLikes = [], topViews = [] }) {
+// round down to a tidy "N+" for the hero counters
+const heroStat = (n) => {
+  n = Number(n) || 0
+  if (n >= 100) return Math.floor(n / 50) * 50 + '+'
+  if (n >= 20) return Math.floor(n / 10) * 10 + '+'
+  return String(n)
+}
+
+export default function Home({ walls, arts, interiorArts, artists, topLikes = [], topViews = [], stats = { arts: 0, artists: 0, sold: 0, cities: 0 } }) {
   const [currentSlide, setSlide] = useState(0);
   const heroArts = arts.slice(0, 4);
   const featuredArts = arts.slice(4, 14);
@@ -120,21 +134,25 @@ export default function Home({ walls, arts, interiorArts, artists, topLikes = []
             </p>
             <div className="index-hero__stats">
               <div className="index-hero__stat">
-                <div className="index-hero__stat-num">1200+</div>
+                <div className="index-hero__stat-num">{heroStat(stats.arts)}</div>
                 <div className="index-hero__stat-label">работ</div>
               </div>
               <div className="index-hero__stat">
-                <div className="index-hero__stat-num">340+</div>
+                <div className="index-hero__stat-num">{heroStat(stats.artists)}</div>
                 <div className="index-hero__stat-label">художников</div>
               </div>
-              <div className="index-hero__stat">
-                <div className="index-hero__stat-num">180+</div>
-                <div className="index-hero__stat-label">продаж</div>
-              </div>
-              <div className="index-hero__stat">
-                <div className="index-hero__stat-num">18</div>
-                <div className="index-hero__stat-label">городов</div>
-              </div>
+              {stats.sold > 0 && (
+                <div className="index-hero__stat">
+                  <div className="index-hero__stat-num">{heroStat(stats.sold)}</div>
+                  <div className="index-hero__stat-label">продано</div>
+                </div>
+              )}
+              {stats.cities > 0 && (
+                <div className="index-hero__stat">
+                  <div className="index-hero__stat-num">{stats.cities}</div>
+                  <div className="index-hero__stat-label">городов</div>
+                </div>
+              )}
             </div>
             <div className="index-hero__ctas">
               <Link href="/catalog" className="btn index-hero__btn-primary">Смотреть каталог <ArrowRight size={16} /></Link>
@@ -259,6 +277,12 @@ export default function Home({ walls, arts, interiorArts, artists, topLikes = []
                       <div className="catalog-item__size">
                         {art.width && art.height && <div>{art.width} x {art.height}</div>}
                       </div>
+                      {(art.views > 0 || art.likes_count > 0) && (
+                        <div className="catalog-item__stats">
+                          {art.views > 0 && <span title="Просмотры"><Eye size={13} /> {art.views}</span>}
+                          {art.likes_count > 0 && <span title="Лайки"><Heart size={13} filled /> {art.likes_count}</span>}
+                        </div>
+                      )}
                       <div className="catalog-item__artist-price">
                         {art.Artist && (
                           <div className="catalog-item__artist">
@@ -479,6 +503,20 @@ export const getServerSideProps = async () => {
       return aP < bP ? 1 : -1;
     });
 
+    const total = async (path) => {
+      try {
+        const r = await fetch(API_HOST + path + (path.includes('?') ? '&' : '?') + 'pagination[pageSize]=1');
+        const j = await r.json();
+        return j?.meta?.pagination?.total || 0;
+      } catch { return 0; }
+    };
+    const stats = await cachedFetch('home:stats', TTL, async () => ({
+      arts: await total('/arts?filters[wall][$notNull]=true'),
+      artists: await total('/artists?filters[works_count][$gt]=0'),
+      sold: await total('/arts?filters[sold][$eq]=true'),
+      cities: await total('/cities'),
+    }));
+
     return {
       props: {
         walls,
@@ -487,11 +525,12 @@ export const getServerSideProps = async () => {
         artists: Array.isArray(artistsJson) ? artistsJson : [],
         topLikes: Array.isArray(topLikesJson) ? topLikesJson : [],
         topViews: Array.isArray(topViewsJson) ? topViewsJson : [],
+        stats,
       },
     };
   } catch {
     return {
-      props: { walls: [], arts: [], interiorArts: [], artists: [], topLikes: [], topViews: [] },
+      props: { walls: [], arts: [], interiorArts: [], artists: [], topLikes: [], topViews: [], stats: { arts: 0, artists: 0, sold: 0, cities: 0 } },
     };
   }
 };

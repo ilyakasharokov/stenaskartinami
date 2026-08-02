@@ -182,20 +182,12 @@ export default function ArtistPage({ artist: initialArtist }) {
           </div>
 
           <div className="wp-hero__content">
-            <div className="wp-hero__badges">
-              {isVerified && (
-                <div className="wp-hero__badge">
-                  <svg width="8" height="8" viewBox="0 0 8 8"><circle cx="4" cy="4" r="4" fill="currentColor"/></svg>
-                  Подтверждённый художник
-                </div>
-              )}
-              {artist.is_ai && (
-                <div className="wp-hero__badge wp-hero__badge--ai" title="Профиль и работы созданы нейросетью">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/></svg>
-                  ИИ-автор
-                </div>
-              )}
-            </div>
+            {isVerified && (
+              <div className="wp-hero__badge">
+                <svg width="8" height="8" viewBox="0 0 8 8"><circle cx="4" cy="4" r="4" fill="currentColor"/></svg>
+                Подтверждённый художник
+              </div>
+            )}
             <div className="ap-hero__title-row">
               <div className="ap-avatar">
                 {avatarImg
