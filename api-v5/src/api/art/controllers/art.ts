@@ -473,21 +473,24 @@ export default factories.createCoreController(uid, () => ({
     const userRecord = await strapi.entityService.findOne('plugin::users-permissions.user', user.id, {}) as any;
     if (!(userRecord?.isModerator ?? userRecord?.is_moderator)) return ctx.forbidden('Not a moderator');
 
-    const { id } = ctx.params;
-    const arts = await strapi.entityService.findMany(uid, {
-      status: 'published', filters: { id: { $eq: Number(id) } } as any, pagination: { pageSize: 1 },
-    });
-    const entity = Array.isArray(arts) ? arts[0] : null;
-    if (!entity) return ctx.notFound();
+    const db = strapi.db.connection;
+    const artRow = await db('arts').where({ id: Number(ctx.params.id) }).first('id', 'document_id');
+    if (!artRow) return ctx.notFound();
 
-    const walls = await strapi.entityService.findMany('api::wall.wall', {
-      status: 'published', filters: { slug: { $eq: 'kartina-svobodna' } } as any, pagination: { pageSize: 1 },
-    });
-    const freeWall = Array.isArray(walls) ? walls[0] : null;
-    if (!freeWall) return ctx.badRequest('Placeholder wall not found');
+    // placeholder wall "Картина свободна": published version for published arts,
+    // draft version for draft arts (mirrors how existing arts are linked)
+    const wPub = await db('walls').where({ slug: 'kartina-svobodna' }).whereNotNull('published_at').first('id');
+    const wDraft = await db('walls').where({ slug: 'kartina-svobodna' }).whereNull('published_at').first('id');
+    if (!wPub) return ctx.badRequest('Placeholder wall not found');
 
-    await strapi.entityService.update(uid, entity.id, { data: { wall: freeWall.id } as any });
-    meiliSync('art', (entity as any).documentId);
+    // attach the wall to every version (draft + published) of this artwork
+    const versions = await db('arts').where({ document_id: artRow.document_id }).select('id', 'published_at');
+    for (const v of versions) {
+      const wallId = v.published_at ? wPub.id : (wDraft?.id ?? wPub.id);
+      await db('arts_wall_lnk').where({ art_id: v.id }).del();
+      await db('arts_wall_lnk').insert({ art_id: v.id, wall_id: wallId, art_ord: 1 });
+    }
+    meiliSync('art', artRow.document_id);
     ctx.send({ ok: true });
   },
 
