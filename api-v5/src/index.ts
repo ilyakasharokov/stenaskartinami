@@ -86,6 +86,8 @@ export default {
         'api::mail-log.mail-log.sendCampaign',
         'api::mail-log.mail-log.logs',
         'api::mail-log.mail-log.refreshScores',
+        'api::art.art.moderation',
+        'api::art.art.reject',
         'plugin::upload.content-api.upload',
       ];
 
