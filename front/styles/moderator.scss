@@ -137,6 +137,13 @@
     &:hover { background: #eee; }
   }
 
+  &--approve {
+    background: #16a34a;
+    color: #fff;
+    &:hover { background: #15803d; }
+    &:disabled { opacity: 0.5; cursor: default; }
+  }
+
   &--reject {
     background: #fef2f2;
     color: #dc2626;

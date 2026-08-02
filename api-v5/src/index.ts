@@ -88,6 +88,7 @@ export default {
         'api::mail-log.mail-log.refreshScores',
         'api::art.art.moderation',
         'api::art.art.reject',
+        'api::art.art.approve',
         'plugin::upload.content-api.upload',
       ];
 

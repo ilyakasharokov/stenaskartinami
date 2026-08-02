@@ -24,6 +24,7 @@ export default function ModeratorPage() {
   const [arts, setArts] = useState([])
   const [loading, setLoading] = useState(true)
   const [rejecting, setRejecting] = useState(null)
+  const [approving, setApproving] = useState(null)
 
   const isModerator = session?.info?.isModerator ?? session?.info?.is_moderator
 
@@ -62,6 +63,18 @@ export default function ModeratorPage() {
       setArts(prev => prev.filter(a => a.id !== art.id))
     } catch {}
     setRejecting(null)
+  }
+
+  const approve = async (art) => {
+    setApproving(art.id)
+    try {
+      const res = await fetch(`${API}/arts/${art.id}/approve`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${session.jwt}` },
+      })
+      if (res.ok) setArts(prev => prev.filter(a => a.id !== art.id))
+    } catch {}
+    setApproving(null)
   }
 
   if (status === 'loading' || (status === 'authenticated' && !isModerator)) return null
@@ -121,6 +134,13 @@ export default function ModeratorPage() {
                     <Link href={artUrl} target="_blank" className="mod-btn mod-btn--ghost">
                       Просмотр
                     </Link>
+                    <button
+                      className="mod-btn mod-btn--approve"
+                      onClick={() => approve(art)}
+                      disabled={approving === art.id}
+                    >
+                      {approving === art.id ? '…' : 'Одобрить'}
+                    </button>
                     <button
                       className="mod-btn mod-btn--reject"
                       onClick={() => reject(art)}

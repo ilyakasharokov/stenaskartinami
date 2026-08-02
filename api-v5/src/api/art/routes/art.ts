@@ -31,6 +31,12 @@ export default {
       config: { policies: [] },
     },
     {
+      method: 'POST',
+      path: '/arts/:id/approve',
+      handler: 'art.approve',
+      config: { policies: [] },
+    },
+    {
       method: 'GET',
       path: '/arts/all',
       handler: 'art.allArts',

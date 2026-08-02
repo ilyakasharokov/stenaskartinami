@@ -465,6 +465,32 @@ export default factories.createCoreController(uid, () => ({
     ctx.send({ ok: true });
   },
 
+  // POST /arts/:id/approve — moderator approves a work: attach the
+  // "Картина свободна" placeholder wall so it becomes visible in the catalog.
+  async approve(ctx) {
+    const user = ctx.state.user;
+    if (!user) return ctx.unauthorized();
+    const userRecord = await strapi.entityService.findOne('plugin::users-permissions.user', user.id, {}) as any;
+    if (!(userRecord?.isModerator ?? userRecord?.is_moderator)) return ctx.forbidden('Not a moderator');
+
+    const { id } = ctx.params;
+    const arts = await strapi.entityService.findMany(uid, {
+      status: 'published', filters: { id: { $eq: Number(id) } } as any, pagination: { pageSize: 1 },
+    });
+    const entity = Array.isArray(arts) ? arts[0] : null;
+    if (!entity) return ctx.notFound();
+
+    const walls = await strapi.entityService.findMany('api::wall.wall', {
+      status: 'published', filters: { slug: { $eq: 'kartina-svobodna' } } as any, pagination: { pageSize: 1 },
+    });
+    const freeWall = Array.isArray(walls) ? walls[0] : null;
+    if (!freeWall) return ctx.badRequest('Placeholder wall not found');
+
+    await strapi.entityService.update(uid, entity.id, { data: { wall: freeWall.id } as any });
+    meiliSync('art', (entity as any).documentId);
+    ctx.send({ ok: true });
+  },
+
   // POST /arts/:id/view — increment view counter (deduped client-side)
   async incrementView(ctx) {
     const id = Number(ctx.params.id);
