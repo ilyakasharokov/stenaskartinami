@@ -1,6 +1,23 @@
 import { sanitize } from '@strapi/utils';
 import { factories } from '@strapi/strapi';
 import { meiliSync, meiliRemove } from '../../../meili/client';
+import { revalidateFront, artPaths } from '../../../utils/revalidate';
+
+// Fetch an art (by documentId) with the fields needed for ISR paths and
+// trigger on-demand revalidation of its art + artist pages.
+async function revalidateArt(documentId: string) {
+  if (!documentId) return;
+  try {
+    const rows = await strapi.entityService.findMany('api::art.art', {
+      filters: { documentId: { $eq: documentId } } as any,
+      populate: { Artist: { fields: ['slug', 'id'] } } as any,
+      fields: ['slug', 'id'] as any,
+      pagination: { pageSize: 1 },
+    });
+    const art = Array.isArray(rows) ? rows[0] : rows;
+    if (art) revalidateFront(artPaths(art));
+  } catch { /* non-critical */ }
+}
 
 const uid = 'api::art.art';
 
@@ -366,6 +383,7 @@ export default factories.createCoreController(uid, () => ({
         strapi.log.error(error);
       }
       meiliSync('art', response.data?.documentId);
+      revalidateArt(response.data?.documentId);
     }
 
     return response;
@@ -462,6 +480,7 @@ export default factories.createCoreController(uid, () => ({
 
     await strapi.entityService.update(uid, entity.id, { data: { publishedAt: null } as any });
     meiliRemove('art', entity.id);
+    revalidateArt((entity as any).documentId);
     ctx.send({ ok: true });
   },
 
@@ -491,6 +510,7 @@ export default factories.createCoreController(uid, () => ({
       await db('arts_wall_lnk').insert({ art_id: v.id, wall_id: wallId, art_ord: 1 });
     }
     meiliSync('art', artRow.document_id);
+    revalidateArt(artRow.document_id);
     ctx.send({ ok: true });
   },
 
