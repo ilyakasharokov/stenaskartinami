@@ -432,7 +432,7 @@ export default factories.createCoreController(uid, () => ({
     const user = ctx.state.user;
     if (!user) return ctx.unauthorized();
     const userRecord = await strapi.entityService.findOne('plugin::users-permissions.user', user.id, {}) as any;
-    if (!userRecord?.is_moderator) return ctx.forbidden('Not a moderator');
+    if (!(userRecord?.isModerator ?? userRecord?.is_moderator)) return ctx.forbidden('Not a moderator');
 
     const { results, pagination } = await strapi.service(uid).find({
       status: 'published',
@@ -449,7 +449,7 @@ export default factories.createCoreController(uid, () => ({
     const user = ctx.state.user;
     if (!user) return ctx.unauthorized();
     const userRecord = await strapi.entityService.findOne('plugin::users-permissions.user', user.id, {}) as any;
-    if (!userRecord?.is_moderator) return ctx.forbidden('Not a moderator');
+    if (!(userRecord?.isModerator ?? userRecord?.is_moderator)) return ctx.forbidden('Not a moderator');
 
     const { id } = ctx.params;
     const results = await strapi.entityService.findMany(uid, {

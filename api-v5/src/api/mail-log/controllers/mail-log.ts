@@ -30,7 +30,7 @@ const PIXEL = Buffer.from(
 
 async function isModerator(userId: number): Promise<boolean> {
   const u = await strapi.entityService.findOne(userUid, userId, {}) as any;
-  return !!u?.is_moderator;
+  return !!(u?.isModerator ?? u?.is_moderator);
 }
 
 function buildEmailHtml(opts: {

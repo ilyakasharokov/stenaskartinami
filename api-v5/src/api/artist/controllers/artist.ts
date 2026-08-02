@@ -220,7 +220,7 @@ export default factories.createCoreController(uid, () => ({
     const user = ctx.state.user;
     if (!user) return ctx.unauthorized();
     const userRecord = await strapi.entityService.findOne(userUid, user.id, {}) as any;
-    if (!userRecord?.is_moderator) return ctx.forbidden('Not a moderator');
+    if (!(userRecord?.isModerator ?? userRecord?.is_moderator)) return ctx.forbidden('Not a moderator');
 
     const documentId = ctx.params.id;
     const artist = await findPublishedByDocumentId(documentId);
