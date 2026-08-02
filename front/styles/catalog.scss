@@ -328,6 +328,16 @@
             color: #bbb;
             flex-shrink: 0;
         }
+        &__size-custom {
+            padding-top: 6px;
+            margin-top: 4px;
+            border-top: 1px solid #f0f0f0;
+        }
+        &__size-custom-label {
+            font-size: 12px;
+            color: #999;
+            margin-bottom: 6px;
+        }
         &__show-all {
             color: #777;
             text-decoration: underline;

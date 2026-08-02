@@ -20,6 +20,12 @@ export default function CatalogFilters({filtersPreloaded, onChange, hideFilters}
   const [priceOpen, setPriceOpen] = useState(!!(router.query?.priceMin || router.query?.priceMax));
   const priceTimerRef = useRef(null);
 
+  const [sizeCustom, setSizeCustom] = useState({
+    min: (router.query?.sizeMin as string) || '',
+    max: (router.query?.sizeMax as string) || '',
+  });
+  const sizeTimerRef = useRef(null);
+
   useEffect(() => {
     setSearchText((router.query?.q as string) || '');
   }, [router.query?.q]);
@@ -30,6 +36,27 @@ export default function CatalogFilters({filtersPreloaded, onChange, hideFilters}
       max: (router.query?.priceMax as string) || '',
     });
   }, [router.query?.priceMin, router.query?.priceMax]);
+
+  useEffect(() => {
+    setSizeCustom({
+      min: (router.query?.sizeMin as string) || '',
+      max: (router.query?.sizeMax as string) || '',
+    });
+  }, [router.query?.sizeMin, router.query?.sizeMax]);
+
+  function handleSizeChange(field, value) {
+    const next = { ...sizeCustom, [field]: value.replace(/[^\d]/g, '') };
+    setSizeCustom(next);
+    clearTimeout(sizeTimerRef.current);
+    sizeTimerRef.current = setTimeout(() => {
+      const newQuery: Record<string, any> = { ...Router.query };
+      if (next.min) newQuery.sizeMin = next.min; else delete newQuery.sizeMin;
+      if (next.max) newQuery.sizeMax = next.max; else delete newQuery.sizeMax;
+      delete newQuery.page;
+      onChange();
+      Router.push({ pathname: Router.pathname, query: newQuery });
+    }, 600);
+  }
 
   function handlePriceChange(field, value) {
     const next = { ...price, [field]: value.replace(/[^\d]/g, '') };
@@ -102,25 +129,25 @@ export default function CatalogFilters({filtersPreloaded, onChange, hideFilters}
           }
         })
         newFilters.size.items = [{
-          title: 'Маленькие',
+          title: 'Маленькие (до 20 см)',
           slug: 'small',
           max: 20,
           id: 1
         },
         {
-          title: 'Средние',
+          title: 'Средние (20–40 см)',
           slug: 'medium',
           max: 40,
           id: 2
         },
         {
-          title: 'Большие',
+          title: 'Большие (40–60 см)',
           slug: 'large',
           max: 60,
           id: 3
         },
         {
-          title: 'Огромные',
+          title: 'Огромные (от 60 см)',
           slug: 'huge',
           max: 1000,
           id: 4
@@ -194,7 +221,8 @@ export default function CatalogFilters({filtersPreloaded, onChange, hideFilters}
     const hasSearch = filters[key].items.length > SECTION_SEARCH_MIN
     const visibleCount = q ? items.length : (!filters[key].showAll ? Math.min(items.length, FILTER_ITEMS_NUM) : items.length)
     const showAllLink = !q && !filters[key].showAll && filters[key].items.length > FILTER_ITEMS_NUM ? 1 : 0
-    return (filters[key].open && ((visibleCount + showAllLink) * ITEM_HEIGHT + (hasSearch ? SEARCH_HEIGHT : 0))) || 0 + 'px'
+    const customSize = key === 'size' ? 84 : 0 // custom "свой размер" row
+    return (filters[key].open && ((visibleCount + showAllLink) * ITEM_HEIGHT + (hasSearch ? SEARCH_HEIGHT : 0) + customSize)) || 0 + 'px'
   }
 
   return (
@@ -259,6 +287,26 @@ export default function CatalogFilters({filtersPreloaded, onChange, hideFilters}
             {
               !(sectionSearch[key] || '').trim() && !filters[key].showAll && filters[key].items.length > FILTER_ITEMS_NUM &&
               <div className="catalog-filters__show-all" onClick={() => showAll(key)}>Показать все</div>
+            }
+            {
+              key === 'size' && (
+                <div className="catalog-filters__size-custom">
+                  <div className="catalog-filters__size-custom-label">Свой размер (сторона, см)</div>
+                  <div className="catalog-filters__price-row">
+                    <input type="text" inputMode="numeric" placeholder="от"
+                      className="catalog-filters__price-input"
+                      value={sizeCustom.min}
+                      onChange={e => handleSizeChange('min', e.target.value)}
+                      onClick={e => e.stopPropagation()} />
+                    <span className="catalog-filters__price-dash">—</span>
+                    <input type="text" inputMode="numeric" placeholder="до"
+                      className="catalog-filters__price-input"
+                      value={sizeCustom.max}
+                      onChange={e => handleSizeChange('max', e.target.value)}
+                      onClick={e => e.stopPropagation()} />
+                  </div>
+                </div>
+              )
             }
             </div>
           </div>
