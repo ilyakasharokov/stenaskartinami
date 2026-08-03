@@ -514,6 +514,33 @@ export default factories.createCoreController(uid, () => ({
     ctx.send({ ok: true });
   },
 
+  // DELETE /arts/:id — owner (or moderator) deletes their artwork
+  async delete(ctx) {
+    const user = ctx.state.user;
+    if (!user) return ctx.unauthorized();
+
+    const { id } = ctx.params;
+    const rows = await strapi.entityService.findMany(uid, {
+      filters: (/^\d+$/.test(id) ? { id: { $eq: Number(id) } } : { documentId: { $eq: id } }) as any,
+      populate: { user_uploader: { fields: ['id'] }, Artist: { fields: ['slug', 'id'] } } as any,
+      fields: ['slug', 'id', 'documentId'] as any,
+      pagination: { pageSize: 1 },
+    });
+    const art: any = Array.isArray(rows) ? rows[0] : rows;
+    if (!art) return ctx.notFound();
+
+    const userRecord = await strapi.entityService.findOne('plugin::users-permissions.user', user.id, {}) as any;
+    const isModerator = userRecord?.isModerator ?? userRecord?.is_moderator;
+    const isOwner = art.user_uploader?.id === user.id;
+    if (!isOwner && !isModerator) return ctx.forbidden('Not allowed to delete this artwork');
+
+    const paths = artPaths(art);
+    await strapi.documents(uid).delete({ documentId: art.documentId });
+    meiliRemove('art', art.id);
+    revalidateFront(paths);
+    ctx.send({ ok: true });
+  },
+
   // POST /arts/:id/view — increment view counter (deduped client-side)
   async incrementView(ctx) {
     const id = Number(ctx.params.id);

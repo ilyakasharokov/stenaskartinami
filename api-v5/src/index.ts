@@ -89,6 +89,7 @@ export default {
         'api::art.art.moderation',
         'api::art.art.reject',
         'api::art.art.approve',
+        'api::art.art.delete',
         'plugin::upload.content-api.upload',
       ];
 
