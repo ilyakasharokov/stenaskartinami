@@ -400,23 +400,14 @@
     padding: 0 16px;
     height: 56px;
 
-    // logo pushes the bell/avatar/burger to the right as one group, and may
-    // shrink (ellipsis) if space is tight so the burger stays inside padding
+    // logo (icon only on mobile) pushes bell/avatar/burger to the right
     .logo-link {
       margin-right: auto;
-      min-width: 0;
-      flex-shrink: 1;
+      flex-shrink: 0;
     }
 
-    .logo { min-width: 0; }
-    .logo img { width: 28px; flex-shrink: 0; }
-    .logo__text {
-      font-size: 12px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      min-width: 0;
-    }
+    .logo img { width: 28px; }
+    .logo__text { display: none; } // icon-only brand on mobile → room for burger
   }
 
   .menu-btn { flex-shrink: 0; }
