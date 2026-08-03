@@ -148,16 +148,20 @@ export default (plugin: any) => {
       const nextIds = isFavorite ? existingIds.filter(id => id !== numericId) : [...existingIds, numericId];
       ctx.send({ arts: nextIds, isFavorite: !isFavorite });
 
-      // Keep denormalized likes_count in sync across all versions of the art
+      // Keep denormalized likes_count in sync across all versions of the art.
+      // Displayed likes_count = real (join table) + seed boost, so the demo
+      // "накрутка" survives real like/unlike toggles.
       setImmediate(async () => {
         try {
           const [{ count }] = await db('up_users_arts_lnk').where({ art_id: numericId }).count({ count: '*' });
-          const likesCount = Number(count) || 0;
-          const artRow = await db('arts').where({ id: numericId }).first('document_id');
+          const real = Number(count) || 0;
+          const artRow = await db('arts').where({ id: numericId }).first('document_id', 'likes_seed');
+          const seed = Number(artRow?.likes_seed) || 0;
+          const total = real + seed;
           if (artRow?.document_id) {
-            await db('arts').where({ document_id: artRow.document_id }).update({ likes_count: likesCount });
+            await db('arts').where({ document_id: artRow.document_id }).update({ likes_count: total });
           } else {
-            await db('arts').where({ id: numericId }).update({ likes_count: likesCount });
+            await db('arts').where({ id: numericId }).update({ likes_count: total });
           }
         } catch (e: any) {
           s.log.warn('[toggleart] likes_count sync failed: ' + e.message);

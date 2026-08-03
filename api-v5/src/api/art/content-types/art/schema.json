@@ -107,6 +107,16 @@
       "default": 0,
       "min": 0
     },
+    "views_seed": {
+      "type": "integer",
+      "default": 0,
+      "min": 0
+    },
+    "likes_seed": {
+      "type": "integer",
+      "default": 0,
+      "min": 0
+    },
     "user_uploader": {
       "type": "relation",
       "relation": "manyToOne",
