@@ -397,16 +397,22 @@
 
 @media screen and (max-width: 994px) {
   .top-navigation {
-    padding: 0 14px;
+    padding: 0 16px;
     height: 56px;
-    justify-content: space-between;
 
+    // logo pushes the bell/avatar/burger to the right as one group,
+    // so the burger stays inside the right padding
     .logo-link {
-      margin-right: 0;
+      margin-right: auto;
+      min-width: 0;
     }
 
     .logo img { width: 28px; }
-    .logo__text { font-size: 12px; }
+    .logo__text {
+      font-size: 12px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
   }
 
   .nav-search {
@@ -474,8 +480,12 @@
 
   .nav-right {
     order: 2;
-    margin-left: auto;
-    margin-right: 4px;
+    flex-shrink: 0;
+  }
+
+  .menu {
+    margin-left: 6px;
+    flex-shrink: 0;
   }
 
   .nav-user__name {

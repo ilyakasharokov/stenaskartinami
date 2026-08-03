@@ -29,10 +29,11 @@ const Icon = ({ d, size = 16 }) => (
   </svg>
 )
 
-function UserAvatar({ name, image, size = 120 }) {
-  if (image) return <img src={image} alt={name} className="prof-avatar__img" style={{ width: size, height: size }} />
+function UserAvatar({ name, image }) {
+  // size is controlled by the .prof-avatar container (responsive) — fill it
+  if (image) return <img src={image} alt={name} className="prof-avatar__img" />
   const initials = (name || '?').split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase()
-  return <div className="prof-avatar__initials" style={{ width: size, height: size, fontSize: size * 0.33 }}>{initials}</div>
+  return <div className="prof-avatar__initials">{initials}</div>
 }
 
 
@@ -345,7 +346,7 @@ export default function ProfilePage() {
           <div className="prof-header__left">
             {/* Avatar */}
             <div className="prof-avatar">
-              <UserAvatar name={displayName} image={avatarImage} size={120} />
+              <UserAvatar name={displayName} image={avatarImage} />
               <input ref={avatarInputRef} type="file" accept="image/*" className="prof-upload-input" onChange={handleAvatarChange} />
               <button className="prof-avatar__cam" onClick={() => avatarInputRef.current?.click()} disabled={avatarUploading} title="Изменить фото">
                 {avatarUploading
