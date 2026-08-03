@@ -16,7 +16,7 @@ export const toArtistDoc = (e: any) => ({
 
 export const toArtDoc = (e: any) => ({
   id: e.id,
-  Title: e.Title || '',
+  Title: e.title || '',
   slug: e.slug || '',
   img: e.Pictures?.[0]?.url || null,
   Artist_full_name: e.Artist?.full_name || '',
@@ -24,7 +24,7 @@ export const toArtDoc = (e: any) => ({
 
 export const toWallDoc = (e: any) => ({
   id: e.id,
-  Title: e.Title || '',
+  Title: e.title || '',
   slug: e.slug || '',
   Address: e.Address || '',
 });

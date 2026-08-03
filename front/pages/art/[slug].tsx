@@ -39,13 +39,13 @@ function ArtGallery({ images, art }) {
           cur?.width && cur?.height
             ? <Image
                 src={imagePath(mainUrl)}
-                alt={art.Title || ''}
+                alt={art.title || ''}
                 width={cur.width}
                 height={cur.height}
                 priority={idx === 0}
                 sizes="(max-width: 900px) 100vw, 55vw"
               />
-            : <img src={imageUrlBuilder(mainUrl)} alt={art.Title} />
+            : <img src={imageUrlBuilder(mainUrl)} alt={art.title} />
         )}
         {imgs.length > 1 && (
           <>
@@ -95,7 +95,7 @@ function BuyForm({ art, mode, onClose }) {
           title: mode === 'buy' ? 'Купить картину' : 'Предложить цену',
           name,
           email,
-          text: art.Title + (art.Artist ? ', ' + art.Artist.full_name : '') + ', id = ' + art.id,
+          text: art.title + (art.Artist ? ', ' + art.Artist.full_name : '') + ', id = ' + art.id,
         }}),
       })
     } catch {}
@@ -267,9 +267,9 @@ export default function Art({ art, style, styleArts, artistArts, artist: initial
     }
   }
 
-  const styleNames   = (art.styles   || []).map(s => s.Title).filter(Boolean).join(', ')
-  const subjectNames = (art.subjects || []).map(s => s.Title).filter(Boolean).join(', ')
-  const mediumNames  = (art.mediums  || []).map(m => m.title || m.Title).filter(Boolean).join(', ')
+  const styleNames   = (art.styles   || []).map(s => s.title).filter(Boolean).join(', ')
+  const subjectNames = (art.subjects || []).map(s => s.title).filter(Boolean).join(', ')
+  const mediumNames  = (art.mediums  || []).map(m => m.title || m.title).filter(Boolean).join(', ')
 
   const specs = [
     { label: 'Размер',     value: art.width && art.height ? `${art.width} × ${art.height} см` : null },
@@ -300,7 +300,7 @@ export default function Art({ art, style, styleArts, artistArts, artist: initial
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'VisualArtwork',
-    name: art.Title,
+    name: art.title,
     image: ogImage,
     url: canonicalUrl,
     ...(art.Artist ? { creator: { '@type': 'Person', name: art.Artist.full_name, url: `https://stenaskartinami.com/artists/${art.Artist.slug}--${art.Artist.id}` } } : {}),
@@ -315,17 +315,17 @@ export default function Art({ art, style, styleArts, artistArts, artist: initial
   return (
     <MainLayout>
       <Head>
-        <title>{art.Title}{art.Artist ? `, ${art.Artist.full_name}` : ''} — купить картину | Стена с картинами</title>
+        <title>{art.title}{art.Artist ? `, ${art.Artist.full_name}` : ''} — купить картину | Стена с картинами</title>
         <meta name="description" content={metaDescClean} />
         <link rel="canonical" href={canonicalUrl} />
         <meta property="og:type"        content="product" />
         <meta property="og:site_name"   content="Стена с картинами" />
-        <meta property="og:title"       content={`${art.Title}${art.Artist ? ` — ${art.Artist.full_name}` : ''}`} />
+        <meta property="og:title"       content={`${art.title}${art.Artist ? ` — ${art.Artist.full_name}` : ''}`} />
         <meta property="og:description" content={metaDescClean} />
         <meta property="og:url"         content={canonicalUrl} />
         <meta property="og:image"       content={ogImage} />
         <meta name="twitter:card"        content="summary_large_image" />
-        <meta name="twitter:title"       content={`${art.Title}${art.Artist ? ` — ${art.Artist.full_name}` : ''}`} />
+        <meta name="twitter:title"       content={`${art.title}${art.Artist ? ` — ${art.Artist.full_name}` : ''}`} />
         <meta name="twitter:description" content={metaDescClean} />
         <meta name="twitter:image"       content={ogImage} />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
@@ -340,11 +340,11 @@ export default function Art({ art, style, styleArts, artistArts, artist: initial
           {style && (
             <>
               <span className="art-breadcrumbs__sep">›</span>
-              <Link href={`/catalog/?styles=${style.slug}`}>{style.Title}</Link>
+              <Link href={`/catalog/?styles=${style.slug}`}>{style.title}</Link>
             </>
           )}
           <span className="art-breadcrumbs__sep">›</span>
-          <span>{art.Title}</span>
+          <span>{art.title}</span>
         </nav>
 
         {/* Main layout */}
@@ -406,9 +406,9 @@ export default function Art({ art, style, styleArts, artistArts, artist: initial
 
             {/* Title + share */}
             <div className="art-title-row">
-              <h1 className="art-title">{art.Title}</h1>
+              <h1 className="art-title">{art.title}</h1>
               <button className="art-share-btn" type="button" title="Поделиться"
-                onClick={() => navigator.share?.({ title: art.Title, url: window.location.href })}>
+                onClick={() => navigator.share?.({ title: art.title, url: window.location.href })}>
                 <ShareIcon /> Поделиться
               </button>
             </div>

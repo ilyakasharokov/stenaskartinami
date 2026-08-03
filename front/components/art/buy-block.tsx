@@ -45,7 +45,7 @@ export default function BuyBlock({art}){
                     <input type="email" name="email" placeholder="E-mail" required/>
                 </div>
                 <input type="hidden" name="title" value="Купить картину"></input>
-                <input type="hidden" name="text" value={art.Title + ', ' + art.Artist.full_name + ', id = ' + art.id }></input>
+                <input type="hidden" name="text" value={art.title + ', ' + art.Artist.full_name + ', id = ' + art.id }></input>
                 </div>
             }
             </div>

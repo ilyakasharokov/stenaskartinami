@@ -17,9 +17,9 @@ async function login(email, password) {
 
 // resolve taxonomy ids once
 const S = {}
-for (const n of ['Абстракционизм', 'Импрессионизм']) S[n] = await idByTitle('styles', 'Title', n)
+for (const n of ['Абстракционизм', 'Импрессионизм']) S[n] = await idByTitle('styles', 'title', n)
 const SUBJ = {}
-for (const n of ['Пейзаж', 'Абстракция']) SUBJ[n] = await idByTitle('subjects', 'Title', n)
+for (const n of ['Пейзаж', 'Абстракция']) SUBJ[n] = await idByTitle('subjects', 'title', n)
 const MED = {}
 for (const n of ['Масло', 'Акрил']) MED[n] = await idByTitle('mediums', 'title', n)
 console.log('styles', S, 'subjects', SUBJ, 'mediums', MED)
@@ -40,9 +40,9 @@ const PLAN = {
 for (const [email, cfg] of Object.entries(PLAN)) {
   const jwt = await login(email, cfg.pw)
   const artistId = email.includes('lebedeva') ? 4389 : 4397
-  const arts = (await fetch(`${API}/arts?filters[Artist][id][$eq]=${artistId}&pagination[pageSize]=10&fields[0]=Title&fields[1]=documentId`).then(r => r.json())).data || []
+  const arts = (await fetch(`${API}/arts?filters[Artist][id][$eq]=${artistId}&pagination[pageSize]=10&fields[0]=title&fields[1]=documentId`).then(r => r.json())).data || []
   for (const art of arts) {
-    const spec = cfg.arts[art.Title]
+    const spec = cfg.arts[art.title]
     if (!spec) continue
     const data = {
       styles: spec.styles.map(n => S[n]).filter(Boolean),
@@ -52,6 +52,6 @@ for (const [email, cfg] of Object.entries(PLAN)) {
       Owners_price: spec.price,
     }
     const r = await fetch(`${API}/arts/${art.documentId}`, { method: 'PUT', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${jwt}` }, body: JSON.stringify({ data }) })
-    console.log(`«${art.Title}» → PUT ${r.status} (стиль/предмет/техника/цена ${spec.price}₽)`)
+    console.log(`«${art.title}» → PUT ${r.status} (стиль/предмет/техника/цена ${spec.price}₽)`)
   }
 }

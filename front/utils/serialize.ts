@@ -156,7 +156,7 @@ function serialize(obj: Record<string, any> = {}) {
 
   if (obj.q) {
     const q = encodeURIComponent(String(obj.q));
-    params.push(`filters[$and][${andIndex}][$or][0][Title][$containsi]=${q}`);
+    params.push(`filters[$and][${andIndex}][$or][0][title][$containsi]=${q}`);
     params.push(`filters[$and][${andIndex}][$or][1][Artist][full_name][$containsi]=${q}`);
     andIndex++;
   }

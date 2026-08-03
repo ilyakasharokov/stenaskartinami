@@ -11,7 +11,7 @@ export default function StylesInput({onStylesChange}){
 
     useEffect(()=>{
         fetchStrapi(API_HOST + `/styles`).then(json => {
-            setOptions(json.sort((a,b) => a.Title < b.Title ? -1: 1 ))
+            setOptions(json.sort((a,b) => a.title < b.title ? -1: 1 ))
         })
     }, [])
 
@@ -31,7 +31,7 @@ export default function StylesInput({onStylesChange}){
                     options.length > 0 && <div className="form-input__hints">
                     {
                         options.map((option) =>
-                            <div className={`form-input__suggestion ${option.active ? 'active': ''}`} onClick={()=>clickStyle(option)} key={option.id}>{ option.Title }</div>
+                            <div className={`form-input__suggestion ${option.active ? 'active': ''}`} onClick={()=>clickStyle(option)} key={option.id}>{ option.title }</div>
                         )
                     }
                     </div>

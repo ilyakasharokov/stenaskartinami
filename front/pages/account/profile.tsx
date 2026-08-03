@@ -233,7 +233,7 @@ export default function ProfilePage() {
   const filteredWalls = wallSearch
     ? activeWallList.filter(w => {
         const q = wallSearch.toLowerCase()
-        return (w.Title || '').toLowerCase().includes(q) || (w.Address || '').toLowerCase().includes(q)
+        return (w.title || '').toLowerCase().includes(q) || (w.Address || '').toLowerCase().includes(q)
       })
     : activeWallList
 
@@ -550,7 +550,7 @@ export default function ProfilePage() {
                     <div key={w.documentId} className="mwc">
                       <div className="mwc__img-wrap">
                         {thumb
-                          ? <img src={thumb} alt={w.Title} className="mwc__img" />
+                          ? <img src={thumb} alt={w.title} className="mwc__img" />
                           : <div className="mwc__img-placeholder" />
                         }
                         <span className={`mwc__badge mwc__badge--${w.wallStatus}`}>
@@ -558,7 +558,7 @@ export default function ProfilePage() {
                         </span>
                       </div>
                       <div className="mwc__body">
-                        <Link href={w.slug ? `/walls/${w.slug}--${w.id}` : `/walls/${w.documentId}`} className="mwc__title">{w.Title || 'Без названия'}</Link>
+                        <Link href={w.slug ? `/walls/${w.slug}--${w.id}` : `/walls/${w.documentId}`} className="mwc__title">{w.title || 'Без названия'}</Link>
                         {addr && (
                           <div className="mwc__addr">
                             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>

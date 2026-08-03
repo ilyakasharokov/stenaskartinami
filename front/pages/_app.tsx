@@ -7,11 +7,18 @@ import { SessionProvider as Provider, useSession, signIn } from 'next-auth/react
 import Head from 'next/head'
 import { useEffect } from 'react'
 import { ToastProvider } from '@/components/ui/Toast'
+import { AuthModalProvider } from '@/components/auth/AuthModal'
 
 function DevAutoLogin() {
   const { status } = useSession()
   useEffect(() => {
-    if (status === 'unauthenticated') signIn('dev-auto', { redirect: false })
+    // Respect an explicit logout during dev: once the user clicks "Выйти" we set
+    // this flag so auto-login doesn't immediately sign them back in.
+    const suppressed = typeof window !== 'undefined' && (
+      sessionStorage.getItem('devAutoLoginOff') === '1' ||
+      /(?:^|;\s*)devLoggedOut=1(?:;|$)/.test(document.cookie)
+    )
+    if (status === 'unauthenticated' && !suppressed) signIn('dev-auto', { redirect: false })
   }, [status])
   return null
 }
@@ -23,7 +30,9 @@ export default function App({ Component, pageProps }) {
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
       </Head>
       {process.env.NEXT_PUBLIC_DEV_AUTO_LOGIN === 'true' && <DevAutoLogin />}
-      <Component {...pageProps} />
+      <AuthModalProvider>
+        <Component {...pageProps} />
+      </AuthModalProvider>
     </ToastProvider>
   </Provider>
 }

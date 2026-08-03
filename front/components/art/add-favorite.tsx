@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef } from 'react'
 import { useSession } from 'next-auth/react'
-import Router from 'next/router'
 import { Heart } from '@/components/ui/icons'
+import { useAuthModal } from '@/components/auth/AuthModal'
 
 export default function AddFavorite({ art }) {
   const { data: session } = useSession()
+  const { open: openAuth } = useAuthModal()
   const [isActive, setActive] = useState(false)
   const pendingRef = useRef(false)
 
@@ -15,7 +16,7 @@ export default function AddFavorite({ art }) {
   }, [session, art.id])
 
   async function toggleFavorite() {
-    if (!session) return Router.push('/auth/signin')
+    if (!session) return openAuth()
     if (pendingRef.current) return
 
     pendingRef.current = true

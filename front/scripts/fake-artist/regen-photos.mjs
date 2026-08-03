@@ -42,13 +42,13 @@ for (const b of bases) {
 // 2) re-upload all three photos and set Pictures
 for (const { email, pw, artistId, map } of PLAN) {
   const jwt = await login(email, pw)
-  const arts = (await fetch(`${API}/arts?filters[Artist][id][$eq]=${artistId}&pagination[pageSize]=10&fields[0]=Title&fields[1]=documentId`).then(r => r.json())).data || []
+  const arts = (await fetch(`${API}/arts?filters[Artist][id][$eq]=${artistId}&pagination[pageSize]=10&fields[0]=title&fields[1]=documentId`).then(r => r.json())).data || []
   for (const art of arts) {
-    const base = map[art.Title]
+    const base = map[art.title]
     if (!base) continue
     const ids = []
     for (const n of [`${base}-1`, `${base}-2`, `${base}-3`]) ids.push(await upload(jwt, resolve(AI, n + '.jpg')))
     const put = await fetch(`${API}/arts/${art.documentId}`, { method: 'PUT', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${jwt}` }, body: JSON.stringify({ data: { Pictures: ids } }) })
-    console.log(`«${art.Title}» → 3 ИИ-фото, PUT ${put.status}`)
+    console.log(`«${art.title}» → 3 ИИ-фото, PUT ${put.status}`)
   }
 }

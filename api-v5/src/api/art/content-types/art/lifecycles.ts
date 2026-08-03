@@ -46,7 +46,7 @@ async function notifyArtistFollowers(artId: number) {
           type: 'new_art',
           recipient_id: row.user_id,
           actor_name: artist.full_name,
-          body: `опубликовал новую работу «${(art as any).Title}»`,
+          body: `опубликовал новую работу «${(art as any).title}»`,
           link: `/art/${artSlug}`,
           image_url: imgUrl,
           read: false,
@@ -74,9 +74,9 @@ async function syncArtistTags(artId: number) {
       status: 'published',
     } as any);
 
-    const dirs  = [...new Set((allArts as any[]).flatMap(a => (a.styles   || []).map((s: any) => s.Title || s.title).filter(Boolean)))].sort();
-    const techs = [...new Set((allArts as any[]).flatMap(a => (a.mediums  || []).map((m: any) => m.title || m.Title).filter(Boolean)))].sort();
-    const subjs = [...new Set((allArts as any[]).flatMap(a => (a.subjects || []).map((s: any) => s.Title || s.title).filter(Boolean)))].sort();
+    const dirs  = [...new Set((allArts as any[]).flatMap(a => (a.styles   || []).map((s: any) => s.title || s.title).filter(Boolean)))].sort();
+    const techs = [...new Set((allArts as any[]).flatMap(a => (a.mediums  || []).map((m: any) => m.title || m.title).filter(Boolean)))].sort();
+    const subjs = [...new Set((allArts as any[]).flatMap(a => (a.subjects || []).map((s: any) => s.title || s.title).filter(Boolean)))].sort();
 
     // Update BOTH draft and published rows via raw Knex (document_id matches all versions)
     await (strapi.db as any).connection('artists')
@@ -96,8 +96,8 @@ export default {
   async beforeCreate(event: any) {
     const { data } = event.params;
 
-    if (data.Title) {
-      data.slug = slugifyValue(data.Title);
+    if (data.title) {
+      data.slug = slugifyValue(data.title);
     }
 
     updateDimensions(data);
@@ -106,8 +106,8 @@ export default {
   async beforeUpdate(event: any) {
     const { data } = event.params;
 
-    if (data.Title) {
-      data.slug = slugifyValue(data.Title);
+    if (data.title) {
+      data.slug = slugifyValue(data.title);
     }
 
     if (data.Size) {

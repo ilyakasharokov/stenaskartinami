@@ -41,8 +41,8 @@ for (const job of JOBS) {
   await photosFromBase(job.base, buf) // saves base-1/2/3
   const c = CRED[job.owner]
   const jwt = await login(c)
-  const arts = (await fetch(`${API}/arts?filters[Artist][id][$eq]=${c.artistId}&fields[0]=Title&fields[1]=documentId&pagination[pageSize]=10`).then(r => r.json())).data || []
-  const art = arts.find(a => a.Title === job.title)
+  const arts = (await fetch(`${API}/arts?filters[Artist][id][$eq]=${c.artistId}&fields[0]=title&fields[1]=documentId&pagination[pageSize]=10`).then(r => r.json())).data || []
+  const art = arts.find(a => a.title === job.title)
   const ids = []
   for (const n of [`${job.base}-1`, `${job.base}-2`, `${job.base}-3`]) ids.push(await upload(jwt, resolve(AI, n + '.jpg')))
   const put = await fetch(`${API}/arts/${art.documentId}`, { method: 'PUT', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${jwt}` }, body: JSON.stringify({ data: { Pictures: ids } }) })

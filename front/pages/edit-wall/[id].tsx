@@ -158,7 +158,7 @@ export default function EditWall({ wall }) {
   const showToast = useToast()
   const [step, setStep] = useState(1)
   const [form, setForm] = useState(() => ({
-    title:                wall.Title || '',
+    title:                wall.title || '',
     wall_type:            wall.wall_type || '',
     description:          extractText(wall.Description),
     city_name:            wall.city_name || 'Москва',
@@ -261,7 +261,7 @@ export default function EditWall({ wall }) {
 
       const body = {
         data: {
-          Title: form.title,
+          title: form.title,
           Description: form.description,
           slug,
           Address: form.address,

@@ -1,0 +1,210 @@
+// ── Jivo chat: hide its floating launcher ─────────────────
+// The chat is opened only via our own header button (ChatButton), so the Jivo
+// widget never floats over the mobile bottom nav. Only the collapsed launcher
+// button is hidden — the chat window (a separate element) still opens via
+// jivo_api.open(). The mobile launcher has a stable `.__jivoMobileButton` class.
+jdiv.__jivoMobileButton {
+  display: none !important;
+}
+
+// Header "chat" button (opens Jivo)
+.chat-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #333;
+  border-radius: 8px;
+  transition: background 0.15s;
+
+  &:hover { background: #f3f4f6; }
+}
+
+// ── Mobile bottom navigation ──────────────────────────────
+// Shown only on mobile (≤994px, matching the header breakpoint). The header
+// burger is hidden there and replaced by this bar.
+
+.mobile-bottom-nav { display: none; }
+
+@media screen and (max-width: 994px) {
+  .mobile-bottom-nav {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 300;
+    display: flex;
+    align-items: stretch;
+    justify-content: space-around;
+    height: 60px;
+    padding-bottom: env(safe-area-inset-bottom, 0);
+    background: #fff;
+    border-top: 1px solid #ececec;
+    box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.06);
+  }
+
+  .mbn-item {
+    flex: 1 1 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #8a8a8a;
+    font-size: 10.5px;
+    font-weight: 500;
+    text-decoration: none;
+    padding: 6px 2px;
+    transition: color 0.15s;
+
+    span { line-height: 1; }
+    &.active { color: #dc3a0f; }
+  }
+
+  // Center raised "+" button
+  .mbn-fab {
+    flex: 0 0 auto;
+    align-self: center;
+    width: 54px;
+    height: 54px;
+    margin-top: -22px;
+    border: none;
+    border-radius: 50%;
+    background: #dc3a0f;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(220, 58, 15, 0.45);
+    transition: transform 0.2s ease, background 0.15s;
+
+    &:active { background: #c33210; }
+    &.open { transform: rotate(45deg); }
+  }
+
+  // Dim backdrop behind sheets/search
+  .mbn-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 290;
+    background: rgba(20, 20, 20, 0.4);
+    animation: mbnFade 0.15s ease;
+  }
+
+  // Bottom sheet (add / menu) rising above the bar
+  .mbn-sheet {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: calc(60px + env(safe-area-inset-bottom, 0));
+    z-index: 295;
+    background: #fff;
+    border-radius: 16px 16px 0 0;
+    padding: 8px 0 12px;
+    box-shadow: 0 -6px 24px rgba(0, 0, 0, 0.16);
+    animation: mbnSlideUp 0.2s ease;
+    max-height: 70vh;
+    overflow-y: auto;
+
+    &__title {
+      font-size: 13px;
+      font-weight: 600;
+      color: #999;
+      padding: 12px 20px 6px;
+    }
+
+    &__item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      width: 100%;
+      padding: 15px 20px;
+      font-size: 16px;
+      color: #1d1d1b;
+      text-decoration: none;
+      background: none;
+      border: none;
+      text-align: left;
+      cursor: pointer;
+
+      &.active { color: #dc3a0f; font-weight: 600; }
+      &:active { background: #f6f6f4; }
+    }
+
+    &__plus {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: #fbe9e3;
+      color: #dc3a0f;
+      flex-shrink: 0;
+
+      svg { width: 18px; height: 18px; }
+    }
+
+    &__divider {
+      height: 1px;
+      background: #eee;
+      margin: 6px 20px;
+    }
+  }
+
+  // Full-width search overlay from the top
+  .mbn-search {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 295;
+    background: #fff;
+    padding: 10px 12px calc(10px + env(safe-area-inset-bottom, 0));
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.12);
+    animation: mbnDropDown 0.18s ease;
+
+    &__bar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    &__widget { flex: 1 1 auto; min-width: 0; }
+
+    &__cancel {
+      flex: 0 0 auto;
+      background: none;
+      border: none;
+      color: #dc3a0f;
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+      padding: 6px 4px;
+    }
+
+    // The embedded search widget should fill the width and show its dropdown inline
+    .top-search-widget { width: 100%; }
+    .top-search-widget input { width: 100%; }
+    .search__dropdown { max-height: calc(100vh - 90px); }
+  }
+
+  // Give page content room so the fixed bar never covers it.
+  main { padding-bottom: 72px; }
+
+  // The header burger moved down — hide it on mobile.
+  .top-navigation .menu { display: none; }
+}
+
+@keyframes mbnFade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes mbnSlideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+@keyframes mbnDropDown { from { transform: translateY(-100%); } to { transform: translateY(0); } }

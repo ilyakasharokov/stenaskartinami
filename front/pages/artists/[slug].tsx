@@ -286,9 +286,9 @@ export default function ArtistPage({ artist: initialArtist }) {
                   return (
                     <Link key={w.id} href={href} className="ap-wall-card">
                       <div className="ap-wall-card__img-wrap">
-                        {img ? <img src={img} alt={w.Title} /> : <div style={{ width: '100%', height: '100%', background: '#f0ede8' }} />}
+                        {img ? <img src={img} alt={w.title} /> : <div style={{ width: '100%', height: '100%', background: '#f0ede8' }} />}
                       </div>
-                      <div className="ap-wall-card__title">{w.Title}</div>
+                      <div className="ap-wall-card__title">{w.title}</div>
                       {w.city_name && <div className="ap-wall-card__meta">{w.city_name}</div>}
                     </Link>
                   )

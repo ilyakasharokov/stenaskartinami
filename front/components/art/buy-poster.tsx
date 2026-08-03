@@ -58,7 +58,7 @@ export default function BuyPoster({art}){
                             <InputMask mask="+9-999-999-99-99" maskChar={null} maskplaceholder="+7-123-456-89-90" name="phone" type="tel" placeholder="Номер телефона" required/>
                         </div>
                         <input type="hidden" name="title" value="Заказать постер"></input>
-                        <input type="hidden" name="text" value={art.Title + ', ' + art.Artist.full_name + ', id = ' + art.id }></input>
+                        <input type="hidden" name="text" value={art.title + ', ' + art.Artist.full_name + ', id = ' + art.id }></input>
                         </div>
                     }
                     </div>

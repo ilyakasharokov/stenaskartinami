@@ -8,6 +8,7 @@ import AddressInput from '@/components/ui/AddressInput'
 import { getSession } from '@/lib/getSession'
 import { useToast } from '@/components/ui/Toast'
 import { ArrowRight, ArrowLeft } from '@/components/ui/icons'
+import RequireAuth from '@/components/auth/RequireAuth'
 
 const WALL_TYPE_ICONS = {
   cafe: (
@@ -220,7 +221,7 @@ function ZonePreview({ width, height }) {
   )
 }
 
-export default function AddWall() {
+function AddWall() {
   const router = useRouter()
   const { data: session } = useSession()
   const showToast = useToast()
@@ -324,7 +325,7 @@ export default function AddWall() {
       const body = {
         data: {
           ...(publish ? { status: 'published' } : {}),
-          Title: form.title,
+          title: form.title,
           Description: form.description,
           slug,
           Address: form.address,
@@ -831,10 +832,15 @@ export default function AddWall() {
 }
 
 
+export default function AddWallPage({ requireAuth }) {
+  if (requireAuth) return <MainLayout><RequireAuth text="Войдите, чтобы добавить стену." /></MainLayout>
+  return <AddWall />
+}
+
 export async function getServerSideProps(context) {
   const session = await getSession(context.req, context.res)
   if (!session?.jwt) {
-    return { redirect: { destination: '/auth/signin?callbackUrl=/add-wall', permanent: false } }
+    return { props: { requireAuth: true } }
   }
   return { props: {} }
 }

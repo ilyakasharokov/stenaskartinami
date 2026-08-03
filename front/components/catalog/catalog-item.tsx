@@ -67,14 +67,14 @@ export default function CatalogItem({art, imageOnLoad}){
                             </div>
                         }
                         <div className="overlay"></div>
-                        <Link href={ '/art/' + art.slug + '--' + art.id} className="catalog-item__img-link" title={art.Title}>
+                        <Link href={ '/art/' + art.slug + '--' + art.id} className="catalog-item__img-link" title={art.title}>
                             {
                               imgW && imgH
                                 ? <Image
                                     ref={imgRefCallback}
                                     className="catalog-item__img"
                                     src={imagePath(picUrl)}
-                                    alt={art.Title || ''}
+                                    alt={art.title || ''}
                                     width={imgW}
                                     height={imgH}
                                     sizes={CARD_SIZES}
@@ -84,14 +84,14 @@ export default function CatalogItem({art, imageOnLoad}){
                                     ref={imgRefCallback}
                                     className="catalog-item__img"
                                     src={imageUrlBuilder(picUrl)}
-                                    alt={art.Title}
+                                    alt={art.title}
                                   />
                             }
                         </Link>
                     </div>
                 }
                 <Link href={ '/art/' + art.slug + '--' + art.id}>
-                    <div className="catalog-item__title">{art.Title}</div>
+                    <div className="catalog-item__title">{art.title}</div>
                 </Link>
                 {
                     art.width && art.height &&

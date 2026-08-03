@@ -16,16 +16,16 @@ export default {
   async beforeCreate(event: any) {
     const { data } = event.params;
 
-    if (data.Title) {
-      data.slug = slugifyValue(data.Title);
+    if (data.title) {
+      data.slug = slugifyValue(data.title);
     }
   },
 
   async beforeUpdate(event: any) {
     const { data } = event.params;
 
-    if (data.Title) {
-      data.slug = slugifyValue(data.Title);
+    if (data.title) {
+      data.slug = slugifyValue(data.title);
     }
   },
 };

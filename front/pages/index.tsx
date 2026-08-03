@@ -1,6 +1,7 @@
 import Head from 'next/head'
 import Link from 'next/link'
 import Image from 'next/image'
+import AuthLink from '@/components/auth/AuthLink'
 import MainLayout from '@/components/layouts/MainLayout'
 import { API_HOST } from "@/constants/constants"
 import imageUrlBuilder, { imagePath } from '@/utils/img-url-builder'
@@ -58,11 +59,11 @@ const TopArtCard = ({ art, badge }) => {
           {badge && <div className="top-badge">{badge}</div>}
           <div className="overlay" />
           <Link href={'/art/' + art.slug + '--' + art.id} className="catalog-item__img-link">
-            {imgUrl && <MasonryImage pic={pic} url={imgUrl} alt={art.Title} />}
+            {imgUrl && <MasonryImage pic={pic} url={imgUrl} alt={art.title} />}
           </Link>
         </div>
         <Link href={'/art/' + art.slug + '--' + art.id}>
-          <div className="catalog-item__title">{art.Title}</div>
+          <div className="catalog-item__title">{art.title}</div>
         </Link>
         <div className="catalog-item__size">
           {art.width && art.height && <div>{art.width} x {art.height}</div>}
@@ -156,7 +157,7 @@ export default function Home({ walls, arts, interiorArts, artists, topLikes = []
             </div>
             <div className="index-hero__ctas">
               <Link href="/catalog" className="btn index-hero__btn-primary">Смотреть каталог <ArrowRight size={16} /></Link>
-              <Link href="/account/add-art" className="index-hero__btn-outline">Добавить работу</Link>
+              <AuthLink href="/account/add-art" className="index-hero__btn-outline">Добавить работу</AuthLink>
             </div>
           </div>
 
@@ -170,7 +171,7 @@ export default function Home({ walls, arts, interiorArts, artists, topLikes = []
                         <Link href={'/art/' + art.slug + '--' + art.id}>
                           <Image
                             src={imagePath(getArtImageUrl(art))}
-                            alt={art.Title || ''}
+                            alt={art.title || ''}
                             className="hero-slider__img"
                             fill
                             priority={i === 0}
@@ -188,7 +189,7 @@ export default function Home({ walls, arts, interiorArts, artists, topLikes = []
                           href={'/art/' + currentArt.slug + '--' + currentArt.id}
                           className="hero-slider__card-title"
                         >
-                          {currentArt.Title}
+                          {currentArt.title}
                         </Link>
                         <AddFavorite art={currentArt} />
                       </div>
@@ -268,11 +269,11 @@ export default function Home({ walls, arts, interiorArts, artists, topLikes = []
                         <div className="catalog-item__btns"><AddFavorite art={art} /></div>
                         <div className="overlay" />
                         <Link href={'/art/' + art.slug + '--' + art.id} className="catalog-item__img-link">
-                          {imgUrl && <MasonryImage pic={pic} url={imgUrl} alt={art.Title} />}
+                          {imgUrl && <MasonryImage pic={pic} url={imgUrl} alt={art.title} />}
                         </Link>
                       </div>
                       <Link href={'/art/' + art.slug + '--' + art.id}>
-                        <div className="catalog-item__title">{art.Title}</div>
+                        <div className="catalog-item__title">{art.title}</div>
                       </Link>
                       <div className="catalog-item__size">
                         {art.width && art.height && <div>{art.width} x {art.height}</div>}
@@ -349,7 +350,7 @@ export default function Home({ walls, arts, interiorArts, artists, topLikes = []
                 >
                   <Image
                     src={imagePath(art.interior_photo?.url)}
-                    alt={art.Title || ''}
+                    alt={art.title || ''}
                     width={art.interior_photo?.width || 800}
                     height={art.interior_photo?.height || 600}
                     sizes="(max-width: 900px) 75vw, 25vw"
@@ -432,7 +433,7 @@ export default function Home({ walls, arts, interiorArts, artists, topLikes = []
                 <div className="index-cta__stat-label">городов</div>
               </div>
             </div>
-            <Link href="/account/add-art" className="btn">Добавить работу</Link>
+            <AuthLink href="/account/add-art" className="btn">Добавить работу</AuthLink>
           </div>
         </div>
 

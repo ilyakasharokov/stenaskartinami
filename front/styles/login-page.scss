@@ -320,4 +320,107 @@
     min-height: 100vh;
     padding: 32px 20px;
   }
+
+  // Inside the modal the card must stay bounded — don't stretch to full viewport.
+  .auth-modal .login-page {
+    min-height: auto;
+    border-radius: 14px;
+    padding: 32px 22px;
+  }
+}
+
+// ── Auth modal ────────────────────────────────────────────
+.auth-modal__overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(20, 20, 20, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  box-sizing: border-box;
+  overflow-y: auto;
+  animation: authModalFade 0.15s ease;
+}
+
+.auth-modal {
+  position: relative;
+  width: 400px;
+  max-width: 100%;
+  margin: auto;
+  animation: authModalPop 0.18s ease;
+
+  .login-page {
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.25);
+  }
+}
+
+.auth-modal__close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 1;
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 50%;
+  background: #f0f0ee;
+  color: #333;
+  cursor: pointer;
+  transition: background 0.15s;
+
+  &:hover { background: #e2e2df; }
+}
+
+@keyframes authModalFade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes authModalPop {
+  from { opacity: 0; transform: translateY(8px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+// ── Protected-page placeholder (shown behind the auth modal) ──
+.require-auth {
+  min-height: 60vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 16px;
+}
+
+.require-auth__card {
+  text-align: center;
+  max-width: 420px;
+}
+
+.require-auth__title {
+  font-size: 22px;
+  font-weight: 700;
+  margin: 0 0 10px;
+}
+
+.require-auth__text {
+  color: #666;
+  margin: 0 0 20px;
+}
+
+.require-auth__btn {
+  border: none;
+  border-radius: 10px;
+  padding: 12px 22px;
+  background: #dc3a0f;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+
+  &:hover { background: #c33210; }
 }

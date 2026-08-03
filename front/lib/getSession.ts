@@ -28,8 +28,15 @@ async function fetchDevSession() {
 
 export async function getSession(req, res) {
   if (process.env.DEV_AUTO_EMAIL) {
-    if (!_devSession) _devSession = await fetchDevSession()
-    if (_devSession) return _devSession
+    // Honour an explicit dev logout: the "Выйти" button sets this cookie so the
+    // server-side bypass stops authenticating and pages can show the real
+    // logged-out experience (auth modal on protected pages, etc.).
+    const cookieHeader = req?.headers?.cookie || ''
+    const loggedOut = req?.cookies?.devLoggedOut === '1' || /(?:^|;\s*)devLoggedOut=1(?:;|$)/.test(cookieHeader)
+    if (!loggedOut) {
+      if (!_devSession) _devSession = await fetchDevSession()
+      if (_devSession) return _devSession
+    }
   }
   return getServerSession(req, res, authOptions as any)
 }

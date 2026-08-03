@@ -97,7 +97,7 @@ export default function WallPage({ wall }) {
   return (
     <MainLayout>
       <Head>
-        <title>{wall.Title} | Стена с картинами</title>
+        <title>{wall.title} | Стена с картинами</title>
         <meta name="description" content={typeof wall.Description === 'string' ? wall.Description.slice(0, 160) : ''} />
       </Head>
 
@@ -105,7 +105,7 @@ export default function WallPage({ wall }) {
         {/* ── Hero ── */}
         <div className="wp-hero">
           {heroImg
-            ? <img src={heroImg} alt={wall.Title} className="wp-hero__img" />
+            ? <img src={heroImg} alt={wall.title} className="wp-hero__img" />
             : <div className="wp-hero__placeholder" />
           }
           <div className="wp-hero__overlay" />
@@ -123,7 +123,7 @@ export default function WallPage({ wall }) {
               <svg width="8" height="8" viewBox="0 0 8 8"><circle cx="4" cy="4" r="4" fill="currentColor"/></svg>
               Опубликовано
             </div>
-            <h1 className="wp-hero__title">{wall.Title}</h1>
+            <h1 className="wp-hero__title">{wall.title}</h1>
             {addr && (
               <div className="wp-hero__addr">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
@@ -442,7 +442,7 @@ export default function WallPage({ wall }) {
                     <ZoomControl />
                     <Placemark
                       geometry={wall.Coordinates.center}
-                      properties={{ hintContent: wall.Title, balloonContent: addr }}
+                      properties={{ hintContent: wall.title, balloonContent: addr }}
                       options={{ iconLayout: 'default#image', iconImageHref: '/images/mapicon.png', iconImageSize: [40, 40], iconImageOffset: [-20, -20] }}
                     />
                   </Map>

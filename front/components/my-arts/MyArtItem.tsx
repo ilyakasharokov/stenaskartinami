@@ -127,7 +127,7 @@ export default function MyArtItem({ art, onDelete, imageOnLoad }) {
               ref={imgRef}
               className={`catalog-item__img${imgLoaded ? ' catalog-item__img--loaded' : ''}`}
               src={imageUrlBuilder(pictureUrl)}
-              alt={art.Title}
+              alt={art.title}
               onLoad={() => { setImgLoaded(true); imageOnLoad?.() }}
               onError={() => setImgLoaded(true)}
             />
@@ -135,7 +135,7 @@ export default function MyArtItem({ art, onDelete, imageOnLoad }) {
             <div className="my-art-item__no-img">Нет фото</div>
           )}
         </div>
-        <div className="catalog-item__title">{art.Title}</div>
+        <div className="catalog-item__title">{art.title}</div>
         {meta && <div className="catalog-item__size">{meta}</div>}
         <div className="catalog-item__artist-price">
           <div className="catalog-item__price">

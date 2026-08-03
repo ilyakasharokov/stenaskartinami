@@ -1,5 +1,6 @@
 import { YMaps, Map, Placemark, ZoomControl } from 'react-yandex-maps';
 import Link from 'next/link';
+import AuthLink from '@/components/auth/AuthLink';
 
 export default function YandexMap({ walls, mapOnly = false }) {
   if (!walls?.length) return null;
@@ -23,7 +24,7 @@ export default function YandexMap({ walls, mapOnly = false }) {
                 iconImageHref: '/images/mapicon.png',
               }}
               properties={{
-                balloonContentHeader: wall.Title,
+                balloonContentHeader: wall.title,
                 balloonContentBody: wall.Address,
                 balloonContentFooter: `<a href="${'/walls/' + wall.slug + '--' + wall.id}">Перейти</a>`,
               }}
@@ -41,7 +42,7 @@ export default function YandexMap({ walls, mapOnly = false }) {
     <div className="index-page__map">
       <h2>Стены на карте</h2>
       {mapEl}
-      <Link href="/add-wall" className="btn">Добавить стену</Link>
+      <AuthLink href="/add-wall" className="btn">Добавить стену</AuthLink>
     </div>
   );
 }

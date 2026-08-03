@@ -209,7 +209,7 @@ export default function CatalogFilters({filtersPreloaded, onChange, hideFilters}
     const q = (sectionSearch[key] || '').toLowerCase().trim()
     if (!q) return filters[key].items
     return filters[key].items.filter(item =>
-      item.active || (item.Title || item.title || '').toLowerCase().includes(q)
+      item.active || (item.title || item.title || '').toLowerCase().includes(q)
     )
   }
 
@@ -279,7 +279,7 @@ export default function CatalogFilters({filtersPreloaded, onChange, hideFilters}
                 return visible.map(item =>
                   <div className="catalog-filters__item" key={item.id}>
                     <div className={`checkbox ${item.active ? 'checkbox--active' : ''}`} onClick={() => сheckboxClick(item, key)}></div>
-                    <div>{item.Title || item.title}</div>
+                    <div>{item.title || item.title}</div>
                   </div>
                 )
               })()

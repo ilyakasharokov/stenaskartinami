@@ -10,6 +10,7 @@ import { fetchStrapi } from '@/utils/strapi'
 import { API_HOST } from '@/constants/constants'
 import { CityInput, CountryInput, countryToCode } from '@/components/ui/AddressInput'
 import { ArrowRight, ArrowLeft } from '@/components/ui/icons'
+import RequireAuth from '@/components/auth/RequireAuth'
 const MESSENGER_TYPES = [['telegram', 'Telegram'], ['whatsapp', 'WhatsApp'], ['phone', 'Телефон'], ['email', 'Email']]
 
 const STEPS = [
@@ -93,7 +94,7 @@ function StringMultiSelect({ label, options, value, onChange }) {
   )
 }
 
-export default function AddArtist() {
+function AddArtist() {
   const router = useRouter()
   const { data: session } = useSession()
   const showToast = useToast()
@@ -112,7 +113,7 @@ export default function AddArtist() {
   const set = (field, value) => setForm(f => ({ ...f, [field]: value }))
 
   useEffect(() => {
-    fetch(`${process.env.NEXT_PUBLIC_API_URL}/walls?pagination[limit]=200&sort=Title:asc`)
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/walls?pagination[limit]=200&sort=title:asc`)
       .then(r => r.json())
       .then(json => {
         const items = Array.isArray(json) ? json : (Array.isArray(json?.data) ? json.data : [])
@@ -128,9 +129,9 @@ export default function AddArtist() {
       fetchStrapi(API_HOST + '/subjects?pagination[limit]=200'),
     ]).then(([styles, mediums, subjects]) => {
       setOptions({
-        directions: (Array.isArray(styles)  ? styles  : []).map(i => i.Title).filter(Boolean),
+        directions: (Array.isArray(styles)  ? styles  : []).map(i => i.title).filter(Boolean),
         techniques: (Array.isArray(mediums)  ? mediums  : []).map(i => i.title).filter(Boolean),
-        subjects:   (Array.isArray(subjects) ? subjects : []).map(i => i.Title).filter(Boolean),
+        subjects:   (Array.isArray(subjects) ? subjects : []).map(i => i.title).filter(Boolean),
       })
     }).catch(() => {})
   }, [])
@@ -568,7 +569,7 @@ export default function AddArtist() {
                 <select className="aw-select aa-exh-card__wall" value={ex.wall_id} onChange={e => updateExhibition(i, 'wall_id', e.target.value)}>
                   <option value="">Стена (необязательно)</option>
                   {wallsList.map(w => (
-                    <option key={w.documentId || w.id} value={w.documentId || w.id}>{w.Title}</option>
+                    <option key={w.documentId || w.id} value={w.documentId || w.id}>{w.title}</option>
                   ))}
                 </select>
               )}
@@ -751,10 +752,15 @@ export default function AddArtist() {
   )
 }
 
+export default function AddArtistPage({ requireAuth }) {
+  if (requireAuth) return <MainLayout><RequireAuth text="Войдите, чтобы добавить художника." /></MainLayout>
+  return <AddArtist />
+}
+
 export async function getServerSideProps(context) {
   const session = await getSession(context.req, context.res)
   if (!session?.jwt) {
-    return { redirect: { destination: '/auth/signin?callbackUrl=/add-artist', permanent: false } }
+    return { props: { requireAuth: true } }
   }
   return { props: {} }
 }

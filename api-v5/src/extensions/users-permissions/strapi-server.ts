@@ -188,7 +188,7 @@ export default (plugin: any) => {
                 type: 'new_like',
                 recipient_id: artist.user_uploader.id,
                 actor_name: user.name || user.username || 'Пользователь',
-                body: `добавил в избранное «${(art as any).Title}»`,
+                body: `добавил в избранное «${(art as any).title}»`,
                 link: `/art/${(art as any).slug}--${art.id}`,
                 image_url: imgUrl ? imgUrl : null,
                 read: false,

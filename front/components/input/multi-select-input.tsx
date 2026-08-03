@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { API_HOST } from '@/constants/constants'
 import { fetchStrapi } from '@/utils/strapi'
 
-export default function MultiSelectInput({ endpoint, label, titleField = 'Title', onChange, aiNames = [], initialIds = [], initialDocumentIds = [] }) {
+export default function MultiSelectInput({ endpoint, label, titleField = 'title', onChange, aiNames = [], initialIds = [], initialDocumentIds = [] }) {
   const [options, setOptions] = useState([])
   const [selected, setSelected] = useState(new Set())
   const [custom, setCustom] = useState([]) // string[]

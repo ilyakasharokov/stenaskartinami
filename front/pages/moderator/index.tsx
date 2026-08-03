@@ -53,7 +53,7 @@ export default function ModeratorPage() {
   useEffect(() => { load() }, [load])
 
   const reject = async (art) => {
-    if (!confirm(`Отклонить «${art.Title}»?`)) return
+    if (!confirm(`Отклонить «${art.title}»?`)) return
     setRejecting(art.id)
     try {
       await fetch(`${API}/arts/${art.id}/reject`, {
@@ -106,13 +106,13 @@ export default function ModeratorPage() {
                 <div key={art.id} className="mod-item">
                   <Link href={artUrl} target="_blank" className="mod-item__thumb">
                     {thumb
-                      ? <img src={thumb} alt={art.Title} />
+                      ? <img src={thumb} alt={art.title} />
                       : <div className="mod-item__no-img" />
                     }
                   </Link>
                   <div className="mod-item__body">
                     <Link href={artUrl} target="_blank" className="mod-item__title">
-                      {art.Title || 'Без названия'}
+                      {art.title || 'Без названия'}
                     </Link>
                     {art.Artist && (
                       artistUrl

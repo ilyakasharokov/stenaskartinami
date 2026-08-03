@@ -27,36 +27,35 @@ const MODERATION_RECIPIENTS = 'ilyakasharokov@mail.ru, dudkinet@gmail.com';
 // so title/artist/etc. are always present (the entry is fresh at create time).
 async function sendModerationEmail(documentId: string, fallbackId: number) {
   try {
+    // Use the db.query layer (not entityService) — the Meilisearch document
+    // middleware that wraps entityService throws "Invalid key" on our relation
+    // field selection, which previously made this fetch return nothing and the
+    // email arrive with empty fields. Full populate avoids selecting bad keys.
+    const emailPopulate = {
+      Artist: true, styles: true, subjects: true, mediums: true,
+      user_uploader: true, Pictures: true,
+    } as any;
     let art: any = null;
     if (documentId) {
-      const rows = await strapi.entityService.findMany(uid, {
-        filters: { documentId: { $eq: documentId } } as any,
-        populate: {
-          Artist: { fields: ['full_name', 'nickname', 'slug', 'id'] },
-          styles: { fields: ['Title', 'title'] },
-          subjects: { fields: ['Title', 'title'] },
-          mediums: { fields: ['title', 'Title'] },
-          Pictures: { fields: ['url'] },
-          user_uploader: { fields: ['username', 'email', 'real_email', 'phone'] },
-        } as any,
-        pagination: { pageSize: 1 },
+      art = await strapi.db.query(uid).findOne({
+        where: { documentId, publishedAt: { $notNull: true } } as any,
+        populate: emailPopulate,
       });
-      art = Array.isArray(rows) ? rows[0] : rows;
     }
     if (!art && fallbackId) {
-      art = await strapi.entityService.findOne(uid, fallbackId, { populate: { Artist: true } as any });
+      art = await strapi.db.query(uid).findOne({ where: { id: fallbackId }, populate: emailPopulate });
     }
     if (!art) return;
 
     const tagNames = (arr: any[]) =>
-      (Array.isArray(arr) ? arr : []).map((t) => t?.Title || t?.title).filter(Boolean).join(', ') || '—';
+      (Array.isArray(arr) ? arr : []).map((t) => t?.title || t?.title).filter(Boolean).join(', ') || '—';
     const u = art.user_uploader || {};
     const contact = [u.email, u.real_email, u.phone].filter(Boolean).join(', ') || '—';
     const dims = art.width && art.height ? `${art.width} × ${art.height} см` : '—';
     const price = art.Owners_price ? `${art.Owners_price} ₽` : 'не указана';
     const artUrl = art.slug ? `https://stenaskartinami.com/art/${art.slug}--${art.id}` : '—';
 
-    const title = art.Title || 'Без названия';
+    const title = art.title || 'Без названия';
     const artist = art.Artist?.full_name || '—';
 
     const lines = [
@@ -435,7 +434,7 @@ export default factories.createCoreController(uid, () => ({
         subject: 'Стена с картинами, новая картина на модерации',
         text: `
           Форма: "Новая картина",
-          Имя: ${entityWithRelations?.Title || ''}
+          Имя: ${(entityWithRelations as any)?.title || ''}
           Художник: ${(entityWithRelations as any)?.Artist?.full_name || ''}
         `,
       });

@@ -11,7 +11,7 @@
     "draftAndPublish": true
   },
   "attributes": {
-    "Title": { "type": "string" },
+    "title": { "type": "string" },
     "Description": { "type": "richtext" },
     "slug": { "type": "string" },
     "Address": { "type": "string" },

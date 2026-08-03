@@ -1,6 +1,8 @@
 import Link from 'next/link'
 import { useState } from 'react'
 import { useRouter } from 'next/router'
+import { useSession } from 'next-auth/react'
+import { useAuthModal } from '@/components/auth/AuthModal'
 
 const menuItems = [
   { title: 'Главная',          link: '/' },
@@ -11,9 +13,15 @@ const menuItems = [
   { title: 'Добавить художника', link: '/add-artist' },
 ]
 
+// Links that require auth — a logged-out click opens the auth modal instead of
+// navigating to the protected page.
+const AUTH_REQUIRED = new Set(['/account/add-art', '/add-wall', '/add-artist'])
+
 export default function Menu() {
   const [showMenu, setShowMenu] = useState(false)
   const router = useRouter()
+  const { data: session } = useSession()
+  const { open: openAuth } = useAuthModal()
 
   const isActive = (link) => {
     if (link === '/') return router.pathname === '/'
@@ -38,7 +46,13 @@ export default function Menu() {
             <Link
               href={item.link}
               className={isActive(item.link) ? 'is-active' : ''}
-              onClick={() => setShowMenu(false)}
+              onClick={(e) => {
+                setShowMenu(false)
+                if (AUTH_REQUIRED.has(item.link) && !session) {
+                  e.preventDefault()
+                  openAuth(item.link)
+                }
+              }}
             >
               {item.title}
             </Link>

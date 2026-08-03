@@ -1,4 +1,5 @@
 import MainLayout from "@/components/layouts/MainLayout"
+import RequireAuth from "@/components/auth/RequireAuth"
 import { API_HOST } from "@/constants/constants"
 import Head from 'next/head'
 import { useState, useCallback, useMemo, useRef, useEffect, Fragment } from "react"
@@ -693,8 +694,8 @@ function DetailsStep({ images, onImagesChange, sessionJwt, userId, initialArtist
       fetchStrapi(API_HOST + '/mediums?pagination[limit]=200'),
     ]).then(([s, sub, m]) => {
       setAvailableOptions({
-        styles: (s || []).map(x => x.Title).filter(Boolean),
-        subjects: (sub || []).map(x => x.Title).filter(Boolean),
+        styles: (s || []).map(x => x.title).filter(Boolean),
+        subjects: (sub || []).map(x => x.title).filter(Boolean),
         mediums: (m || []).map(x => x.title).filter(Boolean),
       })
     }).catch(() => {})
@@ -750,7 +751,7 @@ function DetailsStep({ images, onImagesChange, sessionJwt, userId, initialArtist
       }
       const year = date.getFullYear()
       const artData: Record<string, any> = {
-        Title: fields.title || 'Без названия',
+        title: fields.title || 'Без названия',
         Description: fields.description || '',
         Materials: fields.materials || '',
         Owners_price: parseInt(fields.price) || null,
@@ -994,8 +995,8 @@ function DetailsStep({ images, onImagesChange, sessionJwt, userId, initialArtist
     }
 
     const [customStyleIds, customSubjectIds, customMediumIds] = await Promise.all([
-      createCustomEntries('styles', 'Title', styles.custom),
-      createCustomEntries('subjects', 'Title', subjects.custom),
+      createCustomEntries('styles', 'title', styles.custom),
+      createCustomEntries('subjects', 'title', subjects.custom),
       createCustomEntries('mediums', 'title', mediums.custom),
     ])
 
@@ -1036,7 +1037,7 @@ function DetailsStep({ images, onImagesChange, sessionJwt, userId, initialArtist
 
     const year = date.getFullYear()
     const artData: Record<string, any> = {
-      Title: fields.title,
+      title: fields.title,
       Description: fields.description,
       Materials: fields.materials,
       Owners_price: parseInt(fields.price) || 0,
@@ -1356,8 +1357,8 @@ function SuccessStep({ result, meta, onReset }) {
     hour: '2-digit', minute: '2-digit',
   }).replace(' г.', '')
 
-  const styleNames = (result?.styles || []).map(s => s.Title || s.title).filter(Boolean)
-  const subjectNames = (result?.subjects || []).map(s => s.Title || s.title).filter(Boolean)
+  const styleNames = (result?.styles || []).map(s => s.title || s.title).filter(Boolean)
+  const subjectNames = (result?.subjects || []).map(s => s.title || s.title).filter(Boolean)
   const dimensions = [result?.width, result?.height].filter(Boolean).join(' × ')
   const artistName = result?.Artist?.full_name || meta?.artist?.full_name || ''
   const price = result?.Owners_price
@@ -1373,7 +1374,7 @@ function SuccessStep({ result, meta, onReset }) {
     if (!meta?.imageDataUrl) return
     const a = document.createElement('a')
     a.href = meta.imageDataUrl
-    a.download = `${result?.Title || 'artwork'}.jpg`
+    a.download = `${result?.title || 'artwork'}.jpg`
     a.click()
   }
 
@@ -1413,15 +1414,15 @@ function SuccessStep({ result, meta, onReset }) {
           <div className="success-art-card">
             {meta?.imageDataUrl && (
               <div className="success-art-card__img">
-                <img src={meta.imageDataUrl} alt={result?.Title || ''} />
+                <img src={meta.imageDataUrl} alt={result?.title || ''} />
               </div>
             )}
             <div className="success-art-card__details">
               <div className="success-art-grid">
-                {result?.Title && (
+                {result?.title && (
                   <div className="success-art-field">
                     <span className="success-art-field__label">Название работы</span>
-                    <span className="success-art-field__value">{result.Title}</span>
+                    <span className="success-art-field__value">{result.title}</span>
                   </div>
                 )}
                 {artistName && (
@@ -1575,7 +1576,7 @@ function SuccessStep({ result, meta, onReset }) {
 
 // ── Main ───────────────────────────────────────────────────
 
-export default function AddArt({ sessionJwt, userId, initialArtist, isModerator }) {
+function AddArt({ sessionJwt, userId, initialArtist, isModerator }) {
   const [step, setStep] = useState('upload')
   const [images, setImages] = useState([])
   const [result, setResult] = useState(null)
@@ -1613,10 +1614,15 @@ export default function AddArt({ sessionJwt, userId, initialArtist, isModerator 
   )
 }
 
+export default function AddArtPage({ requireAuth, ...props }) {
+  if (requireAuth) return <MainLayout><RequireAuth text="Войдите, чтобы добавить картину." /></MainLayout>
+  return <AddArt {...props} />
+}
+
 export async function getServerSideProps(context) {
   const session = await getSession(context.req, context.res)
   if (!session?.jwt) {
-    return { redirect: { destination: '/auth/signin?callbackUrl=/account/add-art', permanent: false } }
+    return { props: { requireAuth: true } }
   }
 
   let initialArtist = null

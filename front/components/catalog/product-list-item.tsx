@@ -49,7 +49,7 @@ export default function ProductListItem({art}){
                   </Link>
                 </div>
                 <Link href={ '/art/' + art.slug + '--' + art.id}>
-                    <div className="catalog-item__title">{art.Title}</div>
+                    <div className="catalog-item__title">{art.title}</div>
                 </Link>
                 <div className="catalog-item__size">
                 { 

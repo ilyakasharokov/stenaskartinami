@@ -451,6 +451,22 @@ export interface ApiArtArt extends Struct.CollectionTypeSchema {
     height: Schema.Attribute.Decimal;
     interior_photo: Schema.Attribute.Media<'images'>;
     isSquare: Schema.Attribute.Boolean;
+    likes_count: Schema.Attribute.Integer &
+      Schema.Attribute.SetMinMax<
+        {
+          min: 0;
+        },
+        number
+      > &
+      Schema.Attribute.DefaultTo<0>;
+    likes_seed: Schema.Attribute.Integer &
+      Schema.Attribute.SetMinMax<
+        {
+          min: 0;
+        },
+        number
+      > &
+      Schema.Attribute.DefaultTo<0>;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<'oneToMany', 'api::art.art'> &
       Schema.Attribute.Private;
@@ -466,7 +482,7 @@ export interface ApiArtArt extends Struct.CollectionTypeSchema {
     square: Schema.Attribute.Decimal;
     styles: Schema.Attribute.Relation<'manyToMany', 'api::style.style'>;
     subjects: Schema.Attribute.Relation<'manyToMany', 'api::subject.subject'>;
-    Title: Schema.Attribute.String;
+    title: Schema.Attribute.String;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -476,6 +492,14 @@ export interface ApiArtArt extends Struct.CollectionTypeSchema {
     >;
     video: Schema.Attribute.Media<'images' | 'files' | 'videos', true>;
     views: Schema.Attribute.Integer &
+      Schema.Attribute.SetMinMax<
+        {
+          min: 0;
+        },
+        number
+      > &
+      Schema.Attribute.DefaultTo<0>;
+    views_seed: Schema.Attribute.Integer &
       Schema.Attribute.SetMinMax<
         {
           min: 0;
@@ -521,6 +545,7 @@ export interface ApiArtistArtist extends Struct.CollectionTypeSchema {
       'plugin::users-permissions.user'
     >;
     full_name: Schema.Attribute.String & Schema.Attribute.Required;
+    is_ai: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<
       'oneToMany',
@@ -547,6 +572,7 @@ export interface ApiArtistArtist extends Struct.CollectionTypeSchema {
       'manyToOne',
       'plugin::users-permissions.user'
     >;
+    works_count: Schema.Attribute.Integer;
   };
 }
 
@@ -570,7 +596,7 @@ export interface ApiCityCity extends Struct.CollectionTypeSchema {
       Schema.Attribute.Private;
     publishedAt: Schema.Attribute.DateTime;
     slug: Schema.Attribute.String;
-    Title: Schema.Attribute.String;
+    title: Schema.Attribute.String;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -605,6 +631,43 @@ export interface ApiFormForm extends Struct.CollectionTypeSchema {
     publishedAt: Schema.Attribute.DateTime;
     text: Schema.Attribute.RichText;
     title: Schema.Attribute.String;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
+export interface ApiMailLogMailLog extends Struct.CollectionTypeSchema {
+  collectionName: 'mail_logs';
+  info: {
+    displayName: 'Mail Log';
+    pluralName: 'mail-logs';
+    singularName: 'mail-log';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    artist: Schema.Attribute.Relation<'manyToOne', 'api::artist.artist'>;
+    campaign_id: Schema.Attribute.String;
+    clicked_at: Schema.Attribute.DateTime;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::mail-log.mail-log'
+    > &
+      Schema.Attribute.Private;
+    opened_at: Schema.Attribute.DateTime;
+    publishedAt: Schema.Attribute.DateTime;
+    recipient_email: Schema.Attribute.String;
+    score_after: Schema.Attribute.Integer;
+    score_before: Schema.Attribute.Integer;
+    sent_at: Schema.Attribute.DateTime;
+    subject: Schema.Attribute.String;
+    token: Schema.Attribute.UID & Schema.Attribute.Required;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -671,6 +734,41 @@ export interface ApiMediumMedium extends Struct.CollectionTypeSchema {
   };
 }
 
+export interface ApiNotificationNotification
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'notifications';
+  info: {
+    displayName: 'Notification';
+    pluralName: 'notifications';
+    singularName: 'notification';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    actor_name: Schema.Attribute.String;
+    body: Schema.Attribute.String;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    image_url: Schema.Attribute.String;
+    link: Schema.Attribute.String;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::notification.notification'
+    > &
+      Schema.Attribute.Private;
+    publishedAt: Schema.Attribute.DateTime;
+    read: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
+    recipient_id: Schema.Attribute.Integer & Schema.Attribute.Required;
+    type: Schema.Attribute.String & Schema.Attribute.Required;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
 export interface ApiSlideSlide extends Struct.CollectionTypeSchema {
   collectionName: 'slides';
   info: {
@@ -723,7 +821,7 @@ export interface ApiStyleStyle extends Struct.CollectionTypeSchema {
     publishedAt: Schema.Attribute.DateTime;
     seotitle: Schema.Attribute.String;
     slug: Schema.Attribute.String;
-    Title: Schema.Attribute.String;
+    title: Schema.Attribute.String;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -755,7 +853,7 @@ export interface ApiSubjectSubject extends Struct.CollectionTypeSchema {
       Schema.Attribute.Private;
     publishedAt: Schema.Attribute.DateTime;
     slug: Schema.Attribute.String;
-    Title: Schema.Attribute.String;
+    title: Schema.Attribute.String;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -805,7 +903,7 @@ export interface ApiWallWall extends Struct.CollectionTypeSchema {
     spots_comment: Schema.Attribute.String;
     spots_count: Schema.Attribute.String;
     styles_themes: Schema.Attribute.JSON;
-    Title: Schema.Attribute.String;
+    title: Schema.Attribute.String;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -1276,7 +1374,6 @@ export interface PluginUsersPermissionsUser
   };
   options: {
     draftAndPublish: false;
-    timestamps: true;
   };
   attributes: {
     artist_confirmed: Schema.Attribute.Boolean &
@@ -1297,6 +1394,7 @@ export interface PluginUsersPermissionsUser
         minLength: 6;
       }>;
     instagram: Schema.Attribute.String;
+    is_moderator: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
     isModerator: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<
@@ -1353,8 +1451,10 @@ declare module '@strapi/strapi' {
       'api::artist.artist': ApiArtistArtist;
       'api::city.city': ApiCityCity;
       'api::form.form': ApiFormForm;
+      'api::mail-log.mail-log': ApiMailLogMailLog;
       'api::marquee.marquee': ApiMarqueeMarquee;
       'api::medium.medium': ApiMediumMedium;
+      'api::notification.notification': ApiNotificationNotification;
       'api::slide.slide': ApiSlideSlide;
       'api::style.style': ApiStyleStyle;
       'api::subject.subject': ApiSubjectSubject;

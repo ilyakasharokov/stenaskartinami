@@ -77,7 +77,7 @@ export default function EditArt({ art, sessionJwt, documentId, isModerator }) {
 
   // Form fields
   const [fields, setFields] = useState<Record<string, any>>({
-    title:       art?.Title || '',
+    title:       art?.title || '',
     description: art?.Description || '',
     materials:   art?.Materials || '',
     price:       art?.Owners_price != null ? String(art.Owners_price) : '',
@@ -228,7 +228,7 @@ export default function EditArt({ art, sessionJwt, documentId, isModerator }) {
       ]
       const year = date.getFullYear()
       const data: Record<string, any> = {
-        Title:        fields.title,
+        title:        fields.title,
         Description:  fields.description,
         Materials:    fields.materials,
         Owners_price: parseInt(fields.price) || 0,
@@ -300,7 +300,7 @@ export default function EditArt({ art, sessionJwt, documentId, isModerator }) {
 
   return (
     <MainLayout>
-      <Head><title>Редактировать — {art.Title} | Стена с картинами</title><meta name="robots" content="noindex" /></Head>
+      <Head><title>Редактировать — {art.title} | Стена с картинами</title><meta name="robots" content="noindex" /></Head>
 
       {saving && (
         <div className="overlay">
@@ -324,7 +324,7 @@ export default function EditArt({ art, sessionJwt, documentId, isModerator }) {
               <div className="edit-img-main">
                 {(() => {
                   const url = existingPictures[0]?.formats?.medium?.url || existingPictures[0]?.formats?.small?.url || existingPictures[0]?.url
-                  return url ? <img src={imageUrlBuilder(url)} alt={art.Title} /> : null
+                  return url ? <img src={imageUrlBuilder(url)} alt={art.title} /> : null
                 })()}
               </div>
             )}

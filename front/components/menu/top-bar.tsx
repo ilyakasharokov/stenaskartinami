@@ -2,6 +2,7 @@ import { useSession, signOut } from 'next-auth/react'
 import Link from 'next/link'
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { Image as ImageIcon, Heart, User, Bell } from '@/components/ui/icons'
+import { useAuthModal } from '@/components/auth/AuthModal'
 
 const BellIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
@@ -40,6 +41,7 @@ function UserAvatar({ name, image }) {
 
 export default function NavRight() {
   const { data: session } = useSession()
+  const { open: openAuth } = useAuthModal()
   const [dropdownOpen, setDropdownOpen] = useState(false)
   const dropdownRef = useRef(null)
 
@@ -105,7 +107,7 @@ export default function NavRight() {
   if (!session) {
     return (
       <div className="nav-right">
-        <Link href="/auth/signin" className="nav-auth-link">Войти</Link>
+        <button type="button" className="nav-auth-link" onClick={openAuth}>Войти</button>
       </div>
     )
   }
@@ -211,7 +213,16 @@ export default function NavRight() {
             <div className="nav-user__divider" />
             <button
               className="nav-user__item nav-user__item--danger"
-              onClick={() => { setDropdownOpen(false); signOut() }}
+              onClick={() => {
+                setDropdownOpen(false)
+                // In dev, prevent auto-login (client) and the server-side getSession
+                // bypass from instantly signing us back in.
+                if (typeof window !== 'undefined') {
+                  sessionStorage.setItem('devAutoLoginOff', '1')
+                  document.cookie = 'devLoggedOut=1; path=/; max-age=86400'
+                }
+                signOut()
+              }}
             >
               Выйти
             </button>

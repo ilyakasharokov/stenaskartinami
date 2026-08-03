@@ -25,14 +25,14 @@ async function upload(jwt, base) {
 }
 
 const jwt = await login()
-const S = { sur: await idByTitle('styles', 'Title', 'Сюрреализм'), abs: await idByTitle('styles', 'Title', 'Абстракционизм') }
-const SUBJ = { peiz: await idByTitle('subjects', 'Title', 'Пейзаж'), abst: await idByTitle('subjects', 'Title', 'Абстракция') }
+const S = { sur: await idByTitle('styles', 'title', 'Сюрреализм'), abs: await idByTitle('styles', 'title', 'Абстракционизм') }
+const SUBJ = { peiz: await idByTitle('subjects', 'title', 'Пейзаж'), abst: await idByTitle('subjects', 'title', 'Абстракция') }
 const MED = { maslo: await idByTitle('mediums', 'title', 'Масло') }
 console.log('ids:', S, SUBJ, MED)
 
 // 1) existing art → set style/subject/medium/price
-const arts = (await fetch(`${API}/arts?filters[Artist][id][$eq]=${ARTIST_ID}&fields[0]=Title&fields[1]=documentId&pagination[pageSize]=10`).then(r => r.json())).data || []
-const existing = arts.find(a => a.Title === 'Сон о невесомости')
+const arts = (await fetch(`${API}/arts?filters[Artist][id][$eq]=${ARTIST_ID}&fields[0]=title&fields[1]=documentId&pagination[pageSize]=10`).then(r => r.json())).data || []
+const existing = arts.find(a => a.title === 'Сон о невесомости')
 if (existing) {
   const r = await fetch(`${API}/arts/${existing.documentId}`, { method: 'PUT', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${jwt}` }, body: JSON.stringify({ data: { styles: [S.sur], subjects: [SUBJ.peiz], mediums: [MED.maslo], Price: 58000, Owners_price: 58000 } }) })
   console.log('«Сон о невесомости» данные → PUT', r.status)
@@ -44,11 +44,11 @@ const NEW = [
   { title: 'Внутренний космос', files: ['nika-vnutrenniy-1', 'nika-vnutrenniy-2', 'nika-vnutrenniy-3'], w: 90, h: 90, price: 49000, styles: [S.abs], subjects: [SUBJ.abst], mediums: [MED.maslo], desc: 'Светящийся портал и облака туманности внутри сознания. Бирюза и маджента, геометрия и органика.' },
 ]
 for (const art of NEW) {
-  if (arts.find(a => a.Title === art.title)) { console.log(art.title, '— уже есть, пропускаю'); continue }
+  if (arts.find(a => a.title === art.title)) { console.log(art.title, '— уже есть, пропускаю'); continue }
   const pics = []
   for (const fbase of art.files) pics.push(await upload(jwt, fbase))
   const data = {
-    Title: art.title, Description: art.desc, Materials: 'Холст, масло',
+    title: art.title, Description: art.desc, Materials: 'Холст, масло',
     Owners_price: art.price, Price: art.price, width: art.w, height: art.h, Year: '2026-01-01',
     styles: art.styles.filter(Boolean), subjects: art.subjects.filter(Boolean), mediums: art.mediums.filter(Boolean),
     Pictures: pics, Artist: ARTIST_ID,
