@@ -400,12 +400,9 @@
     padding: 0 16px;
     height: 56px;
 
-    // logo (icon only on mobile) pushes bell/avatar/burger to the right
-    .logo-link {
-      margin-right: auto;
-      flex-shrink: 0;
-    }
-
+    // logo grows to fill, grouping bell/avatar/burger on the right; the burger
+    // (last item) then ends at the right padding edge — no overflow
+    .logo-link { flex: 1 1 auto; min-width: 0; }
     .logo img { width: 28px; }
     .logo__text { display: none; } // icon-only brand on mobile → room for burger
   }
