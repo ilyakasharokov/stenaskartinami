@@ -23,8 +23,8 @@ const IconArtists = () => (
 const IconSearch = () => (
   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
 )
-const IconHome = () => (
-  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9.5L12 3l9 6.5"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg>
+const IconChat = () => (
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
 )
 const IconPlus = () => (
   <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
@@ -64,6 +64,12 @@ export default function MobileBottomNav() {
 
   const toggle = (p: 'add' | 'search') => setPanel(cur => (cur === p ? null : p))
 
+  const openChat = () => {
+    close()
+    const api = (window as any).jivo_api
+    if (api?.open) api.open()
+  }
+
   return (
     <>
       {panel && <div className="mbn-overlay" onClick={close} />}
@@ -89,20 +95,20 @@ export default function MobileBottomNav() {
       )}
 
       <nav className="mobile-bottom-nav">
-        <Link href="/" className={`mbn-item${isActive('/') ? ' active' : ''}`} onClick={close}>
-          <IconHome /><span>Главная</span>
-        </Link>
         <Link href="/catalog" className={`mbn-item${isActive('/catalog') ? ' active' : ''}`} onClick={close}>
           <IconCatalog /><span>Каталог</span>
+        </Link>
+        <Link href="/artists" className={`mbn-item${isActive('/artists') ? ' active' : ''}`} onClick={close}>
+          <IconArtists /><span>Художники</span>
         </Link>
         <button type="button" className={`mbn-fab${panel === 'add' ? ' open' : ''}`} onClick={() => toggle('add')} aria-label="Добавить">
           <IconPlus />
         </button>
-        <Link href="/artists" className={`mbn-item${isActive('/artists') ? ' active' : ''}`} onClick={close}>
-          <IconArtists /><span>Художники</span>
-        </Link>
         <button type="button" className={`mbn-item${panel === 'search' ? ' active' : ''}`} onClick={() => toggle('search')}>
           <IconSearch /><span>Поиск</span>
+        </button>
+        <button type="button" className="mbn-item" onClick={openChat}>
+          <IconChat /><span>Чат</span>
         </button>
       </nav>
     </>

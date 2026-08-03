@@ -2,7 +2,6 @@ import Link from 'next/link'
 import Menu from '../menu/menu'
 import NavRight from '../menu/top-bar'
 import MobileBottomNav from '../menu/mobile-bottom-nav'
-import ChatButton from '../menu/chat-button'
 import dynamic from 'next/dynamic'
 
 const SearchWidget = dynamic(() => import('../menu/search'), { ssr: false })
@@ -25,7 +24,6 @@ export default function MainLayout({ children }) {
             <SearchWidget />
           </div>
 
-          <ChatButton />
           <NavRight />
         </nav>
       </header>

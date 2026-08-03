@@ -1,28 +1,10 @@
 // ── Jivo chat: hide its floating launcher ─────────────────
-// The chat is opened only via our own header button (ChatButton), so the Jivo
-// widget never floats over the mobile bottom nav. Only the collapsed launcher
-// button is hidden — the chat window (a separate element) still opens via
-// jivo_api.open(). The mobile launcher has a stable `.__jivoMobileButton` class.
+// On mobile the chat is opened from the "Чат" item in the bottom nav, so Jivo's
+// floating launcher must not overlap it. Only the collapsed launcher is hidden
+// (stable `.__jivoMobileButton` class) — the chat window is a separate element
+// and still opens via jivo_api.open(). Desktop keeps Jivo's native launcher.
 jdiv.__jivoMobileButton {
   display: none !important;
-}
-
-// Header "chat" button (opens Jivo)
-.chat-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  flex-shrink: 0;
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: #333;
-  border-radius: 8px;
-  transition: background 0.15s;
-
-  &:hover { background: #f3f4f6; }
 }
 
 // ── Mobile bottom navigation ──────────────────────────────
