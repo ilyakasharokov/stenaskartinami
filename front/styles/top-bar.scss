@@ -401,10 +401,17 @@
     height: 56px;
 
     // logo grows to fill, grouping bell/avatar/burger on the right; the burger
-    // (last item) then ends at the right padding edge — no overflow
+    // (.menu has flex:0 0 auto) keeps its width, ending at the right padding.
+    // Brand text may ellipsis on very narrow screens.
     .logo-link { flex: 1 1 auto; min-width: 0; }
-    .logo img { width: 28px; }
-    .logo__text { display: none; } // icon-only brand on mobile → room for burger
+    .logo { min-width: 0; }
+    .logo img { width: 28px; flex-shrink: 0; }
+    .logo__text {
+      font-size: 12px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
   }
 
   .menu-btn { flex-shrink: 0; }
@@ -414,7 +421,7 @@
   }
 
   .menu {
-    flex: 0;
+    flex: 0 0 auto; // reserve the burger's width so it isn't overflowed
     order: 3;
 
     .menu-btn {
