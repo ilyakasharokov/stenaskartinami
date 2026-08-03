@@ -50,3 +50,7 @@ dump/
 
 # site-check screenshots/reports
 front/scripts/site-check-out/
+
+# fake-artist test artifacts
+front/scripts/fake-artist/*-out/
+front/scripts/fake-artist/out/

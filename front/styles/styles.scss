@@ -163,9 +163,7 @@ main {
         display: block;
     }
     
-    .top-navigation {
-        padding: 15px 10px;
-    }
+    // header padding is controlled in top-bar.scss (single source)
 
     .container{
         padding: 0 10px;
