@@ -242,7 +242,11 @@ export default function CatalogFilters({filtersPreloaded, onChange, hideFilters}
                 newFilters[key].activeCount ++;
               }
             });
-            sortByActive(newFilters[key].items)
+            // Only lift active items to the top when the list is collapsed behind
+            // a "Показать все" button — otherwise keep the natural order.
+            if (!newFilters[key].showAll && newFilters[key].items.length > FILTER_ITEMS_NUM) {
+              sortByActive(newFilters[key].items)
+            }
           }
         }
         setFilters(newFilters)

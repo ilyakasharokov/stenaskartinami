@@ -379,14 +379,14 @@
         width: 100%;
         max-width: none;
         position: fixed;
-        z-index: 9;
+        inset: 0;                 /* full-screen modal */
+        z-index: 400;             /* above the fixed bottom nav (300) */
         background: #fff;
-        top: 100px;
-        bottom: 0;
-        left: 0;
-        padding: 30px;
+        padding: 4px 20px 0;
         overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
         display: none;
+        border-top: none;
         .btn{
             display: inline-block;
         }
@@ -395,13 +395,42 @@
         }
     }
 
+    /* sticky top bar with the close button */
+    .catalog-filters .align-right {
+        position: sticky;
+        top: 0;
+        z-index: 2;
+        background: #fff;
+        display: flex;
+        justify-content: flex-end;
+        padding: 10px 0 6px;
+    }
+
+    /* sticky full-width "Применить" pinned to the bottom, clear of the nav */
+    .catalog-filters .align-center {
+        position: sticky;
+        bottom: 0;
+        background: #fff;
+        margin: 8px -20px 0;
+        padding: 12px 20px calc(14px + env(safe-area-inset-bottom, 0px));
+        box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.08);
+    }
+    .catalog-filters .align-center .btn {
+        display: block;
+        width: 100%;
+        text-align: center;
+        padding: 14px;
+        font-size: 16px;
+    }
+
     .catalog-grid{
         display: block;
     }
     
     .catalog-filters__item {
-        font-size: 14px;
-        margin-bottom: 15px;
+        font-size: 15px;
+        margin-bottom: 4px;
+        padding: 6px 0;
     }
 
     .catalog.catalog--show-filters .catalog-filters {
@@ -409,16 +438,18 @@
     }
 
     .checkbox {
-        width: 25px;
-        height: 25px;
+        width: 22px;
+        height: 22px;
+        flex-shrink: 0;
     }
-    
+
     .catalog-filters__item div {
         margin-right: 10px;
     }
 
     .catalog-filters__show-all{
         font-size: 14px;
+        padding: 6px 0;
     }
     .catalog-filters__section-expand-btn{
         height: 20px;
@@ -430,7 +461,13 @@
     }
 
     .catalog-filters__section-title {
-        padding: 20px 10px 20px 0px;
+        padding: 16px 10px 16px 0px;
+        font-size: 16px;
+    }
+
+    .catalog-filters__subtitle {
+        font-size: 12px;
+        margin: 12px 0 6px;
     }
 
 
