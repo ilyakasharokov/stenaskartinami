@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useRouter } from "next/router";
 import Router from 'next/router'
 import Preloader from '../preloader/preloader';
+import { setPendingScroll } from '@/utils/catalog-scroll';
 
 const FILTER_ITEMS_NUM = 6;
 const SECTION_SEARCH_MIN = 8; // показывать поиск внутри секции если элементов больше
@@ -54,7 +55,7 @@ export default function CatalogFilters({filtersPreloaded, onChange, hideFilters}
       if (next.max) newQuery.sizeMax = next.max; else delete newQuery.sizeMax;
       delete newQuery.page;
       onChange();
-      Router.push({ pathname: Router.pathname, query: newQuery });
+      pushKeepScroll({ pathname: Router.pathname, query: newQuery });
     }, 600);
   }
 
@@ -68,7 +69,7 @@ export default function CatalogFilters({filtersPreloaded, onChange, hideFilters}
       if (next.max) newQuery.priceMax = next.max; else delete newQuery.priceMax;
       delete newQuery.page;
       onChange();
-      Router.push({ pathname: Router.pathname, query: newQuery });
+      pushKeepScroll({ pathname: Router.pathname, query: newQuery });
     }, 600);
   }
 
@@ -81,7 +82,7 @@ export default function CatalogFilters({filtersPreloaded, onChange, hideFilters}
       if (!val) delete newQuery.q;
       delete newQuery.page;
       onChange();
-      Router.push({ pathname: Router.pathname, query: newQuery });
+      pushKeepScroll({ pathname: Router.pathname, query: newQuery });
     }, 400);
   }
 
@@ -142,11 +143,30 @@ export default function CatalogFilters({filtersPreloaded, onChange, hideFilters}
     },
   })
 
+  // Navigate without the page jumping to the top: keep scroll, and restore it
+  // once the new results have rendered (SSR nav + arts area reflow can otherwise
+  // clamp the scroll position).
+  function pushKeepScroll(urlObj) {
+    if (typeof window !== 'undefined') setPendingScroll(window.scrollY)
+    Router.push(urlObj, undefined, { scroll: false })
+  }
+
   const keys = Object.keys(filters)
 
   // Static option groups don't need an inner search box, even if they have many items (colours).
   const STATIC_KEYS = new Set(['size', 'orientation', 'color', 'tone', 'availability'])
   const hasSectionSearch = (key) => filters[key].items.length > SECTION_SEARCH_MIN && !STATIC_KEYS.has(key)
+
+  // Visual sections. Some combine several filter keys into labelled sub-lists.
+  // (Наличие is intentionally omitted for now.)
+  const SECTIONS = [
+    { title: 'Стиль',           keys: ['styles'] },
+    { title: 'Теги',            keys: ['subjects'] },
+    { title: 'Техника',         keys: ['mediums'] },
+    { title: 'Цвет и тон',      keys: ['color', 'tone'],       labels: { color: 'Цвет', tone: 'Тон' } },
+    { title: 'Размер и формат', keys: ['size', 'orientation'], labels: { size: 'Размер', orientation: 'Ориентация' } },
+    { title: 'Стена',           keys: ['wall'] },
+  ]
 
   useEffect(()=>{
     let newFilters = Object.assign({}, filters)
@@ -256,11 +276,8 @@ export default function CatalogFilters({filtersPreloaded, onChange, hideFilters}
     onChange()
     const newQuery: Record<string, any> = Router.query ? Object.assign({}, Router.query, query) : query
     delete newQuery.page;
-    Router.push({
-      pathname: Router.pathname,
-      query: newQuery
-    })
-  } 
+    pushKeepScroll({ pathname: Router.pathname, query: newQuery })
+  }
 
   function getFilteredItems(key) {
     const q = (sectionSearch[key] || '').toLowerCase().trim()
@@ -270,7 +287,7 @@ export default function CatalogFilters({filtersPreloaded, onChange, hideFilters}
     )
   }
 
-  function getMaxHeight(key){
+  function keyHeight(key){
     const ITEM_HEIGHT = 45;
     const SEARCH_HEIGHT = 48;
     const q = (sectionSearch[key] || '').trim()
@@ -279,7 +296,61 @@ export default function CatalogFilters({filtersPreloaded, onChange, hideFilters}
     const visibleCount = q ? items.length : (!filters[key].showAll ? Math.min(items.length, FILTER_ITEMS_NUM) : items.length)
     const showAllLink = !q && !filters[key].showAll && filters[key].items.length > FILTER_ITEMS_NUM ? 1 : 0
     const customSize = key === 'size' ? 84 : 0 // custom "свой размер" row
-    return (filters[key].open && ((visibleCount + showAllLink) * ITEM_HEIGHT + (hasSearch ? SEARCH_HEIGHT : 0) + customSize)) || 0 + 'px'
+    return (visibleCount + showAllLink) * ITEM_HEIGHT + (hasSearch ? SEARCH_HEIGHT : 0) + customSize
+  }
+
+  // Combined sections (e.g. "Цвет и тон") render several filter keys as labelled
+  // sub-lists — each key keeps its own query param, so the dimensions AND together.
+  function sectionHeight(section){
+    if (!filters[section.keys[0]].open) return 0
+    const SUBLABEL = 34
+    return section.keys.reduce((sum, key) => sum + keyHeight(key) + (section.labels && section.labels[key] ? SUBLABEL : 0), 0)
+  }
+
+  function toggleSection(section){
+    const newFilters = Object.assign({}, filters)
+    const next = !newFilters[section.keys[0]].open
+    section.keys.forEach(k => { newFilters[k].open = next })
+    setFilters(newFilters)
+  }
+
+  function renderKeyBody(key){
+    const q = (sectionSearch[key] || '').trim()
+    const items = getFilteredItems(key)
+    const visible = q ? items : (!filters[key].showAll ? items.slice(0, FILTER_ITEMS_NUM) : items)
+    return (
+      <>
+        {hasSectionSearch(key) && (
+          <div className="catalog-filters__section-search">
+            <input type="text" className="catalog-filters__section-search-input"
+              placeholder={`Поиск по «${filters[key].title.toLowerCase()}»…`}
+              value={sectionSearch[key] || ''}
+              onChange={e => setSectionSearch(prev => ({ ...prev, [key]: e.target.value }))}
+              onClick={e => e.stopPropagation()} />
+          </div>
+        )}
+        {visible.map(item =>
+          <div className="catalog-filters__item" key={item.id}>
+            <div className={`checkbox ${item.active ? 'checkbox--active' : ''}`} onClick={() => сheckboxClick(item, key)}></div>
+            <div>{item.hex && <span className="catalog-filters__swatch" style={{ background: item.hex }} />}{item.title}</div>
+          </div>
+        )}
+        {!q && !filters[key].showAll && filters[key].items.length > FILTER_ITEMS_NUM &&
+          <div className="catalog-filters__show-all" onClick={() => showAll(key)}>Показать все</div>}
+        {key === 'size' && (
+          <div className="catalog-filters__size-custom">
+            <div className="catalog-filters__size-custom-label">Свой размер (сторона, см)</div>
+            <div className="catalog-filters__price-row">
+              <input type="text" inputMode="numeric" placeholder="от" className="catalog-filters__price-input"
+                value={sizeCustom.min} onChange={e => handleSizeChange('min', e.target.value)} onClick={e => e.stopPropagation()} />
+              <span className="catalog-filters__price-dash">—</span>
+              <input type="text" inputMode="numeric" placeholder="до" className="catalog-filters__price-input"
+                value={sizeCustom.max} onChange={e => handleSizeChange('max', e.target.value)} onClick={e => e.stopPropagation()} />
+            </div>
+          </div>
+        )}
+      </>
+    )
   }
 
   return (
@@ -298,76 +369,37 @@ export default function CatalogFilters({filtersPreloaded, onChange, hideFilters}
       </div>
       <div className="catalog-filters__sections">
       {
-        Object.keys(filters).map((key) => 
-          <div className="catalog-filters__section" key={key}>
-            <div className="catalog-filters__section-top" onClick={ ()=> toggleCollapse(key)}>
-              <div className="catalog-filters__section-title">{filters[key].title}</div> 
+        SECTIONS.map((section) => {
+          const open = filters[section.keys[0]].open
+          return (
+          <div className="catalog-filters__section" key={section.title}>
+            <div className="catalog-filters__section-top" onClick={() => toggleSection(section)}>
+              <div className="catalog-filters__section-title">{section.title}</div>
               <div className="catalog-filters__section-expand-btn">
               {
-                filters[key].open && 
+                open &&
                 <svg className="minus" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 1"><path d="M0 0h10v1H0V0z" fill="#333"></path></svg>
               }
               {
-                !filters[key].open && 
+                !open &&
                 <svg viewBox="0 0 13 13" xmlns="http://www.w3.org/2000/svg"><g fill="#333" fillRule="evenodd"><path d="M0 6h13v1H0z"></path><path d="M6 0h1v13H6z"></path></g></svg>
               }
-              </div> 
-            </div> 
-            <div className="catalog-filters__collapsable" style={{ maxHeight: getMaxHeight(key) }}>
+              </div>
+            </div>
+            <div className="catalog-filters__collapsable" style={{ maxHeight: sectionHeight(section) + 'px' }}>
             {
-              hasSectionSearch(key) && (
-                <div className="catalog-filters__section-search">
-                  <input
-                    type="text"
-                    className="catalog-filters__section-search-input"
-                    placeholder={`Поиск по «${filters[key].title.toLowerCase()}»…`}
-                    value={sectionSearch[key] || ''}
-                    onChange={e => setSectionSearch(prev => ({ ...prev, [key]: e.target.value }))}
-                    onClick={e => e.stopPropagation()}
-                  />
+              section.keys.map((key) => (
+                <div key={key}>
+                  {section.labels && section.labels[key] &&
+                    <div className="catalog-filters__subtitle">{section.labels[key]}</div>}
+                  {renderKeyBody(key)}
                 </div>
-              )
-            }
-            {
-              (() => {
-                const q = (sectionSearch[key] || '').trim()
-                const items = getFilteredItems(key)
-                const visible = q ? items : (!filters[key].showAll ? items.slice(0, FILTER_ITEMS_NUM) : items)
-                return visible.map(item =>
-                  <div className="catalog-filters__item" key={item.id}>
-                    <div className={`checkbox ${item.active ? 'checkbox--active' : ''}`} onClick={() => сheckboxClick(item, key)}></div>
-                    <div>{item.hex && <span className="catalog-filters__swatch" style={{ background: item.hex }} />}{item.title}</div>
-                  </div>
-                )
-              })()
-            }
-            {
-              !(sectionSearch[key] || '').trim() && !filters[key].showAll && filters[key].items.length > FILTER_ITEMS_NUM &&
-              <div className="catalog-filters__show-all" onClick={() => showAll(key)}>Показать все</div>
-            }
-            {
-              key === 'size' && (
-                <div className="catalog-filters__size-custom">
-                  <div className="catalog-filters__size-custom-label">Свой размер (сторона, см)</div>
-                  <div className="catalog-filters__price-row">
-                    <input type="text" inputMode="numeric" placeholder="от"
-                      className="catalog-filters__price-input"
-                      value={sizeCustom.min}
-                      onChange={e => handleSizeChange('min', e.target.value)}
-                      onClick={e => e.stopPropagation()} />
-                    <span className="catalog-filters__price-dash">—</span>
-                    <input type="text" inputMode="numeric" placeholder="до"
-                      className="catalog-filters__price-input"
-                      value={sizeCustom.max}
-                      onChange={e => handleSizeChange('max', e.target.value)}
-                      onClick={e => e.stopPropagation()} />
-                  </div>
-                </div>
-              )
+              ))
             }
             </div>
           </div>
-        )
+          )
+        })
       }
         <div className="catalog-filters__section">
           <div className="catalog-filters__section-top" onClick={() => setPriceOpen(!priceOpen)}>

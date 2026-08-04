@@ -449,3 +449,32 @@
     border: 1px solid rgba(0, 0, 0, 0.15);
     flex-shrink: 0;
 }
+
+/* Desktop: filters sidebar scrolls independently from the artworks area,
+   so changing a filter doesn't move the page (paired with router scroll:false). */
+@media screen and (min-width: 995px) {
+    .catalog__filters-col {
+        position: sticky;
+        top: 16px;
+        align-self: flex-start;
+        max-height: calc(100vh - 32px);
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        padding-right: 8px;
+    }
+    .catalog__filters-col::-webkit-scrollbar { width: 6px; }
+    .catalog__filters-col::-webkit-scrollbar-thumb { background: #dcdcdc; border-radius: 3px; }
+    .catalog__filters-col::-webkit-scrollbar-track { background: transparent; }
+}
+
+/* Sub-group label inside a combined filter section (e.g. "Цвет" / "Тон") */
+.catalog-filters__subtitle {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: #999;
+    margin: 10px 0 6px;
+}
+.catalog-filters__section > .catalog-filters__collapsable > div:first-child > .catalog-filters__subtitle {
+    margin-top: 2px;
+}

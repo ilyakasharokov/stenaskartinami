@@ -221,6 +221,41 @@ export default {
     };
     await backfillOrientation();
 
+    // One-off: fix arts where stored width/height are swapped relative to the
+    // first image's true orientation. Guarded by env so it only runs on request.
+    if (process.env.FIX_ART_DIMENSIONS === 'true') {
+      try {
+        const client = strapi.db.connection.client.config.client || '';
+        if (['pg', 'postgres', 'postgresql'].some((c) => client.includes(c))) {
+          const res = await strapi.db.connection.raw(`
+            WITH firstpic AS (
+              SELECT DISTINCT ON (m.related_id) m.related_id AS art_id, f.width AS iw, f.height AS ih
+              FROM files_related_mph m JOIN files f ON f.id = m.file_id
+              WHERE m.related_type = 'api::art.art' AND m.field = 'Pictures'
+              ORDER BY m.related_id, m."order"
+            ),
+            to_fix AS (
+              SELECT DISTINCT ON (a.document_id) a.document_id, a.width AS w, a.height AS h
+              FROM arts a JOIN firstpic p ON p.art_id = a.id
+              WHERE a.width > 0 AND a.height > 0 AND p.iw > 0 AND p.ih > 0
+                AND ((p.iw > p.ih * 1.02 AND a.height > a.width)
+                  OR (p.ih > p.iw * 1.02 AND a.width > a.height))
+              ORDER BY a.document_id, a.published_at DESC NULLS LAST
+            )
+            UPDATE arts a
+            SET width = tf.h, height = tf.w, square = tf.w * tf.h, is_square = (tf.h = tf.w),
+                orientation = CASE WHEN tf.w > tf.h * 1.05 THEN 'portrait'
+                                   WHEN tf.h > tf.w * 1.05 THEN 'landscape' ELSE 'square' END
+            FROM to_fix tf
+            WHERE a.document_id = tf.document_id
+          `);
+          strapi.log.info('[fix-dimensions] swapped rows: ' + (res.rowCount ?? '?'));
+        }
+      } catch (e: any) {
+        strapi.log.warn('[fix-dimensions] failed: ' + e.message);
+      }
+    }
+
     // Colour families — image processing, run in background when explicitly asked.
     if (process.env.BACKFILL_ART_COLORS === 'true') {
       setImmediate(async () => {

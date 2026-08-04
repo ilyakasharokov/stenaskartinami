@@ -3,7 +3,9 @@
 }
 
 html, body {
-    overflow-x: hidden;
+    /* `clip` (not `hidden`) prevents horizontal scroll WITHOUT creating a
+       scroll container — otherwise it breaks `position: sticky` descendants. */
+    overflow-x: clip;
     width: 100%;
 }
 

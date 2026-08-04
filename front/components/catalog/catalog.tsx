@@ -8,6 +8,7 @@ import CatalogFilters from "./catalog-filters"
 import Preloader from '../preloader/preloader';
 import serialize from '@/utils/serialize'
 import { fetchStrapi } from '@/utils/strapi'
+import { consumePendingScroll } from '@/utils/catalog-scroll'
 import Pagination from './pagination'
 import CatalogItem from './catalog-item'
 
@@ -27,6 +28,28 @@ export default function CatalogCmp({arts, hideFiltersForce = false, title = '', 
     if (!state.arts?.length) return;
     const frame = requestAnimationFrame(() => {
       resizeAllGridItems('catalog-item', 'catalog-grid', '.catalog-item__wrapper');
+      // Restore the pre-filter scroll position now that the new arts are laid out.
+      // Re-assert it across the image-load reflow window; abort if the user scrolls.
+      const y = consumePendingScroll();
+      if (y == null || Math.abs(window.scrollY - y) < 2) return;
+      let cancelled = false;
+      const stop = () => { cancelled = true; cleanup(); };
+      const cleanup = () => {
+        window.removeEventListener('wheel', stop);
+        window.removeEventListener('touchstart', stop);
+        window.removeEventListener('keydown', stop);
+      };
+      window.addEventListener('wheel', stop, { passive: true });
+      window.addEventListener('touchstart', stop, { passive: true });
+      window.addEventListener('keydown', stop);
+      const t0 = Date.now();
+      const tick = () => {
+        if (cancelled) return;
+        if (Math.abs(window.scrollY - y) > 2) window.scrollTo(0, y);
+        if (Date.now() - t0 < 800) requestAnimationFrame(tick);
+        else cleanup();
+      };
+      requestAnimationFrame(tick);
     });
     return () => cancelAnimationFrame(frame);
   }, [state.arts]);
@@ -63,8 +86,9 @@ export default function CatalogCmp({arts, hideFiltersForce = false, title = '', 
       } catch {
         setState(prev => ({ ...prev, showPreloader: false }))
       }
-
-      window.scrollTo(0, 0)
+      // NOTE: don't force scroll to top here — filter changes keep the position
+      // (via pushKeepScroll/scroll:false). Pagination & sort scroll up on their own
+      // through the default Router.push behaviour.
     }
 
     loadArts()
@@ -137,13 +161,13 @@ export default function CatalogCmp({arts, hideFiltersForce = false, title = '', 
 
       <div className={`catalog ${showFilters ? 'catalog--show-filters': ''}`}>
       {
-        !hideFiltersForce && 
-        <div>
+        !hideFiltersForce &&
+        <div className="catalog__filters-col">
         <div className="catalog__toggle-filters" onClick={() => setShowFilters(!showFilters)}>
             <img src="/images/filter.png"/>
             <div>Фильтры </div>
         </div>
-        <CatalogFilters onChange={() => setState(prev => ({...prev, showPreloader: true, arts: [...state.arts], count: state.count}))} filtersPreloaded={filters} hideFilters={() => hideFilters()}></CatalogFilters>
+        <CatalogFilters onChange={() => setState(prev => ({...prev, showPreloader: true}))} filtersPreloaded={filters} hideFilters={() => hideFilters()}></CatalogFilters>
         </div>
       }
       <div className="catalog-arts">
