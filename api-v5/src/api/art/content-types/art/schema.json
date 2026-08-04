@@ -78,6 +78,13 @@
     "isSquare": {
       "type": "boolean"
     },
+    "orientation": {
+      "type": "enumeration",
+      "enum": ["portrait", "landscape", "square"]
+    },
+    "color_families": {
+      "type": "string"
+    },
     "mediums": {
       "type": "relation",
       "relation": "manyToMany",

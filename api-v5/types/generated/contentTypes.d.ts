@@ -444,6 +444,7 @@ export interface ApiArtArt extends Struct.CollectionTypeSchema {
   attributes: {
     Articul: Schema.Attribute.String;
     Artist: Schema.Attribute.Relation<'manyToOne', 'api::artist.artist'>;
+    color_families: Schema.Attribute.String;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -473,6 +474,9 @@ export interface ApiArtArt extends Struct.CollectionTypeSchema {
     main: Schema.Attribute.Boolean;
     Materials: Schema.Attribute.Text;
     mediums: Schema.Attribute.Relation<'manyToMany', 'api::medium.medium'>;
+    orientation: Schema.Attribute.Enumeration<
+      ['portrait', 'landscape', 'square']
+    >;
     Owners_price: Schema.Attribute.Integer & Schema.Attribute.Private;
     Pictures: Schema.Attribute.Media<'images' | 'files' | 'videos', true>;
     Price: Schema.Attribute.Integer;

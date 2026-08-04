@@ -103,22 +103,50 @@ export default function CatalogFilters({filtersPreloaded, onChange, hideFilters}
       items: [],
       open: false,
       showAll: false,
-    }, 
+    },
+    orientation: {
+      title: 'Ориентация',
+      items: [],
+      open: false,
+      showAll: true,
+    },
+    color: {
+      title: 'Цвет',
+      items: [],
+      open: false,
+      showAll: true,
+    },
+    tone: {
+      title: 'Тон',
+      items: [],
+      open: false,
+      showAll: true,
+    },
     size: {
       title: 'Размер',
       items: [],
       open: false,
       showAll: false,
-    },  
+    },
+    availability: {
+      title: 'Наличие',
+      items: [],
+      open: false,
+      showAll: true,
+    },
     wall: {
       title: 'Стена',
       items: [],
       open: false,
       showAll: false,
-    }, 
+    },
   })
 
   const keys = Object.keys(filters)
+
+  // Static option groups don't need an inner search box, even if they have many items (colours).
+  const STATIC_KEYS = new Set(['size', 'orientation', 'color', 'tone', 'availability'])
+  const hasSectionSearch = (key) => filters[key].items.length > SECTION_SEARCH_MIN && !STATIC_KEYS.has(key)
 
   useEffect(()=>{
     let newFilters = Object.assign({}, filters)
@@ -152,6 +180,35 @@ export default function CatalogFilters({filtersPreloaded, onChange, hideFilters}
           max: 1000,
           id: 4
         } ]
+        newFilters.orientation.items = [
+          { title: 'Вертикальные', slug: 'portrait', id: 'or1' },
+          { title: 'Горизонтальные', slug: 'landscape', id: 'or2' },
+          { title: 'Квадратные', slug: 'square', id: 'or3' },
+        ]
+        newFilters.availability.items = [
+          { title: 'В наличии', slug: 'available', id: 'av1' },
+          { title: 'Продано', slug: 'sold', id: 'av2' },
+        ]
+        newFilters.color.items = [
+          { title: 'Красный', slug: 'red', hex: '#d94436', id: 'c1' },
+          { title: 'Оранжевый', slug: 'orange', hex: '#e8873b', id: 'c2' },
+          { title: 'Жёлтый', slug: 'yellow', hex: '#e8c53b', id: 'c3' },
+          { title: 'Зелёный', slug: 'green', hex: '#4a9d5b', id: 'c4' },
+          { title: 'Синий', slug: 'blue', hex: '#3b6fe8', id: 'c5' },
+          { title: 'Фиолетовый', slug: 'purple', hex: '#8b5cd6', id: 'c6' },
+          { title: 'Розовый', slug: 'pink', hex: '#e07aa8', id: 'c7' },
+          { title: 'Коричневый', slug: 'brown', hex: '#8a5a3b', id: 'c8' },
+          { title: 'Бежевый', slug: 'beige', hex: '#d8c3a5', id: 'c9' },
+          { title: 'Чёрный', slug: 'black', hex: '#2b2b2b', id: 'c10' },
+          { title: 'Белый', slug: 'white', hex: '#f2f2f0', id: 'c11' },
+          { title: 'Серый', slug: 'gray', hex: '#9a9a9a', id: 'c12' },
+        ]
+        newFilters.tone.items = [
+          { title: 'Светлые', slug: 'light', id: 't1' },
+          { title: 'Тёмные', slug: 'dark', id: 't2' },
+          { title: 'Яркие', slug: 'vivid', id: 't3' },
+          { title: 'Пастельные', slug: 'pastel', id: 't4' },
+        ]
         for (const [key, value] of Object.entries(Router.query)) {
           if(newFilters[key]){ 
             newFilters[key].activeCount = 0;
@@ -218,7 +275,7 @@ export default function CatalogFilters({filtersPreloaded, onChange, hideFilters}
     const SEARCH_HEIGHT = 48;
     const q = (sectionSearch[key] || '').trim()
     const items = getFilteredItems(key)
-    const hasSearch = filters[key].items.length > SECTION_SEARCH_MIN
+    const hasSearch = hasSectionSearch(key)
     const visibleCount = q ? items.length : (!filters[key].showAll ? Math.min(items.length, FILTER_ITEMS_NUM) : items.length)
     const showAllLink = !q && !filters[key].showAll && filters[key].items.length > FILTER_ITEMS_NUM ? 1 : 0
     const customSize = key === 'size' ? 84 : 0 // custom "свой размер" row
@@ -258,7 +315,7 @@ export default function CatalogFilters({filtersPreloaded, onChange, hideFilters}
             </div> 
             <div className="catalog-filters__collapsable" style={{ maxHeight: getMaxHeight(key) }}>
             {
-              filters[key].items.length > SECTION_SEARCH_MIN && (
+              hasSectionSearch(key) && (
                 <div className="catalog-filters__section-search">
                   <input
                     type="text"
@@ -279,7 +336,7 @@ export default function CatalogFilters({filtersPreloaded, onChange, hideFilters}
                 return visible.map(item =>
                   <div className="catalog-filters__item" key={item.id}>
                     <div className={`checkbox ${item.active ? 'checkbox--active' : ''}`} onClick={() => сheckboxClick(item, key)}></div>
-                    <div>{item.title || item.title}</div>
+                    <div>{item.hex && <span className="catalog-filters__swatch" style={{ background: item.hex }} />}{item.title}</div>
                   </div>
                 )
               })()

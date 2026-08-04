@@ -151,6 +151,10 @@ function serialize(obj: Record<string, any> = {}) {
     'priceMax',
     'sizeMin',
     'sizeMax',
+    'orientation',
+    'availability',
+    'color',
+    'tone',
   ]);
   let andIndex = sizeValues.length ? 1 : 0;
 
@@ -160,6 +164,41 @@ function serialize(obj: Record<string, any> = {}) {
     params.push(`filters[$and][${andIndex}][$or][1][Artist][full_name][$containsi]=${q}`);
     andIndex++;
   }
+
+  // Orientation (scalar enum) — OR across selected values
+  const orientationVals = Array.isArray(obj.orientation) ? obj.orientation : obj.orientation ? [obj.orientation] : [];
+  if (orientationVals.length) {
+    orientationVals.forEach((val, i) => {
+      params.push(`filters[$and][${andIndex}][$or][${i}][orientation][$eq]=${encodeURIComponent(val)}`);
+    });
+    andIndex++;
+  }
+
+  // Colour families (comma-joined string) — OR across selected colours via $containsi
+  const colorVals = Array.isArray(obj.color) ? obj.color : obj.color ? [obj.color] : [];
+  if (colorVals.length) {
+    colorVals.forEach((val, i) => {
+      params.push(`filters[$and][${andIndex}][$or][${i}][color_families][$containsi]=${encodeURIComponent(val)}`);
+    });
+    andIndex++;
+  }
+
+  // Tone / saturation (light/dark/vivid/pastel) — stored alongside colours,
+  // its own $and group so it AND-s with the colour filter.
+  const toneVals = Array.isArray(obj.tone) ? obj.tone : obj.tone ? [obj.tone] : [];
+  if (toneVals.length) {
+    toneVals.forEach((val, i) => {
+      params.push(`filters[$and][${andIndex}][$or][${i}][color_families][$containsi]=${encodeURIComponent(val)}`);
+    });
+    andIndex++;
+  }
+
+  // Availability (sold flag). Both selected → no constraint.
+  const availVals = Array.isArray(obj.availability) ? obj.availability : obj.availability ? [obj.availability] : [];
+  const wantAvail = availVals.includes('available');
+  const wantSold = availVals.includes('sold');
+  if (wantAvail && !wantSold) params.push(`filters[sold][$eq]=false`);
+  else if (wantSold && !wantAvail) params.push(`filters[sold][$eq]=true`);
 
   Object.entries(obj).forEach(([key, value]) => {
     if (specialKeys.has(key)) return;

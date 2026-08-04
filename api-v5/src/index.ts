@@ -201,6 +201,48 @@ export default {
 
     await backfillLikesCount();
 
+    // Orientation from dimensions — cheap, idempotent (only fills NULLs).
+    const backfillOrientation = async () => {
+      try {
+        const client = strapi.db.connection.client.config.client || '';
+        if (['pg', 'postgres', 'postgresql'].some((c) => client.includes(c))) {
+          await strapi.db.connection.raw(`
+            UPDATE arts SET orientation = CASE
+              WHEN height > width * 1.05 THEN 'portrait'
+              WHEN width > height * 1.05 THEN 'landscape'
+              ELSE 'square' END
+            WHERE width IS NOT NULL AND height IS NOT NULL
+              AND width > 0 AND height > 0 AND orientation IS NULL
+          `);
+        }
+      } catch (e: any) {
+        strapi.log.warn('[bootstrap] backfillOrientation failed: ' + e.message);
+      }
+    };
+    await backfillOrientation();
+
+    // Colour families — image processing, run in background when explicitly asked.
+    if (process.env.BACKFILL_ART_COLORS === 'true') {
+      setImmediate(async () => {
+        try {
+          const { extractAndStoreColors } = await import('./utils/art-colors');
+          // Recompute for all published arts (idempotent) so colour + tone tags stay current.
+          const rows = await strapi.db.connection('arts')
+            .whereNotNull('published_at')
+            .select('id');
+          strapi.log.info('[backfill] colours: processing ' + rows.length + ' arts');
+          let done = 0;
+          for (const r of rows) {
+            await extractAndStoreColors(strapi, r.id);
+            if (++done % 25 === 0) strapi.log.info('[backfill] colours ' + done + '/' + rows.length);
+          }
+          strapi.log.info('[backfill] colours done: ' + done);
+        } catch (e: any) {
+          strapi.log.warn('[backfill] colours failed: ' + e.message);
+        }
+      });
+    }
+
     if (process.env.REGENERATE_UPLOAD_FORMATS === 'true') {
       const { default: regenerateUploadFormats } = await import(
         './utils/regenerate-upload-formats'

@@ -1,5 +1,7 @@
 'use strict';
 
+import { extractAndStoreColors } from '../../../../utils/art-colors';
+
 const CYR_TO_LAT: Record<string, string> = {
   а:'a',б:'b',в:'v',г:'g',д:'d',е:'e',ё:'yo',ж:'zh',з:'z',и:'i',й:'j',
   к:'k',л:'l',м:'m',н:'n',о:'o',п:'p',р:'r',с:'s',т:'t',у:'u',ф:'f',
@@ -18,6 +20,10 @@ const updateDimensions = (data: any) => {
   if (typeof data.width !== 'undefined' && typeof data.height !== 'undefined') {
     data.square = data.width * data.height;
     data.isSquare = data.width === data.height;
+    const w = Number(data.width), h = Number(data.height);
+    if (w > 0 && h > 0) {
+      data.orientation = h > w * 1.05 ? 'portrait' : w > h * 1.05 ? 'landscape' : 'square';
+    }
   }
 };
 
@@ -125,6 +131,8 @@ export default {
   async afterCreate(event: any) {
     if (!event.result?.id) return;
     await syncArtistTags(event.result.id);
+    // Dominant colours (image processing) — non-blocking
+    setImmediate(() => extractAndStoreColors(strapi, event.result.id));
     // Notify followers only when the published version is created
     if (event.result.publishedAt) {
       setImmediate(() => notifyArtistFollowers(event.result.id));
@@ -132,6 +140,8 @@ export default {
   },
 
   async afterUpdate(event: any) {
-    if (event.result?.id) await syncArtistTags(event.result.id);
+    if (!event.result?.id) return;
+    await syncArtistTags(event.result.id);
+    setImmediate(() => extractAndStoreColors(strapi, event.result.id));
   },
 };
